@@ -24,23 +24,28 @@ void Circle::rotate(const QPointF& rotationCenter, qreal angle, bool clockwise)
     const qreal newAngle = qDegreesToRadians(oldAngle) + angle * (clockwise ? -1 : 1);
     const qreal x = qCos(newAngle) * d + rotationCenter.x();
     const qreal y = -qSin(newAngle) * d + rotationCenter.y();
-    moveTo(QPointF(x, y));
+
+    const QPointF newCenter(x, y);
+    moveTo(newCenter);
+
+    if (mDraw)
+        drawTo(newCenter);
 }
 
 void Circle::moveTo(const QPointF& center)
 {
-    if (mDraw)
-    {
-        const QLineF line(mDrawPos, center);
-        if (line.length() >= mMinDrawLength)
-        {
-            mScene->addLine(line);
-            mDrawPos = center;
-        }
-    }
-
     mCenter = center;
     mEllise->setPos(mCenter);
+}
+
+void Circle::drawTo(const QPointF& center)
+{
+    const QLineF line(mDrawPos, center);
+    if (line.length() >= mMinDrawLength)
+    {
+        mScene->addLine(line);
+        mDrawPos = center;
+    }
 }
 
 }

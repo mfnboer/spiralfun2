@@ -18,6 +18,7 @@ public:
 
 private:
     void moveTo(const QPointF& center);
+    void drawTo(const QPointF& center);
 
     QGraphicsScene* mScene;
     QGraphicsEllipseItem* mEllise;
