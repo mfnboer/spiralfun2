@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    showFullScreen();
+    showMaximized();
 
     QGraphicsView* view = ui->graphicsView;
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
