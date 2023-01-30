@@ -17,9 +17,10 @@ int main(int argc, char *argv[])
 
     QTimer timer;
     qreal angle = 0.0;
-    const qreal stepAngle = qDegreesToRadians(0.5);
+    const qreal stepAngle = qDegreesToRadians(0.05);
+    const unsigned stepsPerInterval = 4;
     QObject::connect(&timer, &QTimer::timeout, &mainWin, [&mainWin,&timer,&angle,stepAngle]{
-        for (double step = 0.0; step < qDegreesToRadians(1); step += stepAngle)
+        for (unsigned step = 0.0; step < stepsPerInterval; ++step)
         {
             mainWin.advanceCircles(stepAngle);
             angle += stepAngle;
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
             }
         }
     });
-    timer.start(10);
+    timer.start(1);
 
     return a.exec();
 }

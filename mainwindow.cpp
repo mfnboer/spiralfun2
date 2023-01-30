@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include <QScreen>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,10 +10,18 @@ MainWindow::MainWindow(QWidget *parent)
     showMaximized();
 
     QGraphicsView* view = ui->graphicsView;
+    view->setRenderHint(QPainter::Antialiasing);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    const QScreen* screen = view->screen();
+    const QSize& screenSize = screen->size();
+    qInfo() << "screen:" << screenSize << "dpr:" << screen->devicePixelRatio();
+
     mScene.setItemIndexMethod(QGraphicsScene::NoIndex);
-    mScene.setSceneRect(-500, -500, 1000, 1000);
+    const qreal width = screenSize.width();
+    const qreal height = screenSize.height();
+    mScene.setSceneRect(-width / 2.0, -height / 2.0, width, height);
     view->setScene(&mScene);
 }
 
@@ -31,7 +40,7 @@ SpiralFun::Circle* MainWindow::addCircle(qreal radius)
         center.ry() -= prevCircle.getRadius() + radius;
     }
 
-    auto circle = std::make_unique<SpiralFun::Circle>(&mScene, center, radius);
+    auto circle = std::make_unique<SpiralFun::Circle>(ui->graphicsView, center, radius);
     mCircles.push_back(std::move(circle));
     return mCircles.back().get();
 }

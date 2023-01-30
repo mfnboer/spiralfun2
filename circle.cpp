@@ -1,19 +1,22 @@
 #include "circle.h"
-#include <QGraphicsScene>
 #include <QtMath>
+#include <QGraphicsEllipseItem>
+#include <QScreen>
 
 namespace SpiralFun {
 
-Circle::Circle(QGraphicsScene* scene, QPointF center, qreal radius) :
-    mScene(scene),
+Circle::Circle(QGraphicsView* view, const QPointF& center, qreal radius) :
+    mScene(view->scene()),
     mCenter(center),
-    mRadius(radius)
+    mDrawPos(center),
+    mRadius(radius),
+    mMinDrawLength(1.0)
 {
-    mEllise = scene->addEllipse(-radius, -radius, radius * 2.0, radius * 2.0);
+    mEllise = mScene->addEllipse(-radius, -radius, radius * 2.0, radius * 2.0);
     mEllise->setPos(mCenter);
 }
 
-void Circle::rotate(QPointF rotationCenter, qreal angle, bool clockwise)
+void Circle::rotate(const QPointF& rotationCenter, qreal angle, bool clockwise)
 {
     const QLineF line(rotationCenter, mCenter);
     const qreal d = line.length();
@@ -24,10 +27,17 @@ void Circle::rotate(QPointF rotationCenter, qreal angle, bool clockwise)
     moveTo(QPointF(x, y));
 }
 
-void Circle::moveTo(QPointF center)
+void Circle::moveTo(const QPointF& center)
 {
     if (mDraw)
-        mScene->addLine(QLineF(mCenter, center));
+    {
+        const QLineF line(mDrawPos, center);
+        if (line.length() >= mMinDrawLength)
+        {
+            mScene->addLine(line);
+            mDrawPos = center;
+        }
+    }
 
     mCenter = center;
     mEllise->setPos(mCenter);
