@@ -1,6 +1,5 @@
 #include "circle.h"
 #include <QtMath>
-#include <QGraphicsEllipseItem>
 #include <QScreen>
 
 namespace SpiralFun {
@@ -12,8 +11,28 @@ Circle::Circle(QGraphicsView* view, const QPointF& center, qreal radius) :
     mRadius(radius),
     mMinDrawLength(1.0)
 {
-    mEllise = mScene->addEllipse(-radius, -radius, radius * 2.0, radius * 2.0);
-    mEllise->setPos(mCenter);
+    mEllipse.reset(mScene->addEllipse(getBoundingRect()));
+    mEllipse->setPos(mCenter);
+}
+
+Circle* Circle::setCenter(const QPointF& center)
+{
+    moveTo(center);
+    return this;
+}
+
+Circle* Circle::setRadius(qreal radius)
+{
+    mRadius = radius;
+    mEllipse->setRect(getBoundingRect());
+    return this;
+}
+
+void Circle::setFocus(bool focus)
+{
+    auto pen = mEllipse->pen();
+    pen.setWidth(focus ? 4 : 1);
+    mEllipse->setPen(pen);
 }
 
 void Circle::rotate(const QPointF& rotationCenter, qreal angle, bool clockwise)
@@ -35,7 +54,7 @@ void Circle::rotate(const QPointF& rotationCenter, qreal angle, bool clockwise)
 void Circle::moveTo(const QPointF& center)
 {
     mCenter = center;
-    mEllise->setPos(mCenter);
+    mEllipse->setPos(mCenter);
 }
 
 void Circle::drawTo(const QPointF& center)

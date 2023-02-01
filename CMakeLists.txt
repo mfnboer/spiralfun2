@@ -18,6 +18,8 @@ set(PROJECT_SOURCES
         circle.h
         circle.cpp
         main.cpp
+        player.h
+        player.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

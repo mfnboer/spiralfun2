@@ -1,13 +1,15 @@
-#include "appwindow.h"
+﻿#include "appwindow.h"
 #include <QBoxLayout>
-#include <QCheckBox>
 #include <QLabel>
-#include <QPushButton>
 #include <QScreen>
 #include <QStyle>
-#include <QSpinBox>
 
 namespace SpiralFun {
+
+namespace {
+    constexpr int MIN_CIRCLES = 2;
+    constexpr int MAX_CIRCLES = 10;
+}
 
 AppWindow::AppWindow()
 {
@@ -27,44 +29,55 @@ AppWindow::AppWindow()
     mScene->setSceneRect(-width / 2.0, -height / 2.0, width, height);
     mView->setScene(mScene);
 
+    const qreal minScreenDimension = std::min(width, height);
+    mDefaultCircleRadius = minScreenDimension / 2.0 / (MAX_CIRCLES - 0.5) / 2.0;
+
     auto* upButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowUp), "");
     upButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    QObject::connect(upButton, &QPushButton::clicked, this, &AppWindow::handleUp);
     auto* diameterLabel = new QLabel("Diameter:");
-    auto* diameterSpinBox = new QSpinBox();
-    diameterSpinBox->setMinimum(1);
-    diameterSpinBox->setMaximum(300);
-    auto* drawCheckBox = new QCheckBox("draw");
+    mDiameterSpinBox = new QSpinBox();
+    mDiameterSpinBox->setMinimum(1);
+    mDiameterSpinBox->setMaximum(300);
+    QObject::connect(mDiameterSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleDiameter);
+    mDrawCheckBox = new QCheckBox("draw");
+    QObject::connect(mDrawCheckBox, &QCheckBox::clicked, this, &AppWindow::handleDraw);
     auto* row1Layout = new QHBoxLayout();
     row1Layout->addWidget(upButton);
     row1Layout->addWidget(diameterLabel);
-    row1Layout->addWidget(diameterSpinBox, 1);
-    row1Layout->addWidget(drawCheckBox, 1);
+    row1Layout->addWidget(mDiameterSpinBox, 1);
+    row1Layout->addWidget(mDrawCheckBox, 1);
 
     auto* row2Layout = new QHBoxLayout();
     auto* downButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowDown), "");
+    QObject::connect(downButton, &QPushButton::clicked, this, &AppWindow::handleDown);
     downButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     auto* rotationsLabel = new QLabel("Rotations:");
-    auto* rotationsSpinBox = new QSpinBox();
-    rotationsSpinBox->setMinimum(0);
-    rotationsSpinBox->setMaximum(3000);
-    auto* directionCheckBox = new QCheckBox("clockwise");
+    mRotationsSpinBox = new QSpinBox();
+    mRotationsSpinBox->setMinimum(0);
+    mRotationsSpinBox->setMaximum(3000);
+    QObject::connect(mRotationsSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleRotations);
+    mDirectionCheckBox = new QCheckBox("clockwise");
+    QObject::connect(mDirectionCheckBox, &QCheckBox::clicked, this, &AppWindow::handleDirection);
     row2Layout->addWidget(downButton);
     row2Layout->addWidget(rotationsLabel);
-    row2Layout->addWidget(rotationsSpinBox, 1);
-    row2Layout->addWidget(directionCheckBox, 1);
+    row2Layout->addWidget(mRotationsSpinBox, 1);
+    row2Layout->addWidget(mDirectionCheckBox, 1);
 
     auto* numCirclesLabel = new QLabel("Circles:");
-    auto* numCirclesSpinBox = new QSpinBox();
-    numCirclesSpinBox->setMinimum(2);
-    numCirclesSpinBox->setMaximum(10);
-    auto* startStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "Play");
+    mNumCirclesSpinBox = new QSpinBox();
+    mNumCirclesSpinBox->setMinimum(MIN_CIRCLES);
+    mNumCirclesSpinBox->setMaximum(MAX_CIRCLES);
+    QObject::connect(mNumCirclesSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleNumCircles);
+    mStartStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "Play");
+    QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handlePlay);
     auto* helpButton = new QPushButton(style()->standardIcon(QStyle::SP_TitleBarContextHelpButton), "");
     helpButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     auto* row3Layout = new QHBoxLayout();
     row3Layout->addWidget(numCirclesLabel);
-    row3Layout->addWidget(numCirclesSpinBox, 1);
-    row3Layout->addWidget(startStopButton, 1);
+    row3Layout->addWidget(mNumCirclesSpinBox, 1);
+    row3Layout->addWidget(mStartStopButton, 1);
     row3Layout->addWidget(helpButton);
 
     auto* layout = new QVBoxLayout();
@@ -111,6 +124,153 @@ void AppWindow::advanceCircle(unsigned index, qreal angle)
         for (unsigned n = 0; n < std::abs(speed); ++n)
             circle.rotate(rotationCenter, angle, clockwise);
     }
+}
+
+void AppWindow::handleNumCircles(unsigned numCircles)
+{
+    if (numCircles == mCircles.size())
+        return;
+
+    if (numCircles < mCircles.size())
+    {
+        mCircles.resize(numCircles);
+        if (mCurrentIndex >= mCircles.size())
+        {
+            mCurrentIndex = 0;
+            setCurrentCircleFocus(true);
+        }
+
+        return;
+    }
+
+    Q_ASSERT(numCircles > mCircles.size());
+    const int delta = numCircles - mCircles.size();
+    for (int i = 0; i < delta; ++i)
+        addCircle(mDefaultCircleRadius);
+}
+
+void AppWindow::handleDiameter(unsigned diameter)
+{
+    if (mCurrentIndex >= mCircles.size())
+        return;
+
+    auto& circle = mCircles[mCurrentIndex];
+    const qreal radius = diameter / 2.0;
+    const qreal diff = radius - circle->getRadius();
+    QPointF center = circle->getCenter();
+    center.ry() -= diff;
+    circle->setRadius(radius);
+    circle->setCenter(center);
+
+    // Circle changed size, move circles on top of this circle.
+    moveCircles(mCurrentIndex + 1, 2.0 * diff);
+}
+
+void AppWindow::moveCircles(unsigned index, qreal yShift)
+{
+    for (unsigned i = index; i < mCircles.size(); ++i)
+    {
+        auto& circle = mCircles[i];
+        QPointF center = circle->getCenter();
+        center.ry() -= yShift;
+        circle->setCenter(center);
+    }
+}
+
+void AppWindow::handleUp()
+{
+    if (mCircles.empty())
+        return;
+
+    if (mCurrentIndex < mCircles.size() - 1)
+    {
+        setCurrentCircleFocus(false);
+        ++mCurrentIndex;
+        setCurrentCircleFocus(true);
+    }
+}
+
+void AppWindow::handleDown()
+{
+    if (mCurrentIndex > 0)
+    {
+        setCurrentCircleFocus(false);
+        --mCurrentIndex;
+        setCurrentCircleFocus(true);
+    }
+}
+
+void AppWindow::handleDraw(bool draw)
+{
+    if (mCurrentIndex >= mCircles.size())
+        return;
+
+    mCircles[mCurrentIndex]->setDraw(draw);
+}
+
+void AppWindow::handleRotations(unsigned rotations)
+{
+    if (mCircles.empty())
+        return;
+
+    auto& circle = mCircles[mCurrentIndex];
+    const int direction = circle->getSpeed() < 0 ? -1 : 1;
+    circle->setSpeed(rotations * direction);
+}
+
+void AppWindow::handleDirection(bool clockwise)
+{
+    if (mCircles.empty())
+        return;
+
+    auto& circle = mCircles[mCurrentIndex];
+    const int direction = clockwise ? 1 : -1;
+    const int speed = std::abs(circle->getSpeed()) * direction;
+    circle->setSpeed(speed);
+}
+
+void AppWindow::handlePlay()
+{
+    if (!mPlayer)
+        mPlayer = std::make_unique<Player>(this);
+
+    mPlayer->play();
+    mStartStopButton->disconnect();
+    mStartStopButton->setText("Stop");
+    mStartStopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+    QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handleStop);
+}
+
+void AppWindow::handleStop()
+{
+    mPlayer = nullptr;
+    mStartStopButton->disconnect();
+    mStartStopButton->setText("Play");
+    mStartStopButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handlePlay);
+    // TODO: reset scene
+}
+
+void AppWindow::setCurrentCircleFocus(bool focus)
+{
+    if (mCurrentIndex >= mCircles.size())
+    {
+        qWarning() << "Cannot focus, index:" << mCurrentIndex << "focus:" << focus;
+        return;
+    }
+
+    auto& circle = mCircles[mCurrentIndex];
+    circle->setFocus(focus);
+
+    if (!focus)
+        return;
+
+    mDiameterSpinBox->setValue(std::round(circle->getRadius() * 2.0));
+    mDrawCheckBox->setChecked(circle->getDraw());
+    mRotationsSpinBox->setValue(std::abs(circle->getSpeed()));
+    mDirectionCheckBox->setChecked(circle->getSpeed() >= 0);
+
+    mRotationsSpinBox->setEnabled(mCurrentIndex != 0);
 }
 
 }

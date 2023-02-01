@@ -16,24 +16,5 @@ int main(int argc, char *argv[])
     appWin.showMaximized();
     appWin.show();
 
-    QTimer timer;
-    qreal angle = 0.0;
-    const qreal stepAngle = qDegreesToRadians(0.05);
-    const unsigned stepsPerInterval = 4;
-    QObject::connect(&timer, &QTimer::timeout, &appWin, [&appWin,&timer,&angle,stepAngle]{
-        for (unsigned step = 0.0; step < stepsPerInterval; ++step)
-        {
-            appWin.advanceCircles(stepAngle);
-            angle += stepAngle;
-
-            if (angle >= M_PI * 2)
-            {
-                timer.disconnect();
-                break;
-            }
-        }
-    });
-    timer.start(1);
-
     return a.exec();
 }
