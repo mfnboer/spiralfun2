@@ -1,22 +1,18 @@
 #pragma once
 
 #include "circle.h"
-#include <QMainWindow>
 #include <QGraphicsScene>
-#include <vector>
 #include <memory>
+#include <vector>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
+namespace SpiralFun {
 
-class MainWindow : public QMainWindow
+class AppWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    AppWindow();
 
     SpiralFun::Circle* addCircle(qreal radius);
     void advanceCircles(qreal angle);
@@ -24,7 +20,9 @@ public:
 private:
     void advanceCircle(unsigned index, qreal angle);
 
-    Ui::MainWindow *ui;
-    QGraphicsScene mScene;
+    QGraphicsView* mView;
+    QGraphicsScene* mScene;
     std::vector<std::unique_ptr<SpiralFun::Circle>> mCircles;
 };
+
+}
