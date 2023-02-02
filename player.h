@@ -1,8 +1,12 @@
 #pragma once
 
+#include <QTime>
 #include <QTimer>
+#include <chrono>
 
 namespace SpiralFun {
+
+using namespace std::chrono_literals;
 
 class AppWindow;
 
@@ -21,9 +25,9 @@ private:
     AppWindow* mAppWin;
     QTimer mTimer;
     qreal mAngle = 0.0;
-    qreal mStepAngle = qDegreesToRadians(0.05);
-    unsigned mStepIntervalMs = 1;
-    unsigned mStepsPerInterval = 4;
+    const qreal mStepAngle = qDegreesToRadians(0.05);
+    const unsigned mStepsPerInterval = 10;
+    int mStartTime;
 };
 
 }

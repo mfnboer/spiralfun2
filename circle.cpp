@@ -8,16 +8,16 @@ Circle::Circle(QGraphicsView* view, const QPointF& center, qreal radius) :
     mScene(view->scene()),
     mCenter(center),
     mDrawPos(center),
-    mRadius(radius),
-    mMinDrawLength(1.0)
+    mRadius(radius)
 {
-    mEllipse.reset(mScene->addEllipse(getBoundingRect()));
+    mEllipse.reset(mScene->addEllipse(getBoundingRect(), QPen(Qt::white)));
     mEllipse->setPos(mCenter);
 }
 
 Circle* Circle::setCenter(const QPointF& center)
 {
     moveTo(center);
+    mDrawPos = center;
     return this;
 }
 
@@ -31,7 +31,7 @@ Circle* Circle::setRadius(qreal radius)
 void Circle::setFocus(bool focus)
 {
     auto pen = mEllipse->pen();
-    pen.setWidth(focus ? 4 : 1);
+    pen.setWidth(focus ? 10 : 1);
     mEllipse->setPen(pen);
 }
 
@@ -62,9 +62,19 @@ void Circle::drawTo(const QPointF& center)
     const QLineF line(mDrawPos, center);
     if (line.length() >= mMinDrawLength)
     {
-        mScene->addLine(line);
+        mScene->addLine(line, QPen(Qt::white));
         mDrawPos = center;
     }
+}
+
+void Circle::removeFromScene()
+{
+    mScene->removeItem(mEllipse.get());
+}
+
+void Circle::addToScene()
+{
+    mScene->addItem(mEllipse.get());
 }
 
 }

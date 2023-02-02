@@ -18,6 +18,7 @@ class AppWindow : public QWidget
 public:
     AppWindow();
 
+    void setupCircles();
     SpiralFun::Circle* addCircle(qreal radius);
     void advanceCircles(qreal angle);
 
@@ -34,6 +35,9 @@ private:
     void handlePlay();
     void handleStop();
     void setCurrentCircleFocus(bool focus);
+    void enableControls(bool enable);
+    void resetCircles();
+    void resetScene();
 
     QGraphicsView* mView;
     QGraphicsScene* mScene;

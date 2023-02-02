@@ -17,6 +17,7 @@ AppWindow::AppWindow()
     mView->setRenderHint(QPainter::Antialiasing);
     mView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     mView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     const QScreen* scr = screen();
     const QSize& screenSize = scr->size();
@@ -24,10 +25,12 @@ AppWindow::AppWindow()
 
     mScene = new QGraphicsScene();
     mScene->setItemIndexMethod(QGraphicsScene::NoIndex);
+    mScene->setBackgroundBrush(Qt::black);
     const qreal width = screenSize.width();
-    const qreal height = screenSize.height();
+    const qreal height = screenSize.height() * 0.9;
     mScene->setSceneRect(-width / 2.0, -height / 2.0, width, height);
     mView->setScene(mScene);
+    mView->fitInView(mScene->sceneRect(), Qt::KeepAspectRatioByExpanding);
 
     const qreal minScreenDimension = std::min(width, height);
     mDefaultCircleRadius = minScreenDimension / 2.0 / (MAX_CIRCLES - 0.5) / 2.0;
@@ -81,11 +84,22 @@ AppWindow::AppWindow()
     row3Layout->addWidget(helpButton);
 
     auto* layout = new QVBoxLayout();
-    layout->addWidget(mView);
+    layout->addWidget(mView, 1);
     layout->addLayout(row1Layout);
     layout->addLayout(row2Layout);
     layout->addLayout(row3Layout);
     setLayout(layout);
+}
+
+void AppWindow::setupCircles()
+{
+    mCircles.clear();
+    addCircle(mDefaultCircleRadius * 4);
+    addCircle(mDefaultCircleRadius * 2)->setSpeed(1);
+    addCircle(5)->setSpeed(-5)->setDraw(true);
+    mCurrentIndex = 0;
+    setCurrentCircleFocus(true);
+    mView->centerOn(mCircles[0]->GetEllipseItem());
 }
 
 SpiralFun::Circle* AppWindow::addCircle(qreal radius)
@@ -239,6 +253,7 @@ void AppWindow::handlePlay()
     mStartStopButton->setText("Stop");
     mStartStopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handleStop);
+    enableControls(false);
 }
 
 void AppWindow::handleStop()
@@ -248,7 +263,8 @@ void AppWindow::handleStop()
     mStartStopButton->setText("Play");
     mStartStopButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handlePlay);
-    // TODO: reset scene
+    resetScene();
+    enableControls(true);
 }
 
 void AppWindow::setCurrentCircleFocus(bool focus)
@@ -270,7 +286,46 @@ void AppWindow::setCurrentCircleFocus(bool focus)
     mRotationsSpinBox->setValue(std::abs(circle->getSpeed()));
     mDirectionCheckBox->setChecked(circle->getSpeed() >= 0);
 
-    mRotationsSpinBox->setEnabled(mCurrentIndex != 0);
+    mRotationsSpinBox->setEnabled(mCurrentIndex > 1);
+}
+
+void AppWindow::enableControls(bool enable)
+{
+    mDiameterSpinBox->setEnabled(enable);
+    mDrawCheckBox->setEnabled(enable);
+    mRotationsSpinBox->setEnabled(enable);
+    mDirectionCheckBox->setEnabled(enable);
+    mNumCirclesSpinBox->setEnabled(enable);
+    setCurrentCircleFocus(enable);
+}
+
+void AppWindow::resetCircles()
+{
+    if (mCircles.empty())
+        return;
+
+    QPointF center(0.0, 0.0);
+    mCircles[0]->setCenter(center);
+
+    for (int i = 1; i < mCircles.size(); ++i)
+    {
+        auto& circle = mCircles[i];
+        auto& prev = mCircles[i - 1];
+        center.ry() -= prev->getRadius() + circle->getRadius();
+        circle->setCenter(center);
+    }
+}
+
+void AppWindow::resetScene()
+{
+    for (auto& circle : mCircles)
+        circle->removeFromScene();
+
+    mScene->clear();
+    resetCircles();
+
+    for (auto& circle : mCircles)
+        circle->addToScene();
 }
 
 }

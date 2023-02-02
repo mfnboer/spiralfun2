@@ -11,7 +11,8 @@ Player::Player(AppWindow* appWin) :
 
 void Player::play()
 {
-    mTimer.start(mStepIntervalMs);
+    mStartTime = QTime::currentTime().msecsSinceStartOfDay();
+    mTimer.start(0);
 }
 
 void Player::advance()
@@ -24,6 +25,8 @@ void Player::advance()
         if (mAngle >= M_PI * 2)
         {
             mTimer.disconnect();
+            int stopTime = QTime::currentTime().msecsSinceStartOfDay();
+            qDebug() << "Play duration:" << (stopTime - mStartTime) / 1000.0 << "secs";
             break;
         }
     }
