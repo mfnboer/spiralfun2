@@ -6,11 +6,18 @@ namespace SpiralFun {
 GraphicsView::GraphicsView(QGraphicsScene *scene, QWidget *parent) :
     QGraphicsView(scene, parent)
 {
+    setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents);
     setRenderHint(QPainter::Antialiasing);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setDragMode(ScrollHandDrag);
     grabGesture(Qt::PinchGesture);
-    grabGesture(Qt::PanGesture);
+}
+
+void GraphicsView::setTransformation()
+{
+    setTransform(QTransform::fromScale(mTotalScaleFactor * mCurrentScaleFactor,
+                                       mTotalScaleFactor * mCurrentScaleFactor));
 }
 
 bool GraphicsView::event(QEvent* event)
@@ -23,6 +30,7 @@ bool GraphicsView::event(QEvent* event)
 
 bool GraphicsView::gestureEvent(QGestureEvent* event)
 {
+    qDebug() << "gesture event:" << event;
     if (QGesture* pinch = event->gesture(Qt::PinchGesture))
         pinchGesture(static_cast<QPinchGesture*>(pinch));
 
@@ -35,8 +43,7 @@ void GraphicsView::pinchGesture(QPinchGesture* gesture)
     if (changeFlags & QPinchGesture::ScaleFactorChanged)
     {
         mCurrentScaleFactor = gesture->totalScaleFactor();
-        setTransform(QTransform::fromScale(mTotalScaleFactor * mCurrentScaleFactor,
-                                           mTotalScaleFactor * mCurrentScaleFactor));
+        setTransformation();
     }
     if (gesture->state() == Qt::GestureFinished)
     {

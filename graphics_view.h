@@ -16,8 +16,10 @@ protected:
     bool event(QEvent* event) override;
 
 private:
+    void setTransformation();
     bool gestureEvent(QGestureEvent* event);
     void pinchGesture(QPinchGesture* gesture);
+
     qreal mTotalScaleFactor = 1.0;
     qreal mCurrentScaleFactor = 1.0;
 };
