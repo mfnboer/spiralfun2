@@ -4,6 +4,7 @@
 #include "graphics_view.h"
 #include "player.h"
 #include <QCheckBox>
+#include <QComboBox>
 #include <QGraphicsScene>
 #include <QPushButton>
 #include <QSpinBox>
@@ -49,8 +50,8 @@ private:
     QSpinBox* mDiameterSpinBox;
     QCheckBox* mDrawCheckBox;
     QSpinBox* mRotationsSpinBox;
-    QCheckBox* mDirectionCheckBox;
-    QSpinBox* mNumCirclesSpinBox;
+    QComboBox* mDirectionComboBox;
+    QComboBox* mNumCirclesComboBox;
     QPushButton* mStartStopButton;
     std::vector<std::unique_ptr<SpiralFun::Circle>> mCircles;
     unsigned mCurrentIndex = 0;
