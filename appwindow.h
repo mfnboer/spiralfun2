@@ -18,9 +18,13 @@ class AppWindow : public QWidget
 public:
     AppWindow();
 
+    void init();
     void setupCircles();
     SpiralFun::Circle* addCircle(qreal radius);
     void advanceCircles(qreal angle);
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
     void advanceCircle(unsigned index, qreal angle);

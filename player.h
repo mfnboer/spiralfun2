@@ -26,7 +26,7 @@ private:
     QTimer mTimer;
     qreal mAngle = 0.0;
     const qreal mStepAngle = qDegreesToRadians(0.05);
-    const unsigned mStepsPerInterval = 10;
+    const unsigned mStepsPerInterval = 32;
     int mStartTime;
 };
 

@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QScreen>
+#include <QShowEvent>
 #include <QStyle>
 
 namespace SpiralFun {
@@ -13,27 +14,19 @@ namespace {
 
 AppWindow::AppWindow()
 {
+    qInfo() << "screen:" << screen()->size() << "dpr:" << screen()->devicePixelRatio();
+
     mView = new QGraphicsView();
     mView->setRenderHint(QPainter::Antialiasing);
     mView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     mView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     mView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    const QScreen* scr = screen();
-    const QSize& screenSize = scr->size();
-    qInfo() << "screen:" << screenSize << "dpr:" << scr->devicePixelRatio();
-
     mScene = new QGraphicsScene();
     mScene->setItemIndexMethod(QGraphicsScene::NoIndex);
     mScene->setBackgroundBrush(Qt::black);
-    const qreal width = screenSize.width();
-    const qreal height = screenSize.height() * 0.9;
-    mScene->setSceneRect(-width / 2.0, -height / 2.0, width, height);
     mView->setScene(mScene);
-    mView->fitInView(mScene->sceneRect(), Qt::KeepAspectRatioByExpanding);
-
-    const qreal minScreenDimension = std::min(width, height);
-    mDefaultCircleRadius = minScreenDimension / 2.0 / (MAX_CIRCLES - 0.5) / 2.0;
+    mView->installEventFilter(this);
 
     auto* upButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowUp), "");
     upButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -89,6 +82,33 @@ AppWindow::AppWindow()
     layout->addLayout(row2Layout);
     layout->addLayout(row3Layout);
     setLayout(layout);
+
+    enableControls(false);
+}
+
+bool AppWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == mView && (event->type() == QEvent::Show || event->type() == QEvent::Resize))
+    {
+        qDebug() << "Show event, event:" << event->type() << event->spontaneous() <<
+                    "circles:" << mCircles.size() << "view:" << mView->size();
+
+        mView->fitInView(mScene->sceneRect(), Qt::KeepAspectRatioByExpanding);
+    }
+
+    return QWidget::eventFilter(obj, event);
+}
+
+void AppWindow::init()
+{
+    const qreal width = mView->width();
+    const qreal height = mView->height();
+    mScene->setSceneRect(-width / 2.0, -height / 2.0, width, height);
+    mView->fitInView(mScene->sceneRect(), Qt::KeepAspectRatioByExpanding);
+    const qreal minDimension = std::min(width, height);
+    mDefaultCircleRadius = minDimension / 2.0 / (MAX_CIRCLES * 2 - 1);
+
+    qInfo() << "init, scene rect:" << mScene->sceneRect() << "default radius:" << mDefaultCircleRadius;
 }
 
 void AppWindow::setupCircles()
@@ -98,7 +118,7 @@ void AppWindow::setupCircles()
     addCircle(mDefaultCircleRadius * 2)->setSpeed(1);
     addCircle(5)->setSpeed(-5)->setDraw(true);
     mCurrentIndex = 0;
-    setCurrentCircleFocus(true);
+    enableControls(true);
     mView->centerOn(mCircles[0]->GetEllipseItem());
 }
 
@@ -270,10 +290,7 @@ void AppWindow::handleStop()
 void AppWindow::setCurrentCircleFocus(bool focus)
 {
     if (mCurrentIndex >= mCircles.size())
-    {
-        qWarning() << "Cannot focus, index:" << mCurrentIndex << "focus:" << focus;
         return;
-    }
 
     auto& circle = mCircles[mCurrentIndex];
     circle->setFocus(focus);
@@ -285,6 +302,7 @@ void AppWindow::setCurrentCircleFocus(bool focus)
     mDrawCheckBox->setChecked(circle->getDraw());
     mRotationsSpinBox->setValue(std::abs(circle->getSpeed()));
     mDirectionCheckBox->setChecked(circle->getSpeed() >= 0);
+    mNumCirclesSpinBox->setValue(mCircles.size());
 
     mRotationsSpinBox->setEnabled(mCurrentIndex > 1);
 }

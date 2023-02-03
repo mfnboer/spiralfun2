@@ -31,7 +31,7 @@ Circle* Circle::setRadius(qreal radius)
 void Circle::setFocus(bool focus)
 {
     auto pen = mEllipse->pen();
-    pen.setWidth(focus ? 10 : 1);
+    pen.setWidth(focus ? 8 : 1);
     mEllipse->setPen(pen);
 }
 

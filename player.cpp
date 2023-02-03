@@ -25,7 +25,7 @@ void Player::advance()
         if (mAngle >= M_PI * 2)
         {
             mTimer.disconnect();
-            int stopTime = QTime::currentTime().msecsSinceStartOfDay();
+            const int stopTime = QTime::currentTime().msecsSinceStartOfDay();
             qDebug() << "Play duration:" << (stopTime - mStartTime) / 1000.0 << "secs";
             break;
         }
