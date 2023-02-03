@@ -3,6 +3,7 @@
 #include "circle.h"
 #include "graphics_view.h"
 #include "player.h"
+#include "spinbox.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGraphicsScene>
@@ -47,9 +48,9 @@ private:
 
     GraphicsView* mView;
     QGraphicsScene* mScene;
-    QSpinBox* mDiameterSpinBox;
+    SpinBox* mDiameterSpinBox;
     QCheckBox* mDrawCheckBox;
-    QSpinBox* mRotationsSpinBox;
+    SpinBox* mRotationsSpinBox;
     QComboBox* mDirectionComboBox;
     QComboBox* mNumCirclesComboBox;
     QPushButton* mStartStopButton;

@@ -22,6 +22,7 @@ set(PROJECT_SOURCES
         main.cpp
         player.h
         player.cpp
+        spinbox.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

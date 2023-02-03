@@ -29,7 +29,7 @@ AppWindow::AppWindow()
     upButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     QObject::connect(upButton, &QPushButton::clicked, this, &AppWindow::handleUp);
     auto* diameterLabel = new QLabel("Diameter:");
-    mDiameterSpinBox = new QSpinBox();
+    mDiameterSpinBox = new SpinBox();
     mDiameterSpinBox->setMinimum(1);
     mDiameterSpinBox->setMaximum(300);
     QObject::connect(mDiameterSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleDiameter);
@@ -46,7 +46,7 @@ AppWindow::AppWindow()
     QObject::connect(downButton, &QPushButton::clicked, this, &AppWindow::handleDown);
     downButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     auto* rotationsLabel = new QLabel("Rotations:");
-    mRotationsSpinBox = new QSpinBox();
+    mRotationsSpinBox = new SpinBox();
     mRotationsSpinBox->setMinimum(0);
     mRotationsSpinBox->setMaximum(3000);
     QObject::connect(mRotationsSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleRotations);
