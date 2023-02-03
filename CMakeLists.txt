@@ -17,6 +17,8 @@ set(PROJECT_SOURCES
 	appwindow.cpp
         circle.h
         circle.cpp
+        graphics_view.h
+        graphics_view.cpp
         main.cpp
         player.h
         player.cpp

@@ -16,10 +16,7 @@ AppWindow::AppWindow()
 {
     qInfo() << "screen:" << screen()->size() << "dpr:" << screen()->devicePixelRatio();
 
-    mView = new QGraphicsView();
-    mView->setRenderHint(QPainter::Antialiasing);
-    mView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    mView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mView = new GraphicsView();
     mView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     mScene = new QGraphicsScene();

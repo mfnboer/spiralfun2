@@ -1,6 +1,7 @@
 #pragma once
 
 #include "circle.h"
+#include "graphics_view.h"
 #include "player.h"
 #include <QCheckBox>
 #include <QGraphicsScene>
@@ -43,7 +44,7 @@ private:
     void resetCircles();
     void resetScene();
 
-    QGraphicsView* mView;
+    GraphicsView* mView;
     QGraphicsScene* mScene;
     QSpinBox* mDiameterSpinBox;
     QCheckBox* mDrawCheckBox;
