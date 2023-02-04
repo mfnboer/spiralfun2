@@ -66,14 +66,19 @@ void Circle::moveTo(const QPointF& center)
     mEllipse->setPos(mCenter);
 }
 
-void Circle::drawTo(const QPointF& center)
+void Circle::drawTo(const QPointF& center, bool force)
 {
     const QLineF line(mDrawPos, center);
-    if (line.length() >= mMinDrawLength)
+    if (line.length() >= mMinDrawLength || force)
     {
         mScene->addLine(line, QPen(mColor, 1, Qt::SolidLine, Qt::RoundCap));;
         mDrawPos = center;
     }
+}
+
+void Circle::forceDrawToCenter()
+{
+    drawTo(mCenter, true);
 }
 
 void Circle::removeFromScene()

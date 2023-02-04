@@ -26,10 +26,11 @@ public:
     void rotate(const QPointF& rotationCenter, qreal angle, bool clockwise = true);
     void removeFromScene();
     void addToScene();
+    void forceDrawToCenter();
 
 private:
     void moveTo(const QPointF& center);
-    void drawTo(const QPointF& center);
+    void drawTo(const QPointF& center, bool force = false);
 
     QGraphicsScene* mScene;
     std::unique_ptr<QGraphicsEllipseItem> mEllipse;

@@ -1,6 +1,7 @@
 ﻿#include "appwindow.h"
 #include <QBoxLayout>
 #include <QLabel>
+#include <QMenu>
 #include <QScreen>
 #include <QShowEvent>
 #include <QStyle>
@@ -71,14 +72,19 @@ AppWindow::AppWindow()
     QObject::connect(mNumCirclesSpinBox, &SpinBox::valueChanged, this, &AppWindow::handleNumCircles);
     mStartStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "Play");
     QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handlePlay);
-    auto* helpButton = new QPushButton(style()->standardIcon(QStyle::SP_TitleBarContextHelpButton), "");
-    helpButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    mMoreButton = new QPushButton("\U00002630");
+    auto* moreMenu = new QMenu(this);
+    moreMenu->addAction("Examples");
+    moreMenu->addAction("Help");
+    moreMenu->addAction("About");
+    mMoreButton->setMenu(moreMenu);
+    mMoreButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     auto* row3Layout = new QHBoxLayout();
     row3Layout->addWidget(numCirclesLabel);
     row3Layout->addWidget(mNumCirclesSpinBox, 1);
     row3Layout->addWidget(mStartStopButton, 1);
-    row3Layout->addWidget(helpButton);
+    row3Layout->addWidget(mMoreButton);
 
     auto* layout = new QVBoxLayout();
     layout->addWidget(mView, 1);
@@ -145,6 +151,15 @@ void AppWindow::advanceCircles(qreal angle)
 {
     for(int i = 1; i < mCircles.size(); ++i)
         advanceCircle(i, angle);
+}
+
+void AppWindow::forceDraw()
+{
+    for (auto& circle : mCircles)
+    {
+        if (circle->getDraw())
+            circle->forceDrawToCenter();
+    }
 }
 
 void AppWindow::advanceCircle(unsigned index, qreal angle)
@@ -330,7 +345,10 @@ void AppWindow::enableControls(bool enable)
     mRotationsSpinBox->setEnabled(enable);
     mDirectionComboBox->setEnabled(enable);
     mNumCirclesSpinBox->setEnabled(enable);
+    mMoreButton->setEnabled(enable);
     setCurrentCircleFocus(enable);
+
+    mMoreButton->raise();
 }
 
 void AppWindow::resetCircles()

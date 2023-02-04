@@ -24,6 +24,9 @@ void Player::advance()
 
         if (mAngle >= M_PI * 2)
         {
+            // Draw the last line to close the curve. It may not have been drawn yet
+            // due to the minimum draw lenght.
+            mAppWin->forceDraw();
             mAppWin->removeCirclesFromScene();
             mTimer.disconnect();
             const int stopTime = QTime::currentTime().msecsSinceStartOfDay();

@@ -26,6 +26,7 @@ public:
     void setupCircles();
     SpiralFun::Circle* addCircle(qreal radius);
     void advanceCircles(qreal angle);
+    void forceDraw();
     void addCirclesToScene();
     void removeCirclesFromScene();
 
@@ -59,6 +60,7 @@ private:
     QComboBox* mDirectionComboBox;
     SpinBox* mNumCirclesSpinBox;
     QPushButton* mStartStopButton;
+    QPushButton* mMoreButton;
     std::vector<std::unique_ptr<SpiralFun::Circle>> mCircles;
     unsigned mCurrentIndex = 0;
     qreal mDefaultCircleRadius = 10.0;
