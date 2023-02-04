@@ -52,7 +52,7 @@ private:
     QCheckBox* mDrawCheckBox;
     SpinBox* mRotationsSpinBox;
     QComboBox* mDirectionComboBox;
-    QComboBox* mNumCirclesComboBox;
+    SpinBox* mNumCirclesSpinBox;
     QPushButton* mStartStopButton;
     std::vector<std::unique_ptr<SpiralFun::Circle>> mCircles;
     unsigned mCurrentIndex = 0;

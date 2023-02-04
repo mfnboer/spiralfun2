@@ -48,7 +48,7 @@ AppWindow::AppWindow()
     auto* rotationsLabel = new QLabel("Rotations:");
     mRotationsSpinBox = new SpinBox();
     mRotationsSpinBox->setMinimum(0);
-    mRotationsSpinBox->setMaximum(3000);
+    mRotationsSpinBox->setMaximum(9999);
     QObject::connect(mRotationsSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleRotations);
     mDirectionComboBox = new QComboBox();
     mDirectionComboBox->addItems({"clockwise", "counter clock"});
@@ -60,12 +60,10 @@ AppWindow::AppWindow()
     row2Layout->addWidget(mDirectionComboBox, 1);
 
     auto* numCirclesLabel = new QLabel("Circles:");
-    mNumCirclesComboBox = new QComboBox();
-    for (int i = MIN_CIRCLES; i <= MAX_CIRCLES; ++i)
-        mNumCirclesComboBox->addItem(QString::number(i));
-    mNumCirclesComboBox->setWindowFlag(Qt::WindowStaysOnTopHint); // Workaround for combo box bug: no pop under
-    QObject::connect(mNumCirclesComboBox, &QComboBox::currentIndexChanged, this,
-                     [this](int index){ handleNumCircles(index + MIN_CIRCLES); });
+    mNumCirclesSpinBox = new SpinBox();
+    mNumCirclesSpinBox->setMinimum(MIN_CIRCLES);
+    mNumCirclesSpinBox->setMaximum(MAX_CIRCLES);
+    QObject::connect(mNumCirclesSpinBox, &SpinBox::valueChanged, this, &AppWindow::handleNumCircles);
     mStartStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "Play");
     QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handlePlay);
     auto* helpButton = new QPushButton(style()->standardIcon(QStyle::SP_TitleBarContextHelpButton), "");
@@ -73,7 +71,7 @@ AppWindow::AppWindow()
 
     auto* row3Layout = new QHBoxLayout();
     row3Layout->addWidget(numCirclesLabel);
-    row3Layout->addWidget(mNumCirclesComboBox, 1);
+    row3Layout->addWidget(mNumCirclesSpinBox, 1);
     row3Layout->addWidget(mStartStopButton, 1);
     row3Layout->addWidget(helpButton);
 
@@ -303,7 +301,7 @@ void AppWindow::setCurrentCircleFocus(bool focus)
     mDrawCheckBox->setChecked(circle->getDraw());
     mRotationsSpinBox->setValue(std::abs(circle->getSpeed()));
     mDirectionComboBox->setCurrentIndex(circle->getSpeed() >= 0 ? 0 : 1);
-    mNumCirclesComboBox->setCurrentIndex(mCircles.size() - MIN_CIRCLES);
+    mNumCirclesSpinBox->setValue(mCircles.size());
 
     mRotationsSpinBox->setEnabled(mCurrentIndex > 1);
     mDirectionComboBox->setEnabled(mCurrentIndex > 0);
@@ -316,15 +314,8 @@ void AppWindow::enableControls(bool enable)
     mDrawCheckBox->setEnabled(enable);
     mRotationsSpinBox->setEnabled(enable);
     mDirectionComboBox->setEnabled(enable);
-    mNumCirclesComboBox->setEnabled(enable);
+    mNumCirclesSpinBox->setEnabled(enable);
     setCurrentCircleFocus(enable);
-
-    if (enable)
-    {
-        // Workaround for bug in QT
-        // The popup will sometimes pop under. Raise makes it visible again.
-        mNumCirclesComboBox->raise();
-    }
 }
 
 void AppWindow::resetCircles()
