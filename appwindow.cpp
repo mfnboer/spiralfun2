@@ -118,9 +118,9 @@ void AppWindow::init()
 void AppWindow::setupCircles()
 {
     mCircles.clear();
-    addCircle(mDefaultCircleRadius * 4);
-    addCircle(mDefaultCircleRadius * 2)->setSpeed(1);
-    addCircle(5)->setSpeed(-5)->setDraw(true);
+    addCircle(mDefaultCircleRadius * 4)->setColor(Qt::blue);
+    addCircle(mDefaultCircleRadius * 2)->setColor(Qt::green)->setSpeed(1);
+    addCircle(5)->setColor(Qt::white)->setSpeed(-5)->setDraw(true);
     mCurrentIndex = 0;
     enableControls(true);
     mView->centerOn(mCircles[0]->GetEllipseItem());
@@ -350,16 +350,24 @@ void AppWindow::resetCircles()
     }
 }
 
-void AppWindow::resetScene()
+void AppWindow::addCirclesToScene()
+{
+    for (auto& circle : mCircles)
+        circle->addToScene();
+}
+
+void AppWindow::removeCirclesFromScene()
 {
     for (auto& circle : mCircles)
         circle->removeFromScene();
+}
 
+void AppWindow::resetScene()
+{
+    removeCirclesFromScene();
     mScene->clear();
     resetCircles();
-
-    for (auto& circle : mCircles)
-        circle->addToScene();
+    addCirclesToScene();
 }
 
 }

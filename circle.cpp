@@ -78,12 +78,20 @@ void Circle::drawTo(const QPointF& center)
 
 void Circle::removeFromScene()
 {
-    mScene->removeItem(mEllipse.get());
+    if (mIsOnScene)
+    {
+        mScene->removeItem(mEllipse.get());
+        mIsOnScene = false;
+    }
 }
 
 void Circle::addToScene()
 {
-    mScene->addItem(mEllipse.get());
+    if (!mIsOnScene)
+    {
+        mScene->addItem(mEllipse.get());
+        mIsOnScene = true;
+    }
 }
 
 }

@@ -33,6 +33,7 @@ private:
 
     QGraphicsScene* mScene;
     std::unique_ptr<QGraphicsEllipseItem> mEllipse;
+    bool mIsOnScene = true;
     QPointF mCenter;
     QPointF mDrawPos;
     qreal mRadius;

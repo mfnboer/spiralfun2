@@ -26,6 +26,8 @@ public:
     void setupCircles();
     SpiralFun::Circle* addCircle(qreal radius);
     void advanceCircles(qreal angle);
+    void addCirclesToScene();
+    void removeCirclesFromScene();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
