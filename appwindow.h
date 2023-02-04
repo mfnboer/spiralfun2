@@ -1,6 +1,7 @@
 #pragma once
 
 #include "circle.h"
+#include "color_select_button.h"
 #include "graphics_view.h"
 #include "player.h"
 #include "spinbox.h"
@@ -36,6 +37,7 @@ private:
     void moveCircles(unsigned index, qreal yShift);
     void handleUp();
     void handleDown();
+    void handleColor(const QColor& color);
     void handleDraw(bool draw);
     void handleRotations(unsigned rotations);
     void handleDirection(bool clockwise);
@@ -50,6 +52,7 @@ private:
     QGraphicsScene* mScene;
     SpinBox* mDiameterSpinBox;
     QCheckBox* mDrawCheckBox;
+    ColorSelectButton* mDrawColorButton;
     SpinBox* mRotationsSpinBox;
     QComboBox* mDirectionComboBox;
     SpinBox* mNumCirclesSpinBox;

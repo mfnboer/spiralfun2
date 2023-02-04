@@ -3,7 +3,7 @@
 
 namespace SpiralFun {
 
-GraphicsView::GraphicsView(QGraphicsScene *scene, QWidget *parent) :
+GraphicsView::GraphicsView(QGraphicsScene* scene, QWidget* parent) :
     QGraphicsView(scene, parent)
 {
     setAttribute(Qt::WA_TouchPadAcceptSingleTouchEvents);

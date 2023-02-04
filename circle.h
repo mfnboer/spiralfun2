@@ -13,9 +13,11 @@ public:
     const QPointF& getCenter() const { return mCenter; }
     qreal getRadius() const { return mRadius; }
     int getSpeed() const { return mSpeed; }
+    const QColor& getColor() const { return mColor; }
     bool getDraw() const { return mDraw; }
     QGraphicsEllipseItem* GetEllipseItem() const { return mEllipse.get(); }
     QRectF getBoundingRect() const { return QRectF(-mRadius, -mRadius, mRadius * 2.0, mRadius * 2.0); };
+    Circle* setColor(const QColor& color);
     Circle* setDraw(bool draw) { mDraw = draw; return this; }
     Circle* setSpeed(int speed) { mSpeed = speed; return this; }
     Circle* setCenter(const QPointF& center);
@@ -34,6 +36,7 @@ private:
     QPointF mCenter;
     QPointF mDrawPos;
     qreal mRadius;
+    QColor mColor = Qt::white;
     bool mDraw = false;
     int mSpeed = 0;
     const qreal mMinDrawLength = 2.0;

@@ -10,7 +10,7 @@ class GraphicsView : public QGraphicsView
     Q_OBJECT
 
 public:
-    GraphicsView(QGraphicsScene *scene = nullptr, QWidget *parent = nullptr);
+    GraphicsView(QGraphicsScene* scene = nullptr, QWidget* parent = nullptr);
 
 protected:
     bool event(QEvent* event) override;

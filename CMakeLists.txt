@@ -17,6 +17,8 @@ set(PROJECT_SOURCES
 	appwindow.cpp
         circle.h
         circle.cpp
+        color_select_button.h
+        color_select_button.cpp
         graphics_view.h
         graphics_view.cpp
         main.cpp

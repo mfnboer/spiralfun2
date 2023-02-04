@@ -10,6 +10,8 @@ namespace SpiralFun {
 namespace {
     constexpr int MIN_CIRCLES = 2;
     constexpr int MAX_CIRCLES = 10;
+    constexpr int MAX_DIAMETER = 300;
+    constexpr int MAX_ROTATIONS = 9999;
 }
 
 AppWindow::AppWindow()
@@ -31,14 +33,17 @@ AppWindow::AppWindow()
     auto* diameterLabel = new QLabel("Diameter:");
     mDiameterSpinBox = new SpinBox();
     mDiameterSpinBox->setMinimum(1);
-    mDiameterSpinBox->setMaximum(300);
+    mDiameterSpinBox->setMaximum(MAX_DIAMETER);
     QObject::connect(mDiameterSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleDiameter);
+    mDrawColorButton = new ColorSelectButton();
+    QObject::connect(mDrawColorButton, &ColorSelectButton::colorChanged, this, &AppWindow::handleColor);
     mDrawCheckBox = new QCheckBox("draw");
     QObject::connect(mDrawCheckBox, &QCheckBox::clicked, this, &AppWindow::handleDraw);
     auto* row1Layout = new QHBoxLayout();
     row1Layout->addWidget(upButton);
     row1Layout->addWidget(diameterLabel);
     row1Layout->addWidget(mDiameterSpinBox, 1);
+    row1Layout->addWidget(mDrawColorButton, 1);
     row1Layout->addWidget(mDrawCheckBox, 1);
 
     auto* row2Layout = new QHBoxLayout();
@@ -48,7 +53,7 @@ AppWindow::AppWindow()
     auto* rotationsLabel = new QLabel("Rotations:");
     mRotationsSpinBox = new SpinBox();
     mRotationsSpinBox->setMinimum(0);
-    mRotationsSpinBox->setMaximum(9999);
+    mRotationsSpinBox->setMaximum(MAX_ROTATIONS);
     QObject::connect(mRotationsSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleRotations);
     mDirectionComboBox = new QComboBox();
     mDirectionComboBox->addItems({"clockwise", "counter clock"});
@@ -179,7 +184,7 @@ void AppWindow::handleNumCircles(unsigned numCircles)
     Q_ASSERT(numCircles > mCircles.size());
     const int delta = numCircles - mCircles.size();
     for (int i = 0; i < delta; ++i)
-        addCircle(mDefaultCircleRadius);
+        addCircle(mDefaultCircleRadius)->setSpeed(1);
 }
 
 void AppWindow::handleDiameter(unsigned diameter)
@@ -241,6 +246,14 @@ void AppWindow::handleDraw(bool draw)
     mCircles[mCurrentIndex]->setDraw(draw);
 }
 
+void AppWindow::handleColor(const QColor& color)
+{
+    if (mCurrentIndex >= mCircles.size())
+        return;
+
+    mCircles[mCurrentIndex]->setColor(color);
+}
+
 void AppWindow::handleRotations(unsigned rotations)
 {
     if (mCircles.empty())
@@ -298,6 +311,7 @@ void AppWindow::setCurrentCircleFocus(bool focus)
         return;
 
     mDiameterSpinBox->setValue(std::round(circle->getRadius() * 2.0));
+    mDrawColorButton->setColor(circle->getColor());
     mDrawCheckBox->setChecked(circle->getDraw());
     mRotationsSpinBox->setValue(std::abs(circle->getSpeed()));
     mDirectionComboBox->setCurrentIndex(circle->getSpeed() >= 0 ? 0 : 1);
@@ -311,6 +325,7 @@ void AppWindow::setCurrentCircleFocus(bool focus)
 void AppWindow::enableControls(bool enable)
 {
     mDiameterSpinBox->setEnabled(enable);
+    mDrawColorButton->setEnabled(enable);
     mDrawCheckBox->setEnabled(enable);
     mRotationsSpinBox->setEnabled(enable);
     mDirectionComboBox->setEnabled(enable);
