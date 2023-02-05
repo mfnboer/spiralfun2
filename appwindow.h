@@ -50,6 +50,9 @@ private:
     void enableControls(bool enable);
     void resetCircles();
     void resetScene();
+    void examples();
+    void helpInfo();
+    void aboutInfo();
 
     GraphicsView* mView;
     QGraphicsScene* mScene;

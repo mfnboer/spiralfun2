@@ -1,7 +1,10 @@
 ﻿#include "appwindow.h"
 #include <QBoxLayout>
 #include <QLabel>
+#include <QListWidget>
+#include <QListWidgetItem>
 #include <QMenu>
+#include <QMessageBox>
 #include <QScreen>
 #include <QShowEvent>
 #include <QStyle>
@@ -9,6 +12,7 @@
 namespace SpiralFun {
 
 namespace {
+    constexpr char const* APP_NAME = "Spiral Fun";
     constexpr int MIN_CIRCLES = 2;
     constexpr int MAX_CIRCLES = 10;
     constexpr int MAX_DIAMETER = 300;
@@ -72,13 +76,19 @@ AppWindow::AppWindow()
     QObject::connect(mNumCirclesSpinBox, &SpinBox::valueChanged, this, &AppWindow::handleNumCircles);
     mStartStopButton = new QPushButton(style()->standardIcon(QStyle::SP_MediaPlay), "Play");
     QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handlePlay);
-    mMoreButton = new QPushButton("\U00002630");
-    auto* moreMenu = new QMenu(this);
-    moreMenu->addAction("Examples");
-    moreMenu->addAction("Help");
-    moreMenu->addAction("About");
-    mMoreButton->setMenu(moreMenu);
+    mMoreButton = new QPushButton("\u2630");
     mMoreButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    QObject::connect(mMoreButton, &QPushButton::clicked, this, [this](){
+        // Create new window on every button push as work around for Android.
+        // After showing a menu once, it will not show again on Android.
+        QMenu moreMenu;
+        moreMenu.addAction("Examples", this, &AppWindow::examples);
+        moreMenu.addAction("Help", this, &AppWindow::helpInfo);
+        moreMenu.addAction("About", this, &AppWindow::aboutInfo);
+        // Set a minimum width, otherwise the menu is too narrow on Android.
+        moreMenu.setMinimumWidth(150);
+        moreMenu.exec(QCursor::pos());
+    });
 
     auto* row3Layout = new QHBoxLayout();
     row3Layout->addWidget(numCirclesLabel);
@@ -386,6 +396,53 @@ void AppWindow::resetScene()
     mScene->clear();
     resetCircles();
     addCirclesToScene();
+}
+
+void AppWindow::examples()
+{
+    QDialog* w = new QDialog(mView);
+    auto* layout = new QGridLayout();
+    QPixmap square(100, 100);
+    square.fill(Qt::yellow);
+    QLabel* label = new QLabel;
+    label->setPixmap(square);
+    layout->addWidget(label, 0, 0);
+    square.fill(Qt::red);
+    label = new QLabel;
+    label->setPixmap(square);
+    layout->addWidget(label, 0, 1);
+    square.fill(Qt::blue);
+    label = new QLabel;
+    label->setPixmap(square);
+    layout->addWidget(label, 1, 0);
+    square.fill(Qt::green);
+    label = new QLabel;
+    label->setPixmap(square);
+    layout->addWidget(label, 1, 1);
+    QPushButton* pb = new QPushButton("Cancel");
+    QObject::connect(pb, &QPushButton::clicked, w, &QDialog::reject);
+    layout->addWidget(pb, 2, 1);
+    w->setLayout(layout);
+    w->move(50, 50);
+    w->open();
+}
+
+void AppWindow::helpInfo()
+{
+    QMessageBox::information(this, APP_NAME,
+        "Help 1\n"
+        "Help 2");
+}
+
+void AppWindow::aboutInfo()
+{
+    QMessageBox::information(this, APP_NAME,
+        "<center>"
+        "<b>Spiral Fun</b>"
+        "<p>"
+        "Created by Michel de Boer<br>"
+        "\u00A9 2023"
+        "</center>");
 }
 
 }
