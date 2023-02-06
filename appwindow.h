@@ -15,6 +15,21 @@
 
 namespace SpiralFun {
 
+struct CircleConfig
+{
+    qreal mRelRadius;
+    int mSpeed;
+    bool mDraw;
+    QColor mColor;
+};
+
+
+const std::initializer_list<CircleConfig> DEFAULT_CONFIG = {
+    { 4.0, 0, false, Qt::blue },
+    { 2.0, 1, false, Qt::green },
+    { 0.2, -5, true, Qt::white }
+};
+
 class AppWindow : public QWidget
 {
     Q_OBJECT
@@ -23,12 +38,13 @@ public:
     AppWindow();
 
     void init();
-    void setupCircles();
+    void setupCircles(const std::vector<CircleConfig>& config = DEFAULT_CONFIG);
     SpiralFun::Circle* addCircle(qreal radius);
     void advanceCircles(qreal angle);
     void forceDraw();
     void addCirclesToScene();
     void removeCirclesFromScene();
+    void saveImage(const QString& fileName) const;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

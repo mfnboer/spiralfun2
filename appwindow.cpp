@@ -1,4 +1,5 @@
 ﻿#include "appwindow.h"
+#include "image_button.h"
 #include <QBoxLayout>
 #include <QLabel>
 #include <QListWidget>
@@ -12,11 +13,41 @@
 namespace SpiralFun {
 
 namespace {
-    constexpr char const* APP_NAME = "Spiral Fun";
-    constexpr int MIN_CIRCLES = 2;
-    constexpr int MAX_CIRCLES = 10;
-    constexpr int MAX_DIAMETER = 300;
-    constexpr int MAX_ROTATIONS = 9999;
+constexpr char const* APP_NAME = "Spiral Fun";
+constexpr int MIN_CIRCLES = 2;
+constexpr int MAX_CIRCLES = 10;
+constexpr int MAX_DIAMETER = 300;
+constexpr int MAX_ROTATIONS = 9999;
+
+const std::initializer_list<CircleConfig> EXAMPLE1_CONFIG = {
+    { 6.0, 0, false, Qt::blue },
+    { 2.6, 1, false, Qt::green },
+    { 1.6, 5, false, Qt::yellow },
+    { 0.8, 40, true, Qt::red }
+};
+const std::initializer_list<CircleConfig> EXAMPLE2_CONFIG = {
+    { 5.0, 0, false, Qt::blue },
+    { 3.0, 1, false, Qt::yellow },
+    { 1.6, 4, true, Qt::red },
+    { 0.2, 200, true, Qt::white }
+};
+const std::initializer_list<CircleConfig> EXAMPLE3_CONFIG = {
+    { 6.0, 0, false, Qt::blue },
+    { 2.1, 1, false, Qt::green },
+    { 1.6, -5, false, Qt::yellow },
+    { 0.8, 25, true, Qt::red },
+    { 0.4, -125, false, Qt::cyan },
+    { 0.08, 625, true, Qt::white }
+};
+const std::initializer_list<CircleConfig> EXAMPLE4_CONFIG = {
+    { 4.8, 0, false, Qt::cyan },
+    { 2.8, 1, false, Qt::yellow },
+    { 1.6, -3, true, Qt::green },
+    { 0.8, 9, false, Qt::magenta },
+    { 0.4, -27, true, Qt::blue },
+    { 0.2, 81, false, Qt::red },
+    { 0.04, -243, true, Qt::white }
+};
 }
 
 AppWindow::AppWindow()
@@ -131,15 +162,21 @@ void AppWindow::init()
     qInfo() << "init, scene rect:" << mScene->sceneRect() << "default radius:" << mDefaultCircleRadius;
 }
 
-void AppWindow::setupCircles()
+void AppWindow::setupCircles(const std::vector<CircleConfig>& config)
 {
     mCircles.clear();
-    addCircle(mDefaultCircleRadius * 4)->setColor(Qt::blue);
-    addCircle(mDefaultCircleRadius * 2)->setColor(Qt::green)->setSpeed(1);
-    addCircle(5)->setColor(Qt::white)->setSpeed(-5)->setDraw(true);
+    mScene->clear();
+
+    for (const auto& c : config)
+    {
+        addCircle(mDefaultCircleRadius * c.mRelRadius)->
+                setSpeed(c.mSpeed)->
+                setDraw(c.mDraw)->
+                setColor(c.mColor);
+    }
+
     mCurrentIndex = 0;
     enableControls(true);
-    mView->centerOn(mCircles[0]->GetEllipseItem());
 }
 
 SpiralFun::Circle* AppWindow::addCircle(qreal radius)
@@ -399,31 +436,40 @@ void AppWindow::resetScene()
 }
 
 void AppWindow::examples()
-{
-    QDialog* w = new QDialog(mView);
-    auto* layout = new QGridLayout();
-    QPixmap square(100, 100);
-    square.fill(Qt::yellow);
-    QLabel* label = new QLabel;
-    label->setPixmap(square);
-    layout->addWidget(label, 0, 0);
-    square.fill(Qt::red);
-    label = new QLabel;
-    label->setPixmap(square);
-    layout->addWidget(label, 0, 1);
-    square.fill(Qt::blue);
-    label = new QLabel;
-    label->setPixmap(square);
-    layout->addWidget(label, 1, 0);
-    square.fill(Qt::green);
-    label = new QLabel;
-    label->setPixmap(square);
-    layout->addWidget(label, 1, 1);
+{   
+    auto* w = new QDialog(mView);
+    auto* layout = new QGridLayout;
+
+    int row = 0;
+    int column = 0;
+    auto addExample = [this, w, layout, &row, &column]
+            (const QString& fileName, const std::vector<CircleConfig>& config){
+            auto* button = new ImageButton(fileName);
+            QObject::connect(button, &QPushButton::clicked, w, [this, w, config]{
+                    setupCircles(config);
+                    w->accept();
+            });
+            layout->addWidget(button, row, column++);
+
+            if (column > 1)
+            {
+                ++row;
+                column = 0;
+            }
+    };
+
+    addExample(":/images/example1.png", EXAMPLE1_CONFIG);
+    addExample(":/images/example2.png", EXAMPLE2_CONFIG);
+    addExample(":/images/example3.png", EXAMPLE3_CONFIG);
+    addExample(":/images/example4.png", EXAMPLE4_CONFIG);
+
     QPushButton* pb = new QPushButton("Cancel");
     QObject::connect(pb, &QPushButton::clicked, w, &QDialog::reject);
     layout->addWidget(pb, 2, 1);
     w->setLayout(layout);
     w->move(50, 50);
+
+    QObject::connect(w, &QDialog::finished, w, &QDialog::deleteLater);
     w->open();
 }
 
@@ -443,6 +489,13 @@ void AppWindow::aboutInfo()
         "Created by Michel de Boer<br>"
         "\u00A9 2023"
         "</center>");
+}
+
+// TODO
+void AppWindow::saveImage(const QString& fileName) const
+{
+    QPixmap pixmap = mView->grab(QRect(469, 25, 880, 880));
+    pixmap.save(fileName);
 }
 
 }
