@@ -4,13 +4,19 @@
 
 namespace SpiralFun {
 
+namespace {
+constexpr int DRAW_PEN_WIDTH = 1;
+constexpr int CIRCLE_PEN_WIDTH = 1;
+constexpr int SELECT_PEN_WIDTH = 8;
+}
+
 Circle::Circle(QGraphicsView* view, const QPointF& center, qreal radius) :
     mScene(view->scene()),
     mCenter(center),
     mDrawPos(center),
     mRadius(radius)
 {
-    mEllipse.reset(mScene->addEllipse(getBoundingRect(), QPen(mColor)));
+    mEllipse.reset(mScene->addEllipse(getBoundingRect(), QPen(mColor, CIRCLE_PEN_WIDTH)));
     mEllipse->setPos(mCenter);
 }
 
@@ -40,7 +46,7 @@ Circle* Circle::setColor(const QColor& color)
 void Circle::setFocus(bool focus)
 {
     auto pen = mEllipse->pen();
-    pen.setWidth(focus ? 8 : 1);
+    pen.setWidth(focus ? SELECT_PEN_WIDTH : CIRCLE_PEN_WIDTH);
     mEllipse->setPen(pen);
 }
 
@@ -71,7 +77,7 @@ void Circle::drawTo(const QPointF& center, bool force)
     const QLineF line(mDrawPos, center);
     if (line.length() >= mMinDrawLength || force)
     {
-        mScene->addLine(line, QPen(mColor, 1, Qt::SolidLine, Qt::RoundCap));;
+        mScene->addLine(line, QPen(mColor, DRAW_PEN_WIDTH, Qt::SolidLine, Qt::RoundCap));;
         mDrawPos = center;
     }
 }
