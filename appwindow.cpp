@@ -475,20 +475,34 @@ void AppWindow::examples()
 
 void AppWindow::helpInfo()
 {
-    QMessageBox::information(this, APP_NAME,
-        "Help 1\n"
-        "Help 2");
+    QMessageBox msg(this);
+    msg.setStandardButtons(QMessageBox::Ok);
+    msg.setText(
+        "Spiral lines are drawn by circles rotating around each other. "
+        "You can create up to 10 cirles (set in the 'Circles' field)."
+        "<p>"
+        "The first circle is stationary, the second cirle makes 1 rotation. "
+        "For the remaining circles you can set how many rotations to make in "
+        "which direction."
+        "<p>"
+        "For each circle you can set its diameter, its color and whether it "
+        "should draw a line from its center while rotating."
+        "<p>"
+        "With the up and down arrow buttons you can select the circle to configure."
+        "<p>"
+        "Press the play button to start the rotations.");
+    msg.exec();
 }
 
 void AppWindow::aboutInfo()
 {
-    QMessageBox::information(this, APP_NAME,
-        "<center>"
+    QMessageBox msg(this);
+    msg.setStandardButtons(QMessageBox::Ok);
+    msg.setText(
         "<b>Spiral Fun</b>"
         "<p>"
-        "Created by Michel de Boer<br>"
-        "\u00A9 2023"
-        "</center>");
+        "\u00A9 2023 Michel de Boer");
+    msg.exec();
 }
 
 // TODO
