@@ -63,6 +63,8 @@ AppWindow::AppWindow()
     mView->setScene(mScene);
     mView->installEventFilter(this);
 
+    auto* grid = new QGridLayout();
+
     auto* upButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowUp), "");
     upButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     QObject::connect(upButton, &QPushButton::clicked, this, &AppWindow::handleUp);
@@ -75,14 +77,12 @@ AppWindow::AppWindow()
     QObject::connect(mDrawColorButton, &ColorSelectButton::colorChanged, this, &AppWindow::handleColor);
     mDrawCheckBox = new QCheckBox("draw");
     QObject::connect(mDrawCheckBox, &QCheckBox::clicked, this, &AppWindow::handleDraw);
-    auto* row1Layout = new QHBoxLayout();
-    row1Layout->addWidget(upButton);
-    row1Layout->addWidget(diameterLabel);
-    row1Layout->addWidget(mDiameterSpinBox, 1);
-    row1Layout->addWidget(mDrawColorButton, 1);
-    row1Layout->addWidget(mDrawCheckBox, 1);
+    grid->addWidget(upButton, 0, 0);
+    grid->addWidget(diameterLabel, 0 ,1);
+    grid->addWidget(mDiameterSpinBox, 0, 2);
+    grid->addWidget(mDrawColorButton, 0, 3);
+    grid->addWidget(mDrawCheckBox, 0, 4);
 
-    auto* row2Layout = new QHBoxLayout();
     auto* downButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowDown), "");
     QObject::connect(downButton, &QPushButton::clicked, this, &AppWindow::handleDown);
     downButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -95,10 +95,10 @@ AppWindow::AppWindow()
     mDirectionComboBox->addItems({"clockwise", "counter clock"});
     QObject::connect(mDirectionComboBox, &QComboBox::currentIndexChanged, this,
                      [this](int index){ handleDirection(index == 0); });
-    row2Layout->addWidget(downButton);
-    row2Layout->addWidget(rotationsLabel);
-    row2Layout->addWidget(mRotationsSpinBox, 1);
-    row2Layout->addWidget(mDirectionComboBox, 1);
+    grid->addWidget(downButton, 1, 0);
+    grid->addWidget(rotationsLabel, 1, 1);
+    grid->addWidget(mRotationsSpinBox, 1, 2);
+    grid->addWidget(mDirectionComboBox, 1, 3, 1, 2);
 
     auto* numCirclesLabel = new QLabel("Circles:");
     mNumCirclesSpinBox = new SpinBox();
@@ -121,17 +121,20 @@ AppWindow::AppWindow()
         moreMenu.exec(QCursor::pos());
     });
 
-    auto* row3Layout = new QHBoxLayout();
-    row3Layout->addWidget(numCirclesLabel);
-    row3Layout->addWidget(mNumCirclesSpinBox, 1);
-    row3Layout->addWidget(mStartStopButton, 1);
-    row3Layout->addWidget(mMoreButton);
+    grid->addWidget(numCirclesLabel, 2, 1);
+    grid->addWidget(mNumCirclesSpinBox, 2, 2);
+    grid->addWidget(mStartStopButton, 2, 3);
+    grid->addWidget(mMoreButton, 2, 4);
+
+    grid->setColumnStretch(0, 0);
+    grid->setColumnStretch(1, 0);
+    grid->setColumnStretch(2, 1);
+    grid->setColumnStretch(3, 1);
+    grid->setColumnStretch(4, 0);
 
     auto* layout = new QVBoxLayout();
     layout->addWidget(mView, 1);
-    layout->addLayout(row1Layout);
-    layout->addLayout(row2Layout);
-    layout->addLayout(row3Layout);
+    layout->addLayout(grid);
     setLayout(layout);
 
     enableControls(false);
