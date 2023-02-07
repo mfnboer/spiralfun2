@@ -7,12 +7,13 @@ namespace SpiralFun {
 class ImageButton : public QPushButton
 {
 public:
-    ImageButton(const QString& fileName, const QSize& size = QSize(150, 150), QWidget* parent = nullptr) :
+    ImageButton(const QString& fileName, QWidget* parent = nullptr) :
         QPushButton(parent)
     {
-        QPixmap image = QPixmap(fileName).scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        QPixmap image(fileName);
         setIcon(image);
-        setIconSize(size);
+        setIconSize(image.size());
+        setFlat(true);
     }
 };
 

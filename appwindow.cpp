@@ -467,7 +467,7 @@ void AppWindow::examples()
     QObject::connect(pb, &QPushButton::clicked, w, &QDialog::reject);
     layout->addWidget(pb, 2, 1);
     w->setLayout(layout);
-    w->move(50, 50);
+    w->move(10, 10);
 
     QObject::connect(w, &QDialog::finished, w, &QDialog::deleteLater);
     w->open();
