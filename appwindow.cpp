@@ -15,7 +15,6 @@
 namespace SpiralFun {
 
 namespace {
-constexpr char const* APP_NAME = "Spiral Fun";
 constexpr int MIN_CIRCLES = 2;
 constexpr int MAX_CIRCLES = 10;
 constexpr int MAX_DIAMETER = 300;
@@ -63,6 +62,7 @@ AppWindow::AppWindow()
     mScene->setItemIndexMethod(QGraphicsScene::NoIndex);
     mScene->setBackgroundBrush(Qt::black);
     mView->setScene(mScene);
+    mView->setCacheMode(QGraphicsView::CacheBackground);
     mView->installEventFilter(this);
 
     auto* grid = new QGridLayout();
@@ -201,7 +201,7 @@ SpiralFun::Circle* AppWindow::addCircle(qreal radius)
 
 void AppWindow::advanceCircles(qreal angle)
 {
-    for(int i = 1; i < mCircles.size(); ++i)
+    for(unsigned i = 1; i < mCircles.size(); ++i)
         advanceCircle(i, angle);
 }
 
@@ -226,7 +226,7 @@ void AppWindow::advanceCircle(unsigned index, qreal angle)
     for (unsigned i = index; i < mCircles.size(); ++i)
     {
         auto& circle = *mCircles[i];
-        for (unsigned n = 0; n < std::abs(speed); ++n)
+        for (int n = 0; n < std::abs(speed); ++n)
             circle.rotate(rotationCenter, angle, clockwise);
     }
 }
@@ -411,7 +411,7 @@ void AppWindow::resetCircles()
     QPointF center(0.0, 0.0);
     mCircles[0]->setCenter(center);
 
-    for (int i = 1; i < mCircles.size(); ++i)
+    for (unsigned i = 1; i < mCircles.size(); ++i)
     {
         auto& circle = mCircles[i];
         auto& prev = mCircles[i - 1];
