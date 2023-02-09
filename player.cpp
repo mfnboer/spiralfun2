@@ -1,3 +1,5 @@
+// Copyright (C) 2023 Michel de Boer
+// License: GPLv3
 #include "player.h"
 #include "appwindow.h"
 

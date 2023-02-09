@@ -1,4 +1,6 @@
-﻿#include "appwindow.h"
+﻿// Copyright (C) 2023 Michel de Boer
+// License: GPLv3
+#include "appwindow.h"
 #include "image_button.h"
 #include <QBoxLayout>
 #include <QLabel>

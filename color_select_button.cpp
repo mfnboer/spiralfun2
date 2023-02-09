@@ -1,5 +1,6 @@
+// Copyright (C) 2023 Michel de Boer
+// License: GPLv3
 #include "color_select_button.h"
-
 #include <QColorDialog>
 
 namespace SpiralFun {

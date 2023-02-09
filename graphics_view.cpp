@@ -1,3 +1,5 @@
+// Copyright (C) 2023 Michel de Boer
+// License: GPLv3
 #include "graphics_view.h"
 #include <QTouchEvent>
 
