@@ -546,12 +546,4 @@ void AppWindow::aboutInfo()
     msg.exec();
 }
 
-// TODO
-void AppWindow::saveImage(const QString& fileName) const
-{
-    // QPixmap pixmap = mView->grab(QRect(469, 25, 880, 880));
-    QPixmap pixmap = mView->grab(QRect(469+184, 25+184, 512, 512));
-    pixmap.save(fileName);
-}
-
 }

@@ -41,17 +41,14 @@ public:
 
     void init();
     void setupCircles(const std::vector<CircleConfig>& config = DEFAULT_CONFIG);
-    SpiralFun::Circle* addCircle(qreal radius);
     void advanceCircles(qreal angle);
-    void forceDraw();
-    void addCirclesToScene();
-    void removeCirclesFromScene();
-    void saveImage(const QString& fileName) const;
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
+    SpiralFun::Circle* addCircle(qreal radius);
+    void forceDraw();
     void advanceCircle(unsigned index, qreal angle);
     void handleNumCircles(unsigned numCircles);
     void handleDiameter(unsigned diameter);
@@ -67,6 +64,8 @@ private:
     void handleStop();
     void setCurrentCircleFocus(bool focus);
     void enableControls(bool enable);
+    void addCirclesToScene();
+    void removeCirclesFromScene();
     void resetCircles();
     void resetScene();
     void examples();
