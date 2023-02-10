@@ -64,6 +64,7 @@ AppWindow::AppWindow()
     mView->setScene(mScene);
     mView->setCacheMode(QGraphicsView::CacheBackground);
     mView->installEventFilter(this);
+    QObject::connect(mScene, &QGraphicsScene::selectionChanged, this, &AppWindow::handleCircleSelect);
 
     auto* grid = new QGridLayout();
 
@@ -305,6 +306,31 @@ void AppWindow::handleDown()
     }
 }
 
+void AppWindow::handleCircleSelect()
+{
+    const auto& items = mScene->selectedItems();
+    if (items.size() != 1)
+        return;
+
+    const auto* selected = items[0];
+    const auto it = std::find_if(mCircles.begin(), mCircles.end(), [selected](const auto& c){
+        return c->GetEllipseItem() == selected;
+    });
+
+    if (it == mCircles.end())
+        return;
+
+    const unsigned index = it - mCircles.begin();
+    if (index != mCurrentIndex)
+    {
+        setCurrentCircleFocus(false);
+        mCurrentIndex = index;
+        setCurrentCircleFocus(true);
+    }
+
+    mScene->clearSelection();
+}
+
 void AppWindow::handleDraw(bool draw)
 {
     if (mCurrentIndex >= mCircles.size())
@@ -352,6 +378,13 @@ void AppWindow::handlePlay()
     mStartStopButton->setText("Stop");
     mStartStopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handleStop);
+    QObject::connect(mPlayer.get(), &Player::done, this, [this]{
+        // Draw the last line to close the curve. It may not have been drawn yet
+        // due to the minimum draw lenght.
+        forceDraw();
+        removeCirclesFromScene();
+        mStartStopButton->setText("Reset");
+    });
     enableControls(false);
 }
 
@@ -402,7 +435,8 @@ void AppWindow::enableControls(bool enable)
     mMoreButton->setEnabled(enable);
     setCurrentCircleFocus(enable);
 
-    mMoreButton->raise();
+    for (const auto& c : mCircles)
+        c->setEanbled(enable);
 }
 
 void AppWindow::resetCircles()

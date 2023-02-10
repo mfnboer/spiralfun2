@@ -20,6 +20,7 @@ Circle::Circle(QGraphicsView* view, const QPointF& center, qreal radius) :
 {
     mEllipse.reset(mScene->addEllipse(getBoundingRect(), QPen(mColor, CIRCLE_PEN_WIDTH)));
     mEllipse->setPos(mCenter);
+    mEllipse->setFlag(QGraphicsItem::ItemIsSelectable);
 }
 
 Circle* Circle::setCenter(const QPointF& center)

@@ -21,6 +21,9 @@ public:
 
     void play();
 
+signals:
+    void done();
+
 private:
     void advance();
 

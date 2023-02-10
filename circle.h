@@ -24,6 +24,7 @@ public:
     Circle* setSpeed(int speed) { mSpeed = speed; return this; }
     Circle* setCenter(const QPointF& center);
     Circle* setRadius(qreal radius);
+    void setEanbled(bool enabled) { mEllipse->setEnabled(enabled); }
     void setFocus(bool focus);
     void rotate(const QPointF& rotationCenter, qreal angle, bool clockwise = true);
     void removeFromScene();

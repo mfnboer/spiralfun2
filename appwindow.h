@@ -58,6 +58,7 @@ private:
     void moveCircles(unsigned index, qreal yShift);
     void handleUp();
     void handleDown();
+    void handleCircleSelect();
     void handleColor(const QColor& color);
     void handleDraw(bool draw);
     void handleRotations(unsigned rotations);
