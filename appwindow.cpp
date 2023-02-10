@@ -59,7 +59,7 @@ AppWindow::AppWindow()
     mView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     mScene = new QGraphicsScene();
-    mScene->setItemIndexMethod(QGraphicsScene::NoIndex);
+    mScene->setItemIndexMethod(QGraphicsScene::BspTreeIndex);
     mScene->setBackgroundBrush(Qt::black);
     mView->setScene(mScene);
     mView->setCacheMode(QGraphicsView::CacheBackground);

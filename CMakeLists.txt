@@ -14,6 +14,10 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 add_compile_options(-Wall -Wextra -Werror)
 
+if(CMAKE_BUILD_TYPE MATCHES Release)
+    add_compile_definitions(QT_NO_DEBUG_OUTPUT)
+endif()
+
 set(PROJECT_SOURCES
 	appwindow.h
 	appwindow.cpp
