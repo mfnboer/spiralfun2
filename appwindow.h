@@ -74,6 +74,8 @@ private:
 
     GraphicsView* mView;
     QGraphicsScene* mScene;
+    QPushButton* mUpButton;
+    QPushButton* mDownButton;
     SpinBox* mDiameterSpinBox;
     QCheckBox* mDrawCheckBox;
     ColorSelectButton* mDrawColorButton;

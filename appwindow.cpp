@@ -67,9 +67,15 @@ AppWindow::AppWindow()
 
     auto* grid = new QGridLayout();
 
-    auto* upButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowUp), "");
-    upButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    QObject::connect(upButton, &QPushButton::clicked, this, &AppWindow::handleUp);
+    mUpButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowUp), "Up");
+    mUpButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    QObject::connect(mUpButton, &QPushButton::clicked, this, &AppWindow::handleUp);
+    mDownButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowDown), "Down");
+    QObject::connect(mDownButton, &QPushButton::clicked, this, &AppWindow::handleDown);
+    mDownButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    grid->addWidget(mUpButton, 0, 0, 1, 2);
+    grid->addWidget(mDownButton, 0, 2, 1, 2);
+
     auto* diameterLabel = new QLabel("Diameter:");
     mDiameterSpinBox = new SpinBox();
     mDiameterSpinBox->setMinimum(1);
@@ -77,17 +83,13 @@ AppWindow::AppWindow()
     QObject::connect(mDiameterSpinBox, &QSpinBox::valueChanged, this, &AppWindow::handleDiameter);
     mDrawColorButton = new ColorSelectButton();
     QObject::connect(mDrawColorButton, &ColorSelectButton::colorChanged, this, &AppWindow::handleColor);
-    mDrawCheckBox = new QCheckBox("draw");
+    mDrawCheckBox = new QCheckBox("draw line");
     QObject::connect(mDrawCheckBox, &QCheckBox::clicked, this, &AppWindow::handleDraw);
-    grid->addWidget(upButton, 0, 0);
-    grid->addWidget(diameterLabel, 0 ,1);
-    grid->addWidget(mDiameterSpinBox, 0, 2);
-    grid->addWidget(mDrawColorButton, 0, 3);
-    grid->addWidget(mDrawCheckBox, 0, 4);
+    grid->addWidget(diameterLabel, 1, 0);
+    grid->addWidget(mDiameterSpinBox, 1, 1);
+    grid->addWidget(mDrawColorButton, 1, 2);
+    grid->addWidget(mDrawCheckBox, 1, 3);
 
-    auto* downButton = new QPushButton(style()->standardIcon(QStyle::SP_ArrowDown), "");
-    QObject::connect(downButton, &QPushButton::clicked, this, &AppWindow::handleDown);
-    downButton->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     auto* rotationsLabel = new QLabel("Rotations:");
     mRotationsSpinBox = new SpinBox();
     mRotationsSpinBox->setMinimum(0);
@@ -97,10 +99,9 @@ AppWindow::AppWindow()
     mDirectionComboBox->addItems({"clockwise", "counter clock"});
     QObject::connect(mDirectionComboBox, &QComboBox::currentIndexChanged, this,
                      [this](int index){ handleDirection(index == 0); });
-    grid->addWidget(downButton, 1, 0);
-    grid->addWidget(rotationsLabel, 1, 1);
-    grid->addWidget(mRotationsSpinBox, 1, 2);
-    grid->addWidget(mDirectionComboBox, 1, 3, 1, 2);
+    grid->addWidget(rotationsLabel, 2, 0);
+    grid->addWidget(mRotationsSpinBox, 2, 1);
+    grid->addWidget(mDirectionComboBox, 2, 2, 1, 2);
 
     auto* numCirclesLabel = new QLabel("Circles:");
     mNumCirclesSpinBox = new SpinBox();
@@ -123,16 +124,15 @@ AppWindow::AppWindow()
         moreMenu.exec(QCursor::pos());
     });
 
-    grid->addWidget(numCirclesLabel, 2, 1);
-    grid->addWidget(mNumCirclesSpinBox, 2, 2);
-    grid->addWidget(mStartStopButton, 2, 3);
-    grid->addWidget(mMoreButton, 2, 4);
+    grid->addWidget(numCirclesLabel, 3, 0);
+    grid->addWidget(mNumCirclesSpinBox, 3, 1);
+    grid->addWidget(mStartStopButton, 3, 2);
+    grid->addWidget(mMoreButton, 3, 3);
 
     grid->setColumnStretch(0, 0);
-    grid->setColumnStretch(1, 0);
+    grid->setColumnStretch(1, 1);
     grid->setColumnStretch(2, 1);
-    grid->setColumnStretch(3, 1);
-    grid->setColumnStretch(4, 0);
+    grid->setColumnStretch(3, 0);
 
     auto* layout = new QVBoxLayout();
     layout->addWidget(mView, 1);
@@ -251,7 +251,7 @@ void AppWindow::handleNumCircles(unsigned numCircles)
     Q_ASSERT(numCircles > mCircles.size());
     const int delta = numCircles - mCircles.size();
     for (int i = 0; i < delta; ++i)
-        addCircle(mDefaultCircleRadius)->setSpeed(1);
+        addCircle(mDefaultCircleRadius)->setSpeed(1)->setDraw(true);
 }
 
 void AppWindow::handleDiameter(unsigned diameter)
@@ -391,6 +391,8 @@ void AppWindow::setCurrentCircleFocus(bool focus)
 
 void AppWindow::enableControls(bool enable)
 {
+    mUpButton->setEnabled(enable);
+    mDownButton->setEnabled(enable);
     mDiameterSpinBox->setEnabled(enable);
     mDrawColorButton->setEnabled(enable);
     mDrawCheckBox->setEnabled(enable);
@@ -491,7 +493,7 @@ void AppWindow::helpInfo()
         "which direction."
         "<p>"
         "For each circle you can set its diameter, its color and whether it "
-        "should draw a line from its center while rotating."
+        "should draw (the draw line checkbox) a line from its center while rotating."
         "<p>"
         "With the up and down arrow buttons you can select the circle to configure."
         "<p>"
