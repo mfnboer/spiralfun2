@@ -1,0 +1,7 @@
+next
+----
+* Add armeabi-v7a support
+
+1.0
+---
+* First release
