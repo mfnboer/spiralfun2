@@ -43,6 +43,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
                  ${CMAKE_CURRENT_SOURCE_DIR}/android)
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_TARGET_SDK_VERSION 31)
+
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
@@ -66,6 +67,7 @@ set_target_properties(spiralfun PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
+    QT_ANDROID_ABIS "arm64-v8a;armeabi-v7a"
 )
 
 qt_add_resources(spiralfun "images"
