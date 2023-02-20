@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2)
 
 add_compile_options(-Wall -Wextra -Werror)
 
@@ -40,6 +40,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
     )
 
+    qt_add_qml_module(spiralfun
+        URI SpiralFun
+        VERSION 1.0
+        QML_FILES main.qml
+    )
+
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
                  ${CMAKE_CURRENT_SOURCE_DIR}/android)
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_TARGET_SDK_VERSION 31)
@@ -59,7 +65,11 @@ else()
     endif()
 endif()
 
-target_link_libraries(spiralfun PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(spiralfun PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Quick
+    Qt${QT_VERSION_MAJOR}::QuickControls2
+)
 
 set_target_properties(spiralfun PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
