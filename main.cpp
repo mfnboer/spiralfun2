@@ -1,8 +1,6 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
-#include "appwindow.h"
 #include <QApplication>
-#include <QQuickStyle>
 #include <QQuickView>
 #include <QTimer>
 #include <chrono>
@@ -11,6 +9,8 @@ using namespace std::chrono_literals;
 
 int main(int argc, char *argv[])
 {
+    //qputenv("QT_SCALE_FACTOR", "0.9");
+    qputenv("QT_QUICK_CONTROLS_MATERIAL_VARIANT", "Dense");
     QApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");
 
@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
     timer.start(100ms);
 #endif
 
-    QQuickStyle::setStyle("Material");
     QQuickView view;
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl("qrc:/SpiralFun/main.qml"));

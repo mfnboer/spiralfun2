@@ -1,84 +1,89 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 Item {
-    width: 640
-    height: 480
+    id: root
+    width: 480
+    height: 960
 
-    ColumnLayout {
+    GridLayout {
+        columns: 4
         anchors.fill: parent
 
+        // Row 1
         Rectangle {
             color: "black"
+            Layout.columnSpan: 4
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
 
-        GridLayout {
-            columns: 4
-            rows: 4
-            Layout.leftMargin: 5
-            Layout.rightMargin: 5
+        // Row 2
+        Button {
+            text: "Up"
+            //implicitWidth: root.width / 2
+            Layout.columnSpan: 2
+            Layout.fillWidth: true
+            Layout.preferredWidth: root.width / 2
+        }
+        Button {
+            text: "Down"
+            //implicitWidth: root.width / 2
+            Layout.columnSpan: 2
+            Layout.fillWidth: true
+            Layout.preferredWidth: root.width / 2
+        }
 
-            Button {
-                text: "Up"
-                Layout.columnSpan: 2
-                Layout.fillWidth: true
-            }
-            Button {
-                text: "Down"
-                Layout.columnSpan: 2
-                Layout.fillWidth: true
-            }
+        // Row 3
+        Label {
+            text: "Diameter:"
+        }
+        SpinBox {
+            from: 1; to: 300
+            editable: true
+            Layout.fillWidth: true
+        }
+        Button {
+            text: "Color"
+            Layout.fillWidth: true
+        }
+        CheckBox {
+            text: "draw line"
+            Layout.fillWidth: true
+        }
 
-            Text {
-                text: "Diameter:"
-            }
-            SpinBox {
-                from: 1; to: 300
-                editable: true
-                Layout.fillWidth: true
-            }
-            Button {
-                text: "Color"
-                Layout.fillWidth: true
-            }
-            Switch {
-                text: "draw line"
-                Layout.fillWidth: true
-            }
+        // Row 4
+        Label {
+            text: "Rotations:"
+        }
+        SpinBox {
+            from: 1; to: 9999
+            editable: true
+            Layout.fillWidth: true
+        }
+        ComboBox {
+            model: ["clockwise", "counter clockwise"]
+            Layout.columnSpan: 2
+            Layout.fillWidth: true
+        }
 
-            Text {
-                text: "Rotations:"
-            }
-            SpinBox {
-                from: 1; to: 9999
-                editable: true
-                Layout.fillWidth: true
-            }
-            ComboBox {
-                model: ["clockwise", "counter clockwise"]
-                Layout.columnSpan: 2
-                Layout.fillWidth: true
-            }
-
-            Text {
-                text: "Circles:"
-            }
-            SpinBox {
-                from: 2; to: 10
-                editable: true
-                Layout.fillWidth: true
-            }
-            Button {
-                text: "Play"
-                Layout.fillWidth: true
-            }
-            Button {
-                text: "\u2630"
-                Layout.fillWidth: true
-            }
+        // Row 5
+        Label {
+            text: "Circles:"
+        }
+        SpinBox {
+            from: 2; to: 10
+            editable: true
+            Layout.fillWidth: true
+        }
+        Button {
+            text: "Play"
+            Layout.fillWidth: true
+        }
+        Button {
+            text: "\u2630"
+            Layout.fillWidth: true
         }
     }
 }
