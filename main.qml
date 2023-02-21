@@ -2,10 +2,12 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-Item {
+ApplicationWindow {
     id: root
     width: 480
     height: 960
+    visible: true
+    title: "Spiral Fun"
 
     GridLayout {
         columns: 4
@@ -22,17 +24,19 @@ Item {
         // Row 2
         Button {
             text: "Up"
-            //implicitWidth: root.width / 2
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.preferredWidth: root.width / 2
+            Layout.minimumWidth: root.width / 2
+            Layout.maximumWidth: root.width / 2
         }
         Button {
             text: "Down"
-            //implicitWidth: root.width / 2
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.preferredWidth: root.width / 2
+            Layout.minimumWidth: root.width / 2
+            Layout.maximumWidth: root.width / 2
         }
 
         // Row 3
@@ -45,8 +49,17 @@ Item {
             Layout.fillWidth: true
         }
         Button {
-            text: "Color"
+            id: colorButton
+            Material.background: Material.Yellow
             Layout.fillWidth: true
+
+            onClicked: {
+                var component = Qt.createComponent("color_selector.qml");
+                var cs = component.createObject(root);
+                cs.currentColor = colorButton.background.color
+                cs.onAccepted.connect(() => colorButton.background.color = cs.color)
+                cs.open()
+            }
         }
         CheckBox {
             text: "draw line"
@@ -58,9 +71,12 @@ Item {
             text: "Rotations:"
         }
         SpinBox {
+            id: spin
             from: 1; to: 9999
             editable: true
             Layout.fillWidth: true
+
+            textFromValue: function(value, locale) { return value.toString(); }
         }
         ComboBox {
             model: ["clockwise", "counter clockwise"]
