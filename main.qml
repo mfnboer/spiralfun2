@@ -75,7 +75,8 @@ ApplicationWindow {
             value: scene.currentCircle.diameter
             Layout.fillWidth: true
             enabled: scene.notPlaying()
-            onValueChanged: scene.currentCircle.diameter = value
+            onValueModified: scene.currentCircle.diameter = value
+            Keys.onReturnPressed:  Qt.inputMethod.hide()
         }
         Button {
             id: colorButton
@@ -112,6 +113,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             enabled: scene.currentCircleIndex > 1 && scene.notPlaying()
             onValueChanged: scene.currentCircle.rotations = value
+            Keys.onReturnPressed:  Qt.inputMethod.hide()
         }
         ComboBox {
             id: directionComboBox
@@ -135,6 +137,7 @@ ApplicationWindow {
             Layout.fillWidth: true
             enabled: scene.notPlaying()
             onValueChanged: scene.numCircles = value
+            Keys.onReturnPressed:  Qt.inputMethod.hide()
         }
         Button {
             id: playButton

@@ -12,6 +12,9 @@ Player::Player(const CircleList &circles) :
 
 void Player::play()
 {
+    for (auto& circle : mCircles)
+        circle->preparePlay();
+
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
     mTimer.start(0);
 }

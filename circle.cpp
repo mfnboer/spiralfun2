@@ -76,11 +76,6 @@ Circle* Circle::setDraw(bool draw)
 {
     if (draw != mDraw)
     {
-        if (draw)
-            mScene->addLine(this, mColor, mCenter);
-        else
-            mScene->removeLine(this);
-
         mDraw = draw;
         emit drawChanged();
     }
@@ -172,23 +167,15 @@ void Circle::forceDrawToCenter()
     drawTo(mCenter, true);
 }
 
-void Circle::removeFromScene(bool removeLine)
+void Circle::removeFromScene()
 {
     setVisible(false);
-
-    if (removeLine)
-        mScene->removeLine(this);
-
     update();
 }
 
-void Circle::addToScene(bool addLine)
+void Circle::addToScene()
 {
     setVisible(true);
-
-    if (addLine)
-        mScene->addLine(this, mColor, mCenter);
-
     update();
 }
 
@@ -199,6 +186,14 @@ void Circle::paint(QPainter* painter)
     const qreal coord = SELECT_PEN_WIDTH / 2.0;
     const QRectF r(coord, coord, qreal(mDiameter), qreal(mDiameter));
     painter->drawEllipse(r);
+}
+
+void Circle::preparePlay()
+{
+    mScene->removeLine(this);
+
+    if (mDraw)
+        mScene->addLine(this, mColor, mCenter);
 }
 
 }

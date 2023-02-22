@@ -44,9 +44,10 @@ public:
     void setEnabled(bool enabled);
     void setFocus(bool focus);
     void rotate(const QPointF& rotationCenter, qreal angle, bool clockwise = true);
-    void removeFromScene(bool removeLine = false);
-    void addToScene(bool addLine = false);
+    void removeFromScene();
+    void addToScene();
     void forceDrawToCenter();
+    void preparePlay();
 
     void paint(QPainter* painter) override;
 

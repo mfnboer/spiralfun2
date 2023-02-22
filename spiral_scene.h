@@ -86,8 +86,8 @@ private:
     void moveCircles(unsigned index, qreal yShift);
     void setCurrentCircleFocus(bool focus);
     void setCurrentIndex(unsigned index);
-    void addCirclesToScene(bool addLines = false);
-    void removeCirclesFromScene(bool removeLines = false);
+    void addCirclesToScene();
+    void removeCirclesFromScene();
     void resetCircles();
     void resetScene();
     void setPlayState(PlayState state);

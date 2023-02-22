@@ -262,16 +262,16 @@ void SpiralScene::setPlayState(PlayState state)
     emit playStateChanged();
 }
 
-void SpiralScene::addCirclesToScene(bool addLines)
+void SpiralScene::addCirclesToScene()
 {
     for (auto& circle : mCircles)
-        circle->addToScene(addLines);
+        circle->addToScene();
 }
 
-void SpiralScene::removeCirclesFromScene(bool removeLines)
+void SpiralScene::removeCirclesFromScene()
 {
     for (auto& circle : mCircles)
-        circle->removeFromScene(removeLines);
+        circle->removeFromScene();
 }
 
 void SpiralScene::resetCircles()
@@ -291,10 +291,10 @@ void SpiralScene::resetCircles()
 
 void SpiralScene::resetScene()
 {
-    removeCirclesFromScene(true);
+    removeCirclesFromScene();
     mClearScene = true;
     resetCircles();
-    addCirclesToScene(true);
+    addCirclesToScene();
     update();
 }
 
