@@ -19,19 +19,21 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
 endif()
 
 set(PROJECT_SOURCES
-	appwindow.h
-	appwindow.cpp
+#	appwindow.h
+#	appwindow.cpp
         circle.h
         circle.cpp
-        color_select_button.h
-        color_select_button.cpp
-        graphics_view.h
-        graphics_view.cpp
-        image_button.h
+#        color_select_button.h
+#        color_select_button.cpp
+#        graphics_view.h
+#        graphics_view.cpp
+#        image_button.h
         main.cpp
         player.h
         player.cpp
-        spinbox.h
+#        spinbox.h
+        spiral_scene.h
+        spiral_scene.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -380,7 +380,7 @@ void AppWindow::handlePlay()
     QObject::connect(mStartStopButton, &QPushButton::clicked, this, &AppWindow::handleStop);
     QObject::connect(mPlayer.get(), &Player::done, this, [this]{
         // Draw the last line to close the curve. It may not have been drawn yet
-        // due to the minimum draw lenght.
+        // due to the minimum draw length.
         forceDraw();
         removeCirclesFromScene();
         mStartStopButton->setText("Reset");
@@ -436,7 +436,7 @@ void AppWindow::enableControls(bool enable)
     setCurrentCircleFocus(enable);
 
     for (const auto& c : mCircles)
-        c->setEanbled(enable);
+        c->setEnabled(enable);
 }
 
 void AppWindow::resetCircles()
