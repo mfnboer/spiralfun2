@@ -46,6 +46,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         URI SpiralFun
         VERSION 1.0
         QML_FILES
+            about.qml
             color_selector.qml
             main.qml
     )

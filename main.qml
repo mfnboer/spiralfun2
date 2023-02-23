@@ -152,9 +152,32 @@ ApplicationWindow {
             }
         }
         Button {
+            id: moreButton
             text: "\u2630"
             enabled: scene.notPlaying()
             Layout.fillWidth: true
+            onClicked: moreMenu.open()
+        }
+
+        Menu {
+            id: moreMenu
+            x: parent.width - width
+            y: moreButton.y - height
+
+            MenuItem {
+                text: "Examples"
+            }
+            MenuItem {
+                text: "Help"
+            }
+            MenuItem {
+                text: "About"
+                onTriggered: {
+                    var component = Qt.createComponent("about.qml");
+                    var cs = component.createObject(root);
+                    cs.open()
+                }
+            }
         }
     }
 
