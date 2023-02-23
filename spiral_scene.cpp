@@ -78,6 +78,25 @@ void SpiralScene::setupCircles(const std::vector<CircleConfig>& config)
     emit numCirclesChanged();
 }
 
+void SpiralScene::setupExample(const QString& example)
+{
+    const std::unordered_map<QString, std::initializer_list<CircleConfig>> configs = {
+        { "/images/example1.png", EXAMPLE1_CONFIG },
+        { "/images/example2.png", EXAMPLE2_CONFIG },
+        { "/images/example3.png", EXAMPLE3_CONFIG },
+        { "/images/example4.png", EXAMPLE4_CONFIG }
+    };
+
+    auto it = configs.find(example);
+    if (it == configs.end())
+    {
+        qWarning() << "Example not found:" << example;
+        return;
+    }
+
+    setupCircles(it->second);
+}
+
 Circle* SpiralScene::getCurrentCircle() const
 {
     Q_ASSERT(!mCircles.empty());
@@ -110,6 +129,9 @@ void SpiralScene::setNumCircles(int numCircles)
     for (int i = 0; i < delta; ++i)
         addCircle(mDefaultCircleRadius)->setSpeed(1)->setDraw(true);
 
+    setCurrentCircleFocus(false);
+    setCurrentIndex(mCircles.size() - 1);
+    setCurrentCircleFocus(true);
     emit numCirclesChanged();
 }
 
@@ -240,6 +262,7 @@ void SpiralScene::play()
     QObject::connect(mPlayer.get(), &Player::done, this, [this]{
             removeCirclesFromScene();
             setPlayState(DONE_PLAYING);
+            qDebug() << "Line segments drawn:" << calcTotalLineSements();
     });
     mPlayer->play();
     setPlayState(PLAYING);
@@ -257,6 +280,20 @@ void SpiralScene::setPlayState(PlayState state)
 {
     mPlayState = state;
     emit playStateChanged();
+}
+
+uint64_t SpiralScene::calcTotalLineSements() const
+{
+    uint64_t total = mLineSegmentCount;
+
+    // Not all line segements may be rendered yet. Add what is buffered.
+    for (const auto& [_, line] : mLines)
+    {
+        if (line.mLinePoints.size() > 0)
+            total += line.mLinePoints.size() - 1;
+    }
+
+    return total;
 }
 
 void SpiralScene::addCirclesToScene()

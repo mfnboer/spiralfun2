@@ -67,6 +67,7 @@ ApplicationWindow {
         // Row 3
         Label {
             text: "Diameter:"
+            Layout.leftMargin: 5
         }
         SpinBox {
             id: diameterSpinBox
@@ -103,6 +104,7 @@ ApplicationWindow {
         // Row 4
         Label {
             text: "Rotations:"
+            Layout.leftMargin: 5
         }
         SpinBox {
             id: rotationsSpinBox
@@ -128,6 +130,7 @@ ApplicationWindow {
         // Row 5
         Label {
             text: "Circles:"
+            Layout.leftMargin: 5
         }
         SpinBox {
             id: circlesSpinBox
@@ -166,17 +169,25 @@ ApplicationWindow {
 
             MenuItem {
                 text: "Examples"
+                onTriggered: {
+                    var win = moreMenu.showWindow("examples.qml");
+                    win.onAccepted.connect(() => scene.setupExample(win.selected));
+                }
             }
             MenuItem {
                 text: "Help"
+                onTriggered: moreMenu.showWindow("help.qml")
             }
             MenuItem {
                 text: "About"
-                onTriggered: {
-                    var component = Qt.createComponent("about.qml");
-                    var cs = component.createObject(root);
-                    cs.open()
-                }
+                onTriggered: moreMenu.showWindow("about.qml")
+            }
+
+            function showWindow(qmlFile) {
+                var component = Qt.createComponent(qmlFile);
+                var obj = component.createObject(root);
+                obj.open()
+                return obj
             }
         }
     }

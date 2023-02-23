@@ -58,6 +58,7 @@ public:
 public slots:
     void init();
     void setupCircles(const std::vector<CircleConfig>& config = DEFAULT_CONFIG);
+    void setupExample(const QString& example);
     void circleUp();
     void circleDown();
     void play();
@@ -84,6 +85,7 @@ private:
     void resetCircles();
     void resetScene();
     void setPlayState(PlayState state);
+    uint64_t calcTotalLineSements() const;
 
     QSGNode* createLineNode(const Circle::Line& line);
     std::unordered_map<QObject*, Circle::Line> mLines;

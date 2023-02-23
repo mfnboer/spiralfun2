@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 
 Dialog {
-    id: about
     title: "About"
     modal: true
     standardButtons: Dialog.Ok

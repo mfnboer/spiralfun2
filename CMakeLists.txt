@@ -48,6 +48,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         QML_FILES
             about.qml
             color_selector.qml
+            examples.qml
+            help.qml
             main.qml
     )
 
