@@ -157,7 +157,8 @@ void Circle::drawTo(const QPointF& center, bool force)
     const QLineF line(mDrawPos, center);
     if (line.length() >= mMinDrawLength || force)
     {
-        mScene->addPoint(this, center);
+        Q_ASSERT(mSceneLine);
+        mSceneLine->addPoint(center);
         mDrawPos = center;
     }
 }
@@ -193,7 +194,9 @@ void Circle::preparePlay()
     mScene->removeLine(this);
 
     if (mDraw)
-        mScene->addLine(this, mColor, mCenter);
+        mSceneLine = mScene->addLine(this, mColor, mCenter);
+    else
+        mSceneLine = nullptr;
 }
 
 }

@@ -6,6 +6,7 @@
 #include "player.h"
 #include <QQuickItem>
 #include <memory>
+#include <cstdint>
 #include <unordered_map>
 #include <vector>
 
@@ -42,13 +43,6 @@ public:
     enum PlayState { NOT_PLAYING = 0, PLAYING = 1, DONE_PLAYING = 2 };
     Q_ENUM(PlayState)
 
-    struct Line
-    {
-          std::vector<QPointF> mLinePoints;
-          QColor mColor;
-          QSGNode* mRoot = nullptr;
-    };
-
     SpiralScene(QQuickItem *parent = nullptr);
 
     int getNumCircles() const { return mCircles.size(); }
@@ -58,9 +52,8 @@ public:
 
     void setNumCircles(int numCircles);
 
-    void addLine(QObject* object, const QColor& color, const QPointF& startPoint);
+    Circle::Line* addLine(QObject* object, const QColor& color, const QPointF& startPoint);
     void removeLine(QObject* object);
-    void addPoint(QObject* object, const QPointF& point);
 
 public slots:
     void init();
@@ -92,14 +85,15 @@ private:
     void resetScene();
     void setPlayState(PlayState state);
 
-    QSGNode* createLineNode(const Line& line) const;
-    std::unordered_map<QObject*, Line> mLines;
+    QSGNode* createLineNode(const Circle::Line& line);
+    std::unordered_map<QObject*, Circle::Line> mLines;
     bool mClearScene = false;
     CircleList mCircles;
     qreal mDefaultCircleRadius = 10.0;
     unsigned mCurrentIndex = 0;
     std::unique_ptr<Player> mPlayer;
     PlayState mPlayState = NOT_PLAYING;
+    uint64_t mLineSegmentCount = 0;
 
     static constexpr int MIN_CIRCLES = 2;
     static constexpr int MAX_CIRCLES = 10;

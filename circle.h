@@ -24,6 +24,15 @@ public:
     enum Direction { CLOCKWISE = 0, COUNTER_CLOCKWISE = 1 };
     Q_ENUM(Direction)
 
+    struct Line
+    {
+          std::vector<QPointF> mLinePoints;
+          QColor mColor;
+          QSGNode* mRoot = nullptr;
+
+          void addPoint(const QPointF& p) { mLinePoints.push_back(p); }
+    };
+
     const QPointF& getCenter() const { return mCenter; }
     qreal getRadius() const { return mDiameter / 2.0; }
     int getDiameter() const { return mDiameter; }
@@ -71,6 +80,7 @@ private:
     int mSpeed = 0;
     const qreal mMinDrawLength = 2.0;
     int mPenWidth;
+    Line* mSceneLine = nullptr;
 };
 
 using CircleList = std::vector<std::unique_ptr<SpiralFun::Circle>>;

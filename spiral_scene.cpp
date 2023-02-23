@@ -76,7 +76,6 @@ void SpiralScene::setupCircles(const std::vector<CircleConfig>& config)
     setCurrentIndex(0);
     setCurrentCircleFocus(true);
     emit numCirclesChanged();
-    // TODO enableControls(true);
 }
 
 Circle* SpiralScene::getCurrentCircle() const
@@ -127,9 +126,6 @@ SpiralFun::Circle* SpiralScene::addCircle(qreal radius)
     auto circle = std::make_unique<SpiralFun::Circle>(this);
     auto* engine = qmlEngine(this);
     engine->setContextForObject(circle.get(), qmlContext(this));
-    // TODO: create QML object through QML Component.
-    // TODO: object ownership, circle must be deleted before scene.
-
     circle->setCenter(center);
     circle->setRadius(radius);
     QObject::connect(circle.get(), &Circle::diameterChanged, this,
@@ -152,7 +148,6 @@ std::optional<unsigned> SpiralScene::findCircle(const Circle* circle)
 
 void SpiralScene::handleDiameterChange(Circle* circle, int oldDiameter)
 {
-    qDebug() << "Circle:" << circle << "oldDiameter:" << oldDiameter;
     std::optional<unsigned> index = findCircle(circle);
 
     if (!index)
@@ -238,8 +233,10 @@ void SpiralScene::setCurrentIndex(unsigned index)
 
 void SpiralScene::play()
 {
+    mLineSegmentCount = 0;
     setCurrentCircleFocus(false);
     mPlayer = std::make_unique<Player>(mCircles);
+    QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
     QObject::connect(mPlayer.get(), &Player::done, this, [this]{
             removeCirclesFromScene();
             setPlayState(DONE_PLAYING);
@@ -298,23 +295,18 @@ void SpiralScene::resetScene()
     update();
 }
 
-void SpiralScene::addLine(QObject* object, const QColor& color, const QPointF& startPoint)
+Circle::Line* SpiralScene::addLine(QObject* object, const QColor& color, const QPointF& startPoint)
 {
-    Line& line = mLines[object];
+    Circle::Line& line = mLines[object];
     line.mColor = color;
-    line.mLinePoints.reserve(16);
+    line.mLinePoints.reserve(256);
     line.mLinePoints.push_back(startPoint);
+    return &line;
 }
 
 void SpiralScene::removeLine(QObject* object)
 {
     mLines.erase(object);
-}
-
-void SpiralScene::addPoint(QObject* object, const QPointF& point)
-{
-    mLines.at(object).mLinePoints.push_back(point);
-    update();
 }
 
 QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
@@ -348,7 +340,7 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     return sceneRoot;
 }
 
-QSGNode* SpiralScene::createLineNode(const Line& line) const
+QSGNode* SpiralScene::createLineNode(const Circle::Line& line)
 {
     auto* node = new QSGGeometryNode;
     auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), line.mLinePoints.size());
@@ -369,6 +361,7 @@ QSGNode* SpiralScene::createLineNode(const Line& line) const
     }
 
     node->markDirty(QSGNode::DirtyGeometry);
+    mLineSegmentCount += line.mLinePoints.size() - 1;
     return node;
 }
 

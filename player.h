@@ -5,11 +5,9 @@
 #include "circle.h"
 #include <QTime>
 #include <QTimer>
-#include <chrono>
+
 
 namespace SpiralFun {
-
-using namespace std::chrono_literals;
 
 class Player : public QObject
 {
@@ -22,6 +20,7 @@ public:
 
 signals:
     void done();
+    void refreshScene();
 
 private:
     void advance();
@@ -30,7 +29,8 @@ private:
     void forceDraw();
 
     const CircleList& mCircles;
-    QTimer mTimer;
+    QTimer mPlayTimer;
+    QTimer mSceneRefreshTimer;
     qreal mAngle = 0.0;
     const qreal mStepAngle = qDegreesToRadians(0.05);
     const unsigned mStepsPerInterval = 1;

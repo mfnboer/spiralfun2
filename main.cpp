@@ -32,13 +32,13 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     const QUrl url("qrc:/SpiralFun/main.qml");
-#if 0
+
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
-#endif
+
     engine.load(url);
 
 #if 0

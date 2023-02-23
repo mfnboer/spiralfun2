@@ -1,13 +1,17 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "player.h"
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 namespace SpiralFun {
 
 Player::Player(const CircleList &circles) :
     mCircles(circles)
 {
-    QObject::connect(&mTimer, &QTimer::timeout, this, &Player::advance);
+    QObject::connect(&mPlayTimer, &QTimer::timeout, this, &Player::advance);
+    QObject::connect(&mSceneRefreshTimer, &QTimer::timeout, this, [this]{ emit refreshScene(); });
 }
 
 void Player::play()
@@ -16,7 +20,8 @@ void Player::play()
         circle->preparePlay();
 
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
-    mTimer.start(0);
+    mPlayTimer.start(0);
+    mSceneRefreshTimer.start(40ms);
 }
 
 void Player::advance()
@@ -28,13 +33,15 @@ void Player::advance()
 
         if (mAngle >= M_PI * 2)
         {
-            mTimer.disconnect();
+            mPlayTimer.disconnect();
+            mSceneRefreshTimer.disconnect();
             qDebug() << "Play duration:" <<
                         (QTime::currentTime().msecsSinceStartOfDay() - mStartTime) / 1000.0 << "secs";
 
             // Draw the last line to close the curve. It may not have been drawn yet
             // due to the minimum draw length.
             forceDraw();
+            emit refreshScene();
             emit done();
             break;
         }
