@@ -31,14 +31,14 @@ ApplicationWindow {
                     return playState === SpiralScene.NOT_PLAYING;
                 }
 
-                function playStateText() {
+                function playStateIcon() {
                     switch (scene.playState) {
                     case SpiralScene.NOT_PLAYING:
-                        return "Play";
+                        return "media-playback-start";
                     case SpiralScene.PLAYING:
-                        return "Stop";
+                        return "media-playback-stop";
                     case SpiralScene.DONE_PLAYING:
-                        return "Reset";
+                        return "go-home";
                     }
                 }
             }
@@ -46,7 +46,7 @@ ApplicationWindow {
 
         // Row 2
         Button {
-            text: "Up"
+            icon.name: "go-up"
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.minimumWidth: root.width / 2 - 5
@@ -56,7 +56,7 @@ ApplicationWindow {
             onClicked: scene.circleUp()
         }
         Button {
-            text: "Down"
+            icon.name: "go-down"
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.minimumWidth: root.width / 2 - 5
@@ -148,7 +148,7 @@ ApplicationWindow {
         }
         Button {
             id: playButton
-            text: scene.playStateText()
+            icon.name: scene.playStateIcon()
             Layout.fillWidth: true
             onClicked: {
                 if (scene.playState === SpiralScene.NOT_PLAYING) {
