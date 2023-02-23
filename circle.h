@@ -67,6 +67,9 @@ signals:
     void directionChanged();
     void colorChanged();
 
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+
 private:
     void moveTo(const QPointF& center);
     void drawTo(const QPointF& center, bool force = false);

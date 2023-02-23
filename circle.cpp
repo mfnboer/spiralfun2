@@ -199,4 +199,10 @@ void Circle::preparePlay()
         mSceneLine = nullptr;
 }
 
+void Circle::mousePressEvent(QMouseEvent *event)
+{
+    mScene->selectCircle(this);
+    event->accept();
+}
+
 }

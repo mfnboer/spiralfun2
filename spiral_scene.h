@@ -49,9 +49,8 @@ public:
     SpiralFun::Circle* getCurrentCircle() const;
     int getCurrentCircleIndex() const { return mCurrentIndex; }
     PlayState getPlayState() const { return mPlayState; }
-
     void setNumCircles(int numCircles);
-
+    void selectCircle(Circle* circle);
     Circle::Line* addLine(QObject* object, const QColor& color, const QPointF& startPoint);
     void removeLine(QObject* object);
 

@@ -49,8 +49,9 @@ ApplicationWindow {
             text: "Up"
             Layout.columnSpan: 2
             Layout.fillWidth: true
-            Layout.minimumWidth: root.width / 2
-            Layout.maximumWidth: root.width / 2
+            Layout.minimumWidth: root.width / 2 - 5
+            Layout.maximumWidth: root.width / 2 - 5
+            Layout.leftMargin: 5
             enabled: scene.currentCircleIndex < scene.numCircles - 1 && scene.notPlaying()
             onClicked: scene.circleUp()
         }
@@ -58,8 +59,9 @@ ApplicationWindow {
             text: "Down"
             Layout.columnSpan: 2
             Layout.fillWidth: true
-            Layout.minimumWidth: root.width / 2
-            Layout.maximumWidth: root.width / 2
+            Layout.minimumWidth: root.width / 2 - 5
+            Layout.maximumWidth: root.width / 2 - 5
+            Layout.rightMargin: 5
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
             onClicked: scene.circleDown()
         }
@@ -97,6 +99,7 @@ ApplicationWindow {
             text: "draw line"
             checked: scene.currentCircle.draw
             Layout.fillWidth: true
+            Layout.rightMargin: 5
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
             onCheckedChanged: scene.currentCircle.draw = checked
         }
@@ -123,6 +126,7 @@ ApplicationWindow {
             currentIndex: scene.currentCircle.direction
             Layout.columnSpan: 2
             Layout.fillWidth: true
+            Layout.rightMargin: 5
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
             onCurrentIndexChanged: scene.currentCircle.direction = currentIndex
         }
@@ -159,7 +163,8 @@ ApplicationWindow {
             text: "\u2630"
             enabled: scene.notPlaying()
             Layout.fillWidth: true
-            onClicked: moreMenu.open()
+            Layout.rightMargin: 5
+            onClicked: { moreMenu.currentIndex = -1; moreMenu.open(); }
         }
 
         Menu {

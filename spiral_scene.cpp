@@ -332,6 +332,24 @@ void SpiralScene::resetScene()
     update();
 }
 
+void SpiralScene::selectCircle(Circle* circle)
+{
+    const auto it = std::find_if(mCircles.begin(), mCircles.end(), [circle](const auto& c){
+        return c.get() == circle;
+    });
+
+    if (it == mCircles.end())
+        return;
+
+    const unsigned index = it - mCircles.begin();
+    if (index != mCurrentIndex)
+    {
+        setCurrentCircleFocus(false);
+        setCurrentIndex(index);
+        setCurrentCircleFocus(true);
+    }
+}
+
 Circle::Line* SpiralScene::addLine(QObject* object, const QColor& color, const QPointF& startPoint)
 {
     Circle::Line& line = mLines[object];
