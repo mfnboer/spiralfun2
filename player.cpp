@@ -20,12 +20,14 @@ void Player::play()
         circle->preparePlay();
 
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
+    mCycles = 0;
     mPlayTimer.start(0);
     mSceneRefreshTimer.start(40ms);
 }
 
 void Player::advance()
 {
+    ++mCycles;
     for (unsigned step = 0.0; step < mStepsPerInterval; ++step)
     {
         advanceCircles(mStepAngle);
@@ -35,8 +37,11 @@ void Player::advance()
         {
             mPlayTimer.disconnect();
             mSceneRefreshTimer.disconnect();
-            qDebug() << "Play duration:" <<
-                        (QTime::currentTime().msecsSinceStartOfDay() - mStartTime) / 1000.0 << "secs";
+
+            const qreal t = (QTime::currentTime().msecsSinceStartOfDay() - mStartTime) / 1000.0;
+            const qreal avgCycleT = t / mCycles;
+            qInfo() << "Play duration:" << t << "secs" << "cycles:" << mCycles <<
+                        "avg-cycle-time:" << avgCycleT * 1000 << "ms";
 
             // Draw the last line to close the curve. It may not have been drawn yet
             // due to the minimum draw length.

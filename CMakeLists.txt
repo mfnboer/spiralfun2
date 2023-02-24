@@ -45,12 +45,52 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_qml_module(spiralfun
         URI SpiralFun
         VERSION 1.0
+        NO_RESOURCE_TARGET_PATH
         QML_FILES
             about.qml
             color_selector.qml
             examples.qml
             help.qml
             main.qml
+        RESOURCES
+            "icons/spiralfun/20x20/arrow_downward.png"
+            "icons/spiralfun/20x20/arrow_upward.png"
+            "icons/spiralfun/20x20/help.png"
+            "icons/spiralfun/20x20/home.png"
+            "icons/spiralfun/20x20/info.png"
+            "icons/spiralfun/20x20/more.png"
+            "icons/spiralfun/20x20/play.png"
+            "icons/spiralfun/20x20/stop.png"
+            "icons/spiralfun/20x20@2/arrow_downward.png"
+            "icons/spiralfun/20x20@2/arrow_upward.png"
+            "icons/spiralfun/20x20@2/help.png"
+            "icons/spiralfun/20x20@2/home.png"
+            "icons/spiralfun/20x20@2/info.png"
+            "icons/spiralfun/20x20@2/more.png"
+            "icons/spiralfun/20x20@2/play.png"
+            "icons/spiralfun/20x20@2/stop.png"
+            "icons/spiralfun/20x20@3/arrow_downward.png"
+            "icons/spiralfun/20x20@3/arrow_upward.png"
+            "icons/spiralfun/20x20@3/help.png"
+            "icons/spiralfun/20x20@3/home.png"
+            "icons/spiralfun/20x20@3/info.png"
+            "icons/spiralfun/20x20@3/more.png"
+            "icons/spiralfun/20x20@3/play.png"
+            "icons/spiralfun/20x20@3/stop.png"
+            "icons/spiralfun/20x20@4/arrow_downward.png"
+            "icons/spiralfun/20x20@4/arrow_upward.png"
+            "icons/spiralfun/20x20@4/help.png"
+            "icons/spiralfun/20x20@4/home.png"
+            "icons/spiralfun/20x20@4/info.png"
+            "icons/spiralfun/20x20@4/more.png"
+            "icons/spiralfun/20x20@4/play.png"
+            "icons/spiralfun/20x20@4/stop.png"
+            "icons/spiralfun/index.theme"
+            "images/appicon.png"
+            "images/example1.png"
+            "images/example2.png"
+            "images/example3.png"
+            "images/example4.png"
     )
 
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -85,16 +125,6 @@ set_target_properties(spiralfun PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
     QT_ANDROID_ABIS "arm64-v8a;armeabi-v7a"
-)
-
-qt_add_resources(spiralfun "images"
-    PREFIX "/"
-    FILES
-        images/appicon.png
-        images/example1.png
-        images/example2.png
-        images/example3.png
-        images/example4.png
 )
 
 install(TARGETS spiralfun

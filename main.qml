@@ -34,11 +34,11 @@ ApplicationWindow {
                 function playStateIcon() {
                     switch (scene.playState) {
                     case SpiralScene.NOT_PLAYING:
-                        return "media-playback-start";
+                        return "play";
                     case SpiralScene.PLAYING:
-                        return "media-playback-stop";
+                        return "stop";
                     case SpiralScene.DONE_PLAYING:
-                        return "go-home";
+                        return "home";
                     }
                 }
             }
@@ -46,7 +46,7 @@ ApplicationWindow {
 
         // Row 2
         Button {
-            icon.name: "go-up"
+            icon { name: "arrow_upward"; color: "transparent" }
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.minimumWidth: root.width / 2 - 5
@@ -56,7 +56,7 @@ ApplicationWindow {
             onClicked: scene.circleUp()
         }
         Button {
-            icon.name: "go-down"
+            icon { name: "arrow_downward"; color: "transparent" }
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.minimumWidth: root.width / 2 - 5
@@ -148,7 +148,7 @@ ApplicationWindow {
         }
         Button {
             id: playButton
-            icon.name: scene.playStateIcon()
+            icon { name: scene.playStateIcon(); color: "transparent" }
             Layout.fillWidth: true
             onClicked: {
                 if (scene.playState === SpiralScene.NOT_PLAYING) {
@@ -160,7 +160,7 @@ ApplicationWindow {
         }
         Button {
             id: moreButton
-            text: "\u2630"
+            icon { name: "more"; color: "transparent" }
             enabled: scene.notPlaying()
             Layout.fillWidth: true
             Layout.rightMargin: 5
@@ -174,6 +174,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: "Examples"
+                icon { source: "/images/appicon.png"; color: "transparent" }
                 onTriggered: {
                     var win = moreMenu.showWindow("examples.qml");
                     win.onAccepted.connect(() => scene.setupExample(win.selected));
@@ -181,10 +182,12 @@ ApplicationWindow {
             }
             MenuItem {
                 text: "Help"
+                icon { name: "help"; color: "transparent" }
                 onTriggered: moreMenu.showWindow("help.qml")
             }
             MenuItem {
                 text: "About"
+                icon { name: "info"; color: "transparent" }
                 onTriggered: moreMenu.showWindow("about.qml")
             }
 

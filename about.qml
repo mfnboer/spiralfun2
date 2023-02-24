@@ -10,9 +10,8 @@ Dialog {
 
     Text {
         wrapMode: Text.WordWrap
-        text: "
-            <b>Spiral Fun</b>
-            <p>
-            \u00A9 2023 Michel de Boer"
+        text: "<b>Spiral Fun</b>" +
+              "<p>" +
+              "\u00A9 2023 Michel de Boer"
     }
 }

@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     qputenv("QT_QUICK_CONTROLS_MATERIAL_VARIANT", "Dense");
     QApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");
+    QIcon::setThemeName("spiralfun");
 
 #if 0
     SpiralFun::AppWindow appWin;
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
 #endif
 
     QQmlApplicationEngine engine;
-    const QUrl url("qrc:/SpiralFun/main.qml");
+    const QUrl url("qrc:/main.qml");
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {

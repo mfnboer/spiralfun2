@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
 Dialog {
     property string selected
@@ -12,32 +13,38 @@ Dialog {
     onAccepted: destroy()
     onRejected: destroy()
 
-    Grid {
-        columns: 2
+    ColumnLayout {
+        Grid {
+            columns: 2
 
-        Button {
-            display: AbstractButton.IconOnly
-            icon.source: "/images/example1.png"
-            icon { width: 150; height: 150; color: "transparent" }
-            onClicked: { examplesDialog.selected = icon.source; accept(); }
+            Button {
+                display: AbstractButton.IconOnly
+                icon.source: "/images/example1.png"
+                icon { width: 150; height: 150; color: "transparent" }
+                onClicked: { examplesDialog.selected = icon.source; accept(); }
+            }
+            Button {
+                display: AbstractButton.IconOnly
+                icon.source: "/images/example2.png"
+                icon { width: 150; height: 150; color: "transparent" }
+                onClicked: { examplesDialog.selected = icon.source; accept(); }
+            }
+            Button {
+                display: AbstractButton.IconOnly
+                icon.source: "/images/example3.png"
+                icon { width: 150; height: 150; color: "transparent" }
+                onClicked: { examplesDialog.selected = icon.source; accept(); }
+            }
+            Button {
+                display: AbstractButton.IconOnly
+                icon.source: "/images/example4.png"
+                icon { width: 150; height: 150; color: "transparent" }
+                onClicked: { examplesDialog.selected = icon.source; accept(); }
+            }
         }
-        Button {
-            display: AbstractButton.IconOnly
-            icon.source: "/images/example2.png"
-            icon { width: 150; height: 150; color: "transparent" }
-            onClicked: { examplesDialog.selected = icon.source; accept(); }
-        }
-        Button {
-            display: AbstractButton.IconOnly
-            icon.source: "/images/example3.png"
-            icon { width: 150; height: 150; color: "transparent" }
-            onClicked: { examplesDialog.selected = icon.source; accept(); }
-        }
-        Button {
-            display: AbstractButton.IconOnly
-            icon.source: "/images/example4.png"
-            icon { width: 150; height: 150; color: "transparent" }
-            onClicked: { examplesDialog.selected = icon.source; accept(); }
+
+        Text {
+            text: "Tap an example to play."
         }
     }
 }

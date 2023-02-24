@@ -35,6 +35,7 @@ private:
     const qreal mStepAngle = qDegreesToRadians(0.05);
     const unsigned mStepsPerInterval = 1;
     int mStartTime;
+    int mCycles;
 };
 
 }
