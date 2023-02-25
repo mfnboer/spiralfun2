@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import SpiralFun
 
 Dialog {
     title: "About"
@@ -11,6 +12,8 @@ Dialog {
     Label {
         wrapMode: Text.WordWrap
         text: "<b>Spiral Fun</b>" +
+              "<p>" +
+              "Version: " + scene.VERSION +
               "<p>" +
               "\u00A9 2023 Michel de Boer"
     }

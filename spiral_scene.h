@@ -29,6 +29,7 @@ const std::initializer_list<CircleConfig> DEFAULT_CONFIG = {
 class SpiralScene : public QQuickItem
 {
     Q_OBJECT
+    Q_PROPERTY(QString VERSION MEMBER VERSION CONSTANT)
     Q_PROPERTY(int MIN_CIRCLES MEMBER MIN_CIRCLES CONSTANT)
     Q_PROPERTY(int MAX_CIRCLES MEMBER MAX_CIRCLES CONSTANT)
     Q_PROPERTY(int MAX_DIAMETER MEMBER MAX_DIAMETER CONSTANT)
@@ -100,6 +101,7 @@ private:
     static constexpr int MAX_CIRCLES = 10;
     static constexpr int MAX_DIAMETER = 300;
     static constexpr int MAX_ROTATIONS = 9999;
+    static constexpr const char* VERSION = APP_VERSION;
 };
 
 }

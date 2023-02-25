@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2)
 
+add_compile_definitions(APP_VERSION="${PROJECT_VERSION}")
 add_compile_options(-Wall -Wextra -Werror)
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
