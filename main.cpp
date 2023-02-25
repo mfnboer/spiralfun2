@@ -11,7 +11,7 @@ using namespace std::chrono_literals;
 int main(int argc, char *argv[])
 {
     qputenv("QT_SCALE_FACTOR", "0.9");
-    qputenv("QT_QUICK_CONTROLS_MATERIAL_VARIANT", "Dense");
+    //qputenv("QT_QUICK_CONTROLS_MATERIAL_VARIANT", "Dense");
     QApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");
     QIcon::setThemeName("spiralfun");

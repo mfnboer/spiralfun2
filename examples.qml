@@ -43,7 +43,7 @@ Dialog {
             }
         }
 
-        Text {
+        Label {
             text: "Tap an example to play."
         }
     }

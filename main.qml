@@ -46,7 +46,7 @@ ApplicationWindow {
 
         // Row 2
         Button {
-            icon { name: "arrow_upward"; color: "transparent" }
+            icon.name: "arrow_upward"
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.minimumWidth: root.width / 2 - 5
@@ -56,7 +56,7 @@ ApplicationWindow {
             onClicked: scene.circleUp()
         }
         Button {
-            icon { name: "arrow_downward"; color: "transparent" }
+            icon.name: "arrow_downward"
             Layout.columnSpan: 2
             Layout.fillWidth: true
             Layout.minimumWidth: root.width / 2 - 5
@@ -148,7 +148,7 @@ ApplicationWindow {
         }
         Button {
             id: playButton
-            icon { name: scene.playStateIcon(); color: "transparent" }
+            icon.name: scene.playStateIcon()
             Layout.fillWidth: true
             onClicked: {
                 if (scene.playState === SpiralScene.NOT_PLAYING) {
@@ -160,7 +160,7 @@ ApplicationWindow {
         }
         Button {
             id: moreButton
-            icon { name: "more"; color: "transparent" }
+            icon.name: "more"
             enabled: scene.notPlaying()
             Layout.fillWidth: true
             Layout.rightMargin: 5
@@ -174,7 +174,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: "Examples"
-                icon { source: "/images/appicon.png"; color: "transparent" }
+                icon.name: "spiral"
                 onTriggered: {
                     var win = moreMenu.showWindow("examples.qml");
                     win.onAccepted.connect(() => scene.setupExample(win.selected));
@@ -182,12 +182,12 @@ ApplicationWindow {
             }
             MenuItem {
                 text: "Help"
-                icon { name: "help"; color: "transparent" }
+                icon.name: "help"
                 onTriggered: moreMenu.showWindow("help.qml")
             }
             MenuItem {
                 text: "About"
-                icon { name: "info"; color: "transparent" }
+                icon.name: "info"
                 onTriggered: moreMenu.showWindow("about.qml")
             }
 

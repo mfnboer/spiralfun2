@@ -8,7 +8,7 @@ Dialog {
     anchors.centerIn: parent
     onAccepted: destroy()
 
-    Text {
+    Label {
         wrapMode: Text.WordWrap
         text: "<b>Spiral Fun</b>" +
               "<p>" +

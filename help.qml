@@ -8,7 +8,7 @@ Dialog {
     anchors.centerIn: parent
     onAccepted: destroy()
 
-    Text {
+    Label {
         anchors.fill: parent
         wrapMode: Text.WordWrap
         textFormat: Text.MarkdownText

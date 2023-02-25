@@ -60,6 +60,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20/info.png"
             "icons/spiralfun/20x20/more.png"
             "icons/spiralfun/20x20/play.png"
+            "icons/spiralfun/20x20/spiral.png"
             "icons/spiralfun/20x20/stop.png"
             "icons/spiralfun/20x20@2/arrow_downward.png"
             "icons/spiralfun/20x20@2/arrow_upward.png"
@@ -68,6 +69,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20@2/info.png"
             "icons/spiralfun/20x20@2/more.png"
             "icons/spiralfun/20x20@2/play.png"
+            "icons/spiralfun/20x20@2/spiral.png"
             "icons/spiralfun/20x20@2/stop.png"
             "icons/spiralfun/20x20@3/arrow_downward.png"
             "icons/spiralfun/20x20@3/arrow_upward.png"
@@ -76,6 +78,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20@3/info.png"
             "icons/spiralfun/20x20@3/more.png"
             "icons/spiralfun/20x20@3/play.png"
+            "icons/spiralfun/20x20@3/spiral.png"
             "icons/spiralfun/20x20@3/stop.png"
             "icons/spiralfun/20x20@4/arrow_downward.png"
             "icons/spiralfun/20x20@4/arrow_upward.png"
@@ -84,6 +87,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20@4/info.png"
             "icons/spiralfun/20x20@4/more.png"
             "icons/spiralfun/20x20@4/play.png"
+            "icons/spiralfun/20x20@4/spiral.png"
             "icons/spiralfun/20x20@4/stop.png"
             "icons/spiralfun/index.theme"
             "images/appicon.png"
@@ -91,6 +95,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "images/example2.png"
             "images/example3.png"
             "images/example4.png"
+            "qtquickcontrols2.conf"
     )
 
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
