@@ -72,6 +72,7 @@ signals:
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) override;
+    void touchEvent(QTouchEvent* event) override;
 
 private:
     SpiralFun::Circle* addCircle(qreal radius);
@@ -96,6 +97,7 @@ private:
     std::unique_ptr<Player> mPlayer;
     PlayState mPlayState = NOT_PLAYING;
     uint64_t mLineSegmentCount = 0;
+    qreal mScaleFactor = 1.0;
 
     static constexpr int MIN_CIRCLES = 2;
     static constexpr int MAX_CIRCLES = 10;

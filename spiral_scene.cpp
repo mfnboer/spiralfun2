@@ -48,6 +48,7 @@ SpiralScene::SpiralScene(QQuickItem *parent) :
     setFlag(ItemHasContents);
     setAntialiasing(true);
     setClip(true);
+    setAcceptTouchEvents(true);
 
     // The screen size is not yet known at this time. But setting up a scene
     // guarantees there are always circles available.
@@ -329,6 +330,8 @@ void SpiralScene::resetScene()
     mClearScene = true;
     resetCircles();
     addCirclesToScene();
+    mScaleFactor = 1.0;
+    setScale(mScaleFactor);
     update();
 }
 
@@ -420,4 +423,41 @@ QSGNode* SpiralScene::createLineNode(const Circle::Line& line)
     return node;
 }
 
+void SpiralScene::touchEvent(QTouchEvent* event)
+{
+    switch (event->type())
+    {
+    case QEvent::TouchCancel:
+        event->accept();
+        return;
+    case QEvent::TouchBegin:
+    case QEvent::TouchEnd:
+    case QEvent::TouchUpdate:
+        break;
+    default:
+        qWarning() << "Unknown touch event:" << event->type();
+        return;
+    }
+
+    QTouchEvent* touch = static_cast<QTouchEvent*>(event);
+    if (touch->points().size() == 2)
+    {
+        const QEventPoint& p1 = touch->points()[0];
+        const QEventPoint& p2 = touch->points()[1];
+        const qreal currentDist = QLineF(p1.position(), p2.position()).length();
+        const qreal startDist = QLineF(p1.pressPosition(), p2.pressPosition()).length();
+        qreal currentScaleFactor = currentDist / startDist;
+
+        if (touch->touchPointStates() & QEventPoint::Released)
+        {
+            // If one finger is temporarily released, remember the current cale factor.
+            mScaleFactor *= currentScaleFactor;
+            currentScaleFactor = 1.0;
+        }
+
+        setScale(mScaleFactor * currentScaleFactor);
+    }
+
+    event->accept();
+}
 }
