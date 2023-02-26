@@ -33,18 +33,6 @@ Dialog {
             verticalItemAlignment: Grid.AlignVCenter
 
             Button {
-                icon.name: "arrow_upward"
-            }
-            Label {
-                text: "Go to the circle above the current."
-            }
-            Button {
-                icon.name: "arrow_downward"
-            }
-            Label {
-                text: "Go to the circle below the current."
-            }
-            Button {
                 icon.name: "play"
             }
             Label {
@@ -61,6 +49,18 @@ Dialog {
             }
             Label {
                 text: "Clear the drawing. Restore the circles."
+            }
+            Button {
+                icon.name: "save"
+            }
+            Label {
+                text: "Save image (after playing) to your gallery."
+            }
+            Button {
+                icon.name: "share"
+            }
+            Label {
+                text: "Share image (after playing)."
             }
         }
     }

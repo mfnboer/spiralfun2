@@ -2,10 +2,13 @@
 // License: GPLv3
 #include "spiral_scene.h"
 #include "circle.h"
+#include "file_utils.h"
 #include "player.h"
+#include <QFile>
+#include <QQmlEngine>
+#include <QQuickItemGrabResult>
 #include <QSGFlatColorMaterial>
 #include <QSGNode>
-#include <QQmlEngine>
 
 namespace SpiralFun {
 
@@ -45,7 +48,7 @@ const std::initializer_list<CircleConfig> EXAMPLE4_CONFIG = {
 SpiralScene::SpiralScene(QQuickItem *parent) :
     QQuickItem(parent)
 {
-    setFlag(ItemHasContents);
+    setFlags(ItemHasContents | ItemIsViewport);
     setAntialiasing(true);
     setClip(true);
     setAcceptTouchEvents(true);
@@ -333,6 +336,9 @@ void SpiralScene::resetScene()
     mScaleFactor = 1.0;
     setScale(mScaleFactor);
     update();
+    mSavedImage = false;
+    mSavedImageFileName.clear();
+    emit savedImageChanged();
 }
 
 void SpiralScene::selectCircle(Circle* circle)
@@ -460,4 +466,53 @@ void SpiralScene::touchEvent(QTouchEvent* event)
 
     event->accept();
 }
+
+void SpiralScene::saveImage(bool share)
+{
+    auto grabResult = grabToImage();
+    if (!grabResult)
+    {
+        qWarning() << "Could not grab image.";
+        return;
+    }
+
+    const QString picPath = getPicturesPath();
+    if (picPath.isNull())
+        return;
+
+    const QString fileName = picPath + "/" + createPictureFileName();
+    QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
+        [this, grabResult, fileName, share]{
+            if (grabResult->saveToFile(fileName))
+            {
+                qDebug() << "Saved file:" << fileName;
+                scanMediaFile(fileName, share);
+                mSavedImage = true;
+                mSavedImageFileName = fileName;
+                emit savedImageChanged();
+            }
+            else
+            {
+                qWarning() << "Failed to save:" << fileName;
+            }
+        });
+
+    return;
+}
+
+void SpiralScene::shareImage()
+{
+    if (mSavedImage && QFile::exists(mSavedImageFileName))
+    {
+        qDebug() << "File already saved, share saved file:" << mSavedImageFileName;
+        scanMediaFile(mSavedImageFileName, true);
+    }
+    else
+    {
+        saveImage(true);
+    }
+}
+
+// D QAndroidUtils: -> uri=content://media/external/images/media/299077
+
 }

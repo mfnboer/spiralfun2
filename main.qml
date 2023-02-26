@@ -1,3 +1,4 @@
+import QtCore
 import QtQml
 import QtQuick
 import QtQuick.Controls.Material
@@ -29,6 +30,10 @@ ApplicationWindow {
 
                 function notPlaying() {
                     return playState === SpiralScene.NOT_PLAYING;
+                }
+
+                function donePlaying() {
+                    return playState === SpiralScene.DONE_PLAYING;
                 }
 
                 function playStateIcon() {
@@ -146,31 +151,49 @@ ApplicationWindow {
             onValueChanged: scene.numCircles = value
             Keys.onReturnPressed:  Qt.inputMethod.hide()
         }
-        Button {
-            id: playButton
-            icon.name: scene.playStateIcon()
-            Layout.fillWidth: true
-            onClicked: {
-                if (scene.playState === SpiralScene.NOT_PLAYING) {
-                    scene.play();
-                } else {
-                    scene.stop();
+        RowLayout {
+            id: buttonRow
+            Layout.columnSpan: 2
+            Button {
+                id: playButton
+                icon.name: scene.playStateIcon()
+                Layout.fillWidth: true
+                onClicked: {
+                    if (scene.playState === SpiralScene.NOT_PLAYING) {
+                        scene.play();
+                    } else {
+                        scene.stop();
+                    }
                 }
             }
-        }
-        Button {
-            id: moreButton
-            icon.name: "more"
-            enabled: scene.notPlaying()
-            Layout.fillWidth: true
-            Layout.rightMargin: 5
-            onClicked: { moreMenu.currentIndex = -1; moreMenu.open(); }
+            Button {
+                id: saveButton
+                icon.name: "save"
+                Layout.fillWidth: true
+                enabled: scene.donePlaying() && !scene.savedImage
+                onClicked: scene.saveImage()
+            }
+            Button {
+                id: shareButton
+                icon.name: "share"
+                Layout.fillWidth: true
+                enabled: scene.donePlaying()
+                onClicked: scene.shareImage()
+            }
+            Button {
+                id: moreButton
+                icon.name: "more"
+                enabled: scene.notPlaying()
+                Layout.fillWidth: true
+                Layout.rightMargin: 5
+                onClicked: { moreMenu.currentIndex = -1; moreMenu.open(); }
+            }
         }
 
         Menu {
             id: moreMenu
             x: parent.width - width
-            y: moreButton.y - height
+            y: buttonRow.y - height
 
             MenuItem {
                 text: "Examples"

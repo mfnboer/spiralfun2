@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core)
 
 add_compile_definitions(APP_VERSION="${PROJECT_VERSION}")
 add_compile_options(-Wall -Wextra -Werror)
@@ -20,19 +20,13 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
 endif()
 
 set(PROJECT_SOURCES
-#	appwindow.h
-#	appwindow.cpp
         circle.h
         circle.cpp
-#        color_select_button.h
-#        color_select_button.cpp
-#        graphics_view.h
-#        graphics_view.cpp
-#        image_button.h
+        file_utils.h
+        file_utils.cpp
         main.cpp
         player.h
         player.cpp
-#        spinbox.h
         spiral_scene.h
         spiral_scene.cpp
 )
@@ -54,6 +48,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             help.qml
             main.qml
         RESOURCES
+            "android/src/com/gmail/mfnboer/QAndroidUtils.java"
             "icons/spiralfun/20x20/arrow_downward.png"
             "icons/spiralfun/20x20/arrow_upward.png"
             "icons/spiralfun/20x20/help.png"
@@ -61,6 +56,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20/info.png"
             "icons/spiralfun/20x20/more.png"
             "icons/spiralfun/20x20/play.png"
+            "icons/spiralfun/20x20/save.png"
+            "icons/spiralfun/20x20/share.png"
             "icons/spiralfun/20x20/spiral.png"
             "icons/spiralfun/20x20/stop.png"
             "icons/spiralfun/20x20@2/arrow_downward.png"
@@ -70,6 +67,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20@2/info.png"
             "icons/spiralfun/20x20@2/more.png"
             "icons/spiralfun/20x20@2/play.png"
+            "icons/spiralfun/20x20@2/save.png"
+            "icons/spiralfun/20x20@2/share.png"
             "icons/spiralfun/20x20@2/spiral.png"
             "icons/spiralfun/20x20@2/stop.png"
             "icons/spiralfun/20x20@3/arrow_downward.png"
@@ -79,6 +78,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20@3/info.png"
             "icons/spiralfun/20x20@3/more.png"
             "icons/spiralfun/20x20@3/play.png"
+            "icons/spiralfun/20x20@3/save.png"
+            "icons/spiralfun/20x20@3/share.png"
             "icons/spiralfun/20x20@3/spiral.png"
             "icons/spiralfun/20x20@3/stop.png"
             "icons/spiralfun/20x20@4/arrow_downward.png"
@@ -88,6 +89,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "icons/spiralfun/20x20@4/info.png"
             "icons/spiralfun/20x20@4/more.png"
             "icons/spiralfun/20x20@4/play.png"
+            "icons/spiralfun/20x20@4/save.png"
+            "icons/spiralfun/20x20@4/share.png"
             "icons/spiralfun/20x20@4/spiral.png"
             "icons/spiralfun/20x20@4/stop.png"
             "icons/spiralfun/index.theme"
@@ -109,8 +112,7 @@ else()
         add_library(spiralfun SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#        set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+        set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(spiralfun
             ${PROJECT_SOURCES}
@@ -122,6 +124,7 @@ target_link_libraries(spiralfun PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::QuickControls2
+    Qt${QT_VERSION_MAJOR}::Core
 )
 
 set_target_properties(spiralfun PROPERTIES
