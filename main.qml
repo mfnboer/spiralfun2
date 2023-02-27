@@ -27,6 +27,7 @@ ApplicationWindow {
                 id: scene
                 width: parent.width
                 height: parent.height
+                onMessage: (msg) => showMessage(msg)
 
                 function notPlaying() {
                     return playState === SpiralScene.NOT_PLAYING;
@@ -45,6 +46,38 @@ ApplicationWindow {
                     case SpiralScene.DONE_PLAYING:
                         return "home";
                     }
+                }
+            }
+
+            RoundButton {
+                id: sceneMoreButton
+                icon.name: "more"
+                Material.background: "transparent"
+                anchors.top: parent.top
+                anchors.right: parent.right
+                enabled: scene.donePlaying()
+                visible: scene.donePlaying()
+                onClicked: { sceneMoreMenu.currentIndex = -1; sceneMoreMenu.open(); }
+            }
+
+            RoundButton {
+                id: sceneShareButton
+                icon.name: "share"
+                Material.background: "transparent"
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                enabled: scene.donePlaying()
+                visible: scene.donePlaying()
+                onClicked: scene.shareImage()
+            }
+
+            Menu {
+                id: sceneMoreMenu
+                x: parent.width - width
+
+                MenuItem {
+                    text: "Save image"
+                    onTriggered: scene.saveImage()
                 }
             }
         }
@@ -94,9 +127,9 @@ ApplicationWindow {
             onClicked: {
                 var component = Qt.createComponent("color_selector.qml");
                 var cs = component.createObject(root);
-                cs.currentColor = colorButton.background.color
-                cs.onAccepted.connect(() => scene.currentCircle.color = cs.color)
-                cs.open()
+                cs.currentColor = colorButton.background.color;
+                cs.onAccepted.connect(() => scene.currentCircle.color = cs.color);
+                cs.open();
             }
         }
         CheckBox {
@@ -167,31 +200,17 @@ ApplicationWindow {
                 }
             }
             Button {
-                id: saveButton
-                icon.name: "save"
-                Layout.fillWidth: true
-                enabled: scene.donePlaying() && !scene.savedImage
-                onClicked: scene.saveImage()
-            }
-            Button {
-                id: shareButton
-                icon.name: "share"
-                Layout.fillWidth: true
-                enabled: scene.donePlaying()
-                onClicked: scene.shareImage()
-            }
-            Button {
-                id: moreButton
-                icon.name: "more"
+                id: helpButton
+                icon.name: "help"
                 enabled: scene.notPlaying()
                 Layout.fillWidth: true
                 Layout.rightMargin: 5
-                onClicked: { moreMenu.currentIndex = -1; moreMenu.open(); }
+                onClicked: { helpMenu.currentIndex = -1; helpMenu.open(); }
             }
         }
 
         Menu {
-            id: moreMenu
+            id: helpMenu
             x: parent.width - width
             y: buttonRow.y - height
 
@@ -199,32 +218,39 @@ ApplicationWindow {
                 text: "Examples"
                 icon.name: "spiral"
                 onTriggered: {
-                    var win = moreMenu.showWindow("examples.qml");
+                    var win = helpMenu.showWindow("examples.qml");
                     win.onAccepted.connect(() => scene.setupExample(win.selected));
                 }
             }
             MenuItem {
                 text: "Help"
                 icon.name: "help"
-                onTriggered: moreMenu.showWindow("help.qml")
+                onTriggered: helpMenu.showWindow("help.qml")
             }
             MenuItem {
                 text: "About"
                 icon.name: "info"
-                onTriggered: moreMenu.showWindow("about.qml")
+                onTriggered: helpMenu.showWindow("about.qml")
             }
 
             function showWindow(qmlFile) {
                 var component = Qt.createComponent(qmlFile);
                 var obj = component.createObject(root);
-                obj.open()
-                return obj
+                obj.open();
+                return obj;
             }
         }
     }
 
+    function showMessage(message) {
+        var component = Qt.createComponent("message.qml");
+        var obj = component.createObject(root);
+        obj.msg = message
+        obj.open();
+    }
+
     Component.onCompleted: {
-        scene.init()
-        scene.setupCircles()
+        scene.init();
+        scene.setupCircles();
     }
 }

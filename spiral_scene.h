@@ -34,7 +34,6 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(int MAX_CIRCLES MEMBER MAX_CIRCLES CONSTANT)
     Q_PROPERTY(int MAX_DIAMETER MEMBER MAX_DIAMETER CONSTANT)
     Q_PROPERTY(int MAX_ROTATIONS MEMBER MAX_ROTATIONS CONSTANT)
-    Q_PROPERTY(bool savedImage MEMBER mSavedImage NOTIFY savedImageChanged)
     Q_PROPERTY(int numCircles READ getNumCircles WRITE setNumCircles NOTIFY numCirclesChanged)
     Q_PROPERTY(SpiralFun::Circle* currentCircle READ getCurrentCircle NOTIFY currentCircleChanged)
     Q_PROPERTY(int currentCircleIndex READ getCurrentCircleIndex NOTIFY currentCircleIndexChanged)
@@ -72,7 +71,7 @@ signals:
     void currentCircleIndexChanged();
     void numCirclesChanged();
     void playStateChanged();
-    void savedImageChanged();
+    void message(const QString message);
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) override;
@@ -102,7 +101,6 @@ private:
     PlayState mPlayState = NOT_PLAYING;
     uint64_t mLineSegmentCount = 0;
     qreal mScaleFactor = 1.0;
-    bool mSavedImage = false;
     QString mSavedImageFileName;
 
     static constexpr int MIN_CIRCLES = 2;

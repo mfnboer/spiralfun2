@@ -61,6 +61,6 @@ public class QAndroidUtils
             "Get app for Android: https://play.google.com/store/apps/details?id=com.gmail.mfnboer.spiralfun");
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.setType("image/jpg");
-        QtNative.activity().startActivity(Intent.createChooser(intent, "Share using"));
+        QtNative.activity().startActivity(Intent.createChooser(intent, "Share spiral using"));
     }
 }

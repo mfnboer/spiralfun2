@@ -3,7 +3,7 @@
 #pragma once
 #include <QString>
 
-namespace SpiralFun {
+namespace SpiralFun::Utils {
 
 QString getPicturesPath();
 QString createPictureFileName();

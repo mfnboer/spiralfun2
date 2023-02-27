@@ -1,6 +1,6 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
-#include "file_utils.h"
+#include "utils.h"
 #include <QDir>
 #include <QJniObject>
 #include <QStandardPaths>
@@ -9,7 +9,7 @@
 #include <QtCore/private/qandroidextras_p.h>
 #endif
 
-namespace SpiralFun {
+namespace SpiralFun::Utils {
 
 QString getPicturesPath()
 {
@@ -41,7 +41,7 @@ QString getPicturesPath()
     const QString picPath = path + "/SpiralFun";
     if (!QDir().mkpath(picPath))
     {
-        qWarning() << "Failed to create path." << picPath;
+        qWarning() << "Failed to create path:" << picPath;
         return QString();
     }
 #endif
@@ -66,7 +66,7 @@ void scanMediaFile(const QString& fileName, bool share)
 #else
     if (share)
     {
-        qWarning() << "Shareing not supported:" << fileName;
+        qWarning() << "Sharing not supported:" << fileName;
     }
 #endif
 }

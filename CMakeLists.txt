@@ -22,8 +22,8 @@ endif()
 set(PROJECT_SOURCES
         circle.h
         circle.cpp
-        file_utils.h
-        file_utils.cpp
+        utils.h
+        utils.cpp
         main.cpp
         player.h
         player.cpp
@@ -47,6 +47,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             examples.qml
             help.qml
             main.qml
+            message.qml
         RESOURCES
             "android/src/com/gmail/mfnboer/QAndroidUtils.java"
             "icons/spiralfun/20x20/arrow_downward.png"

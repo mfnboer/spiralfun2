@@ -2,11 +2,12 @@
 // License: GPLv3
 #include "spiral_scene.h"
 #include "circle.h"
-#include "file_utils.h"
+#include "utils.h"
 #include "player.h"
 #include <QFile>
 #include <QQmlEngine>
 #include <QQuickItemGrabResult>
+#include <QQuickWindow>
 #include <QSGFlatColorMaterial>
 #include <QSGNode>
 
@@ -53,7 +54,7 @@ SpiralScene::SpiralScene(QQuickItem *parent) :
     setClip(true);
     setAcceptTouchEvents(true);
 
-    // The screen size is not yet known at this time. But setting up a scene
+    // The window size is not yet known at this time. But setting up a scene
     // guarantees there are always circles available.
     setupCircles();
 }
@@ -62,7 +63,8 @@ void SpiralScene::init()
 {
     const qreal minDimension = std::min(width(), height());
     mDefaultCircleRadius = minDimension / 2.0 / (MAX_CIRCLES * 2 - 1);
-    qDebug() << "Scene, size:" << width() << "x" << height() << "default-radius:" << mDefaultCircleRadius;
+    qDebug() << "Scene size:" << size() << "default-radius:" << mDefaultCircleRadius;
+    qDebug() << "Screen:" << window()->screen()->size() << "dpr:" << window()->devicePixelRatio() << window()->screen()->devicePixelRatio();
 }
 
 void SpiralScene::setupCircles(const std::vector<CircleConfig>& config)
@@ -336,9 +338,7 @@ void SpiralScene::resetScene()
     mScaleFactor = 1.0;
     setScale(mScaleFactor);
     update();
-    mSavedImage = false;
     mSavedImageFileName.clear();
-    emit savedImageChanged();
 }
 
 void SpiralScene::selectCircle(Circle* circle)
@@ -469,31 +469,35 @@ void SpiralScene::touchEvent(QTouchEvent* event)
 
 void SpiralScene::saveImage(bool share)
 {
-    auto grabResult = grabToImage();
+    const qreal dpr = window()->effectiveDevicePixelRatio();
+    const QSize imageSize = (size() * dpr).toSize();
+    auto grabResult = grabToImage(imageSize);
     if (!grabResult)
     {
-        qWarning() << "Could not grab image.";
+        emit message("Failed to grab image.");
         return;
     }
 
-    const QString picPath = getPicturesPath();
+    const QString picPath = Utils::getPicturesPath();
     if (picPath.isNull())
+    {
+        emit message("Cannot save file.");
         return;
+    }
 
-    const QString fileName = picPath + "/" + createPictureFileName();
+    const QString fileName = picPath + "/" + Utils::createPictureFileName();
     QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
         [this, grabResult, fileName, share]{
             if (grabResult->saveToFile(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
-                scanMediaFile(fileName, share);
-                mSavedImage = true;
+                emit message(QString("Saved file: %1").arg(fileName));
+                Utils::scanMediaFile(fileName, share);
                 mSavedImageFileName = fileName;
-                emit savedImageChanged();
             }
             else
             {
-                qWarning() << "Failed to save:" << fileName;
+                emit message(QString("Failed to save: %1").arg(fileName));
             }
         });
 
@@ -502,17 +506,15 @@ void SpiralScene::saveImage(bool share)
 
 void SpiralScene::shareImage()
 {
-    if (mSavedImage && QFile::exists(mSavedImageFileName))
+    if (!mSavedImageFileName.isNull() && QFile::exists(mSavedImageFileName))
     {
         qDebug() << "File already saved, share saved file:" << mSavedImageFileName;
-        scanMediaFile(mSavedImageFileName, true);
+        Utils::scanMediaFile(mSavedImageFileName, true);
     }
     else
     {
         saveImage(true);
     }
 }
-
-// D QAndroidUtils: -> uri=content://media/external/images/media/299077
 
 }
