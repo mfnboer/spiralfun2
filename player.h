@@ -14,7 +14,7 @@ class Player : public QObject
     Q_OBJECT
 
 public:
-    Player(const CircleList &circles);
+    explicit Player(const CircleList &circles);
 
     void play();
 

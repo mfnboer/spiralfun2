@@ -34,6 +34,7 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(int MAX_CIRCLES MEMBER MAX_CIRCLES CONSTANT)
     Q_PROPERTY(int MAX_DIAMETER MEMBER MAX_DIAMETER CONSTANT)
     Q_PROPERTY(int MAX_ROTATIONS MEMBER MAX_ROTATIONS CONSTANT)
+    Q_PROPERTY(int CFG_IMAGE_SIZE MEMBER CFG_IMAGE_SIZE CONSTANT)
     Q_PROPERTY(int numCircles READ getNumCircles WRITE setNumCircles NOTIFY numCirclesChanged)
     Q_PROPERTY(SpiralFun::Circle* currentCircle READ getCurrentCircle NOTIFY currentCircleChanged)
     Q_PROPERTY(int currentCircleIndex READ getCurrentCircleIndex NOTIFY currentCircleIndexChanged)
@@ -44,7 +45,7 @@ public:
     enum PlayState { NOT_PLAYING = 0, PLAYING = 1, DONE_PLAYING = 2 };
     Q_ENUM(PlayState)
 
-    SpiralScene(QQuickItem *parent = nullptr);
+    explicit SpiralScene(QQuickItem *parent = nullptr);
 
     int getNumCircles() const { return mCircles.size(); }
     SpiralFun::Circle* getCurrentCircle() const;
@@ -65,6 +66,8 @@ public slots:
     void stop();
     void saveImage(bool share = false);
     void shareImage();
+    void saveConfig();
+    QStringList loadConfig();
 
 signals:
     void currentCircleChanged();
@@ -107,6 +110,7 @@ private:
     static constexpr int MAX_CIRCLES = 10;
     static constexpr int MAX_DIAMETER = 300;
     static constexpr int MAX_ROTATIONS = 9999;
+    static constexpr int CFG_IMAGE_SIZE = 150;
     static constexpr const char* VERSION = APP_VERSION;
 };
 

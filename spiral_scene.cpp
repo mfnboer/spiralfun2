@@ -4,6 +4,8 @@
 #include "circle.h"
 #include "utils.h"
 #include "player.h"
+#include "spiral_config.h"
+#include <QDir>
 #include <QFile>
 #include <QQmlEngine>
 #include <QQuickItemGrabResult>
@@ -513,6 +515,47 @@ void SpiralScene::shareImage()
     {
         saveImage(true);
     }
+}
+
+void SpiralScene::saveConfig()
+{
+    // TODO: determine the bounding rectangle of the spiral and cut a nice square around the
+    //       center of the spirall.
+    const QSize imageSize = size().scaled(CFG_IMAGE_SIZE, CFG_IMAGE_SIZE, Qt::KeepAspectRatioByExpanding).toSize();
+    auto grabResult = grabToImage(imageSize);
+    if (!grabResult)
+    {
+        emit message("Failed to grab image.");
+        return;
+    }
+
+    QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
+        [this, grabResult]{
+            const QImage img = grabResult->image();
+            const QSize sz = img.size();
+            const int x = sz.width() <= CFG_IMAGE_SIZE ? 0 : (sz.width() - CFG_IMAGE_SIZE) / 2;
+            const int y = sz.height() <= CFG_IMAGE_SIZE ? 0 : (sz.height() - CFG_IMAGE_SIZE) / 2;
+            QImage imgRect = img.copy(x, y, CFG_IMAGE_SIZE, CFG_IMAGE_SIZE);
+
+            SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+            cfg.save(imgRect);
+        });
+}
+
+QStringList SpiralScene::loadConfig()
+{
+    // TODO: dummy code
+    const QString path = Utils::getSpiralCongifPath();
+    QDir dir(path);
+    auto files = dir.entryList({"*.jpg"});
+    QStringList absFiles;
+    for (const auto& f : files)
+    {
+        absFiles.append(dir.absoluteFilePath(f));
+    }
+
+    qDebug() << absFiles;
+    return absFiles;
 }
 
 }

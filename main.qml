@@ -2,6 +2,7 @@ import QtCore
 import QtQml
 import QtQuick
 import QtQuick.Controls.Material
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import SpiralFun
 
@@ -78,6 +79,10 @@ ApplicationWindow {
                 MenuItem {
                     text: "Save image"
                     onTriggered: scene.saveImage()
+                }
+                MenuItem {
+                    text: "Save config"
+                    onTriggered: scene.saveConfig()
                 }
             }
         }
@@ -231,6 +236,15 @@ ApplicationWindow {
                 text: "About"
                 icon.name: "info"
                 onTriggered: helpMenu.showWindow("about.qml")
+            }
+            MenuItem {
+                text: "LOAD"
+                onTriggered: {
+                    var component = Qt.createComponent("file_dialog.qml");
+                    var obj = component.createObject(root);
+                    obj.onAccepted.connect(() => console.debug("Selected:", obj.selected))
+                    obj.show(scene.loadConfig(), scene.CFG_IMAGE_SIZE);
+                }
             }
 
             function showWindow(qmlFile) {

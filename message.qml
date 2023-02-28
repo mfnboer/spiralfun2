@@ -11,6 +11,7 @@ Dialog {
     onAccepted: destroy()
 
     Label {
+        Layout.maximumWidth: parent.width
         wrapMode: Text.WordWrap
         text: msgDialog.msg
     }

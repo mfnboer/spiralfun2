@@ -16,12 +16,12 @@ import android.util.Log;
 public class QAndroidUtils
 {
     private static final String TAG = "QAndroidUtils";
-    private static final String APP_DIR = "SpiralFun";
     private static final String APP_NAME = "Spiral Fun";
 
-    public static String getPicturesPath() {
-        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File appPath = new File(path, APP_DIR);
+    private static String getPath(String type, String subDir)
+    {
+        File path = Environment.getExternalStoragePublicDirectory(type);
+        File appPath = new File(path, subDir);
 
         try {
             appPath.mkdirs();
@@ -31,6 +31,14 @@ public class QAndroidUtils
         }
 
         return appPath.getAbsolutePath();
+    }
+
+    public static String getPicturesPath(String subDir) {
+        return getPath(Environment.DIRECTORY_PICTURES, subDir);
+    }
+
+    public static String getSpiralConfigPath(String subDir) {
+        return getPath(Environment.DIRECTORY_DOCUMENTS, subDir);
     }
 
     // Make a media file show up in the gallery

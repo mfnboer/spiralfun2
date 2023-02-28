@@ -27,6 +27,8 @@ set(PROJECT_SOURCES
         main.cpp
         player.h
         player.cpp
+        spiral_config.h
+        spiral_config.cpp
         spiral_scene.h
         spiral_scene.cpp
 )
@@ -45,6 +47,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             about.qml
             color_selector.qml
             examples.qml
+            file_dialog.qml
             help.qml
             main.qml
             message.qml

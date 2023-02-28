@@ -9,9 +9,11 @@
 #include <QtCore/private/qandroidextras_p.h>
 #endif
 
-namespace SpiralFun::Utils {
+namespace {
+constexpr const char* PICTURES_SUB_DIR = "SpiralFun";
+constexpr const char* SPIRAL_CONFIG_SUB_DIR = "SpiralFun/SpiralConfigs";
 
-QString getPicturesPath()
+bool checkStoragePermission()
 {
 #if defined(Q_OS_ANDROID)
     auto checkResult = QtAndroidPrivate::checkPermission(QtAndroidPrivate::Storage);
@@ -22,12 +24,27 @@ QString getPicturesPath()
         if (requestResult.result() != QtAndroidPrivate::Authorized)
         {
             qWarning() << "No permission to write to storage.";
-            return QString();
+            return false;
         }
     }
+#endif
+    return true;
+}
+}
 
+namespace SpiralFun::Utils {
+
+QString getPicturesPath()
+{
+    if (!checkStoragePermission())
+        return QString();
+
+#if defined(Q_OS_ANDROID)
+    auto jsSubDir = QJniObject::fromString(PICTURES_SUB_DIR);
     auto pathObj = QJniObject::callStaticMethod<jstring>("com/gmail/mfnboer/QAndroidUtils",
-                                                         "getPicturesPath");
+                                                         "getPicturesPath",
+                                                         "(Ljava/lang/String;)Ljava/lang/String;",
+                                                         jsSubDir.object<jstring>());
     if (!pathObj.isValid())
     {
         qWarning() << "Cannot create pictures path.";
@@ -38,7 +55,7 @@ QString getPicturesPath()
     qDebug() << "Pictures path:" << picPath;
 #else
     auto path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-    const QString picPath = path + "/SpiralFun";
+    const QString picPath = path + "/" + PICTURES_SUB_DIR;
     if (!QDir().mkpath(picPath))
     {
         qWarning() << "Failed to create path:" << picPath;
@@ -49,9 +66,45 @@ QString getPicturesPath()
     return picPath;
 }
 
+QString getSpiralCongifPath()
+{    if (!checkStoragePermission())
+        return QString();
+
+#if defined(Q_OS_ANDROID)
+    auto jsSubDir = QJniObject::fromString(SPIRAL_CONFIG_SUB_DIR);
+    auto pathObj = QJniObject::callStaticMethod<jstring>("com/gmail/mfnboer/QAndroidUtils",
+                                                         "getSpiralConfigPath",
+                                                         "(Ljava/lang/String;)Ljava/lang/String;",
+                                                         jsSubDir.object<jstring>());
+    if (!pathObj.isValid())
+    {
+        qWarning() << "Cannot create spiral config path.";
+        return QString();
+    }
+
+    const QString cfgPath = pathObj.toString();
+    qDebug() << "Spiral config path:" << cfgPath;
+#else
+    auto path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    const QString cfgPath = path + "/" + SPIRAL_CONFIG_SUB_DIR;
+    if (!QDir().mkpath(cfgPath))
+    {
+        qWarning() << "Failed to create path:" << cfgPath;
+        return QString();
+    }
+#endif
+
+    return cfgPath;
+}
+
+QString createDateTimeName()
+{
+    return QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
+}
+
 QString createPictureFileName()
 {
-    return QString("IMG_%1.jpg").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
+    return QString("IMG_%1.jpg").arg(createDateTimeName());
 }
 
 void scanMediaFile(const QString& fileName, bool share)
