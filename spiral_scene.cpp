@@ -51,7 +51,6 @@ SpiralScene::SpiralScene(QQuickItem *parent) :
 {
     setFlags(ItemHasContents | ItemIsViewport);
     setAntialiasing(true);
-    setClip(true);
     setAcceptTouchEvents(true);
 
     // The window size is not yet known at this time. But setting up a scene
@@ -491,7 +490,6 @@ void SpiralScene::saveImage(bool share)
             if (grabResult->saveToFile(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
-                emit message(QString("Saved file: %1").arg(fileName));
                 Utils::scanMediaFile(fileName, share);
                 mSavedImageFileName = fileName;
             }
