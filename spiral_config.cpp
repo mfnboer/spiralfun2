@@ -160,6 +160,20 @@ CircleConfigList SpiralConfig::load(const QString& fileName) const
     return createConfig(doc);
 }
 
+void SpiralConfig::remove(const QStringList& fileNameList) const
+{
+    static const QRegularExpression jsonFileRe("SPIRAL_(.*)\\.json");
+    for (const auto& jsonFileName : fileNameList)
+    {
+        QString imgFileName(jsonFileName);
+        imgFileName.replace(jsonFileRe, "IMG_\\1.jpg");
+        qDebug() << "Delete:" << imgFileName;
+        qDebug() << "Delete:" << jsonFileName;
+        QFile::remove(imgFileName);
+        QFile::remove(jsonFileName);
+    }
+}
+
 CircleConfigList SpiralConfig::createConfig(const QJsonDocument& doc) const
 {
     if (!doc.isObject())

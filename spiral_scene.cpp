@@ -538,4 +538,10 @@ void SpiralScene::loadConfig(const QString& fileName)
         setupCircles(circleCfgList);
 }
 
+void SpiralScene::deleteConfig(const QStringList& fileNameList)
+{
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    cfg.remove(fileNameList);
+}
+
 }

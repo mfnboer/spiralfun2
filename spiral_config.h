@@ -49,6 +49,7 @@ public:
     bool save(const QImage& img) const;
     QObjectList getConfigFiles() const;
     CircleConfigList load(const QString& fileName) const;
+    void remove(const QStringList& fileNameList) const;
 
 private:
     QJsonDocument createJsonDoc() const;

@@ -55,6 +55,7 @@ public slots:
     void saveConfig();
     QObjectList getConfigFileList();
     void loadConfig(const QString& fileName);
+    void deleteConfig(const QStringList& fileNameList);
 
 signals:
     void maxDiameterChanged();

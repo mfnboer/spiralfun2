@@ -16,6 +16,7 @@ ApplicationWindow {
     GridLayout {
         columns: 4
         anchors.fill: parent
+        rowSpacing: 0
 
         // Row 1
         Rectangle {
@@ -85,7 +86,7 @@ ApplicationWindow {
                     onTriggered: {
                         var component = Qt.createComponent("file_dialog.qml");
                         var obj = component.createObject(root);
-                        obj.onAccepted.connect(() => scene.loadConfig(obj.selected));
+                        obj.onAccepted.connect(() => sceneMoreMenu.handleFileDialogAccepted(obj));
                         obj.show(scene.getConfigFileList(), scene.CFG_IMAGE_SIZE);
                     }
                 }
@@ -109,6 +110,13 @@ ApplicationWindow {
                 MenuItem {
                     text: "About"
                     onTriggered: sceneMoreMenu.showWindow("about.qml")
+                }
+
+                function handleFileDialogAccepted(obj) {
+                    if (obj.selected)
+                        scene.loadConfig(obj.selected);
+                    else
+                        scene.deleteConfig(obj.toDelete);
                 }
 
                 function showWindow(qmlFile) {
