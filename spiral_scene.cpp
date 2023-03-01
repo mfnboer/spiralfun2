@@ -4,8 +4,6 @@
 #include "circle.h"
 #include "utils.h"
 #include "player.h"
-#include "spiral_config.h"
-#include <QDir>
 #include <QFile>
 #include <QQmlEngine>
 #include <QQuickItemGrabResult>
@@ -14,39 +12,6 @@
 #include <QSGNode>
 
 namespace SpiralFun {
-
-namespace {
-
-const std::initializer_list<CircleConfig> EXAMPLE1_CONFIG = {
-    { 6.0, 0, false, Qt::blue },
-    { 2.6, 1, false, Qt::green },
-    { 1.6, 5, false, Qt::yellow },
-    { 0.8, 40, true, Qt::red }
-};
-const std::initializer_list<CircleConfig> EXAMPLE2_CONFIG = {
-    { 5.0, 0, false, Qt::blue },
-    { 3.0, 1, false, Qt::yellow },
-    { 1.6, 4, true, Qt::red },
-    { 0.2, 200, true, Qt::white }
-};
-const std::initializer_list<CircleConfig> EXAMPLE3_CONFIG = {
-    { 6.0, 0, false, Qt::blue },
-    { 2.1, 1, false, Qt::green },
-    { 1.6, -5, false, Qt::yellow },
-    { 0.8, 25, true, Qt::red },
-    { 0.4, -125, false, Qt::cyan },
-    { 0.08, 625, true, Qt::white }
-};
-const std::initializer_list<CircleConfig> EXAMPLE4_CONFIG = {
-    { 4.8, 0, false, Qt::cyan },
-    { 2.8, 1, false, Qt::yellow },
-    { 1.6, -3, true, Qt::green },
-    { 0.8, 9, false, Qt::magenta },
-    { 0.4, -27, true, Qt::blue },
-    { 0.2, 81, false, Qt::red },
-    { 0.04, -243, true, Qt::white }
-};
-}
 
 SpiralScene::SpiralScene(QQuickItem *parent) :
     QQuickItem(parent)
@@ -64,11 +29,17 @@ void SpiralScene::init()
 {
     const qreal minDimension = std::min(width(), height());
     mDefaultCircleRadius = minDimension / 2.0 / (MAX_CIRCLES * 2 - 1);
-    qDebug() << "Scene size:" << size() << "default-radius:" << mDefaultCircleRadius;
+    const int oldMaxDiameter = MAX_DIAMETER;
+    MAX_DIAMETER = SpiralConfig::MAX_REL_RADIUS * mDefaultCircleRadius * 2;
+
+    if (oldMaxDiameter != MAX_DIAMETER)
+        emit maxDiameterChanged();
+
+    qDebug() << "Scene size:" << size() << "default-radius:" << mDefaultCircleRadius << "max-diameter:" << MAX_DIAMETER;
     qDebug() << "Screen:" << window()->screen()->size() << "dpr:" << window()->devicePixelRatio() << window()->screen()->devicePixelRatio();
 }
 
-void SpiralScene::setupCircles(const std::vector<CircleConfig>& config)
+void SpiralScene::setupCircles(const CircleConfigList& config)
 {
     mCircles.clear();
 
@@ -392,10 +363,12 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         if (!line.mRoot)
         {
             line.mRoot = new QSGNode;
+            line.mRoot->setFlag(QSGNode::OwnedByParent);
             sceneRoot->appendChildNode(line.mRoot);
         }
 
         auto* node = createLineNode(line);
+        node->setFlag(QSGNode::OwnedByParent);
         line.mRoot->appendChildNode(node);
         QPointF p = line.mLinePoints.back();
         line.mLinePoints.clear();
@@ -542,20 +515,27 @@ void SpiralScene::saveConfig()
         });
 }
 
-QStringList SpiralScene::loadConfig()
+QObjectList SpiralScene::getConfigFileList()
 {
-    // TODO: dummy code
-    const QString path = Utils::getSpiralCongifPath();
-    QDir dir(path);
-    auto files = dir.entryList({"*.jpg"});
-    QStringList absFiles;
-    for (const auto& f : files)
-    {
-        absFiles.append(dir.absoluteFilePath(f));
-    }
+    mConfigFileList.clear();
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    QObjectList l = cfg.getConfigFiles();
 
-    qDebug() << absFiles;
-    return absFiles;
+    // The listview in QML needs raw pointers.
+    // Wrap them in unique pointers so we can cleanup next time.
+    for (auto obj : l)
+        mConfigFileList.emplace_back(obj);
+
+    return l;
+}
+
+void SpiralScene::loadConfig(const QString& fileName)
+{
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    const CircleConfigList circleCfgList = cfg.load(fileName);
+
+    if (!circleCfgList.empty())
+        setupCircles(circleCfgList);
 }
 
 }

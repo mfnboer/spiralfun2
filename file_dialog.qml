@@ -3,13 +3,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Dialog {
-    property list<string> files
     property int imgSize
     property string selected
 
     id: fileDialog
-
-    title: "Load Spiral Config"
+    title: "Load spiral config"
     modal: true
     standardButtons: Dialog.Cancel
     height: parent.height
@@ -21,45 +19,35 @@ Dialog {
     Rectangle {
         color: "transparent"
         anchors.fill: parent
+
         GridView {
-            id: list
-            interactive: true
+            id: grid
             cellWidth: fileDialog.imgSize + 5
             cellHeight: fileDialog.imgSize + 20
             anchors.fill: parent
             clip: true
             delegate: Column {
                 Image {
-                    id: img
-                    source: "file://" + modelData
+                    source: modelData.imgFileName ? "file://" + modelData.imgFileName : "/images/question_mark.png"
                     width: fileDialog.imgSize
                     height: fileDialog.imgSize
                     anchors.horizontalCenter: parent.horizontalCenter
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: { console.debug(index, modelData); list.currentIndex = index }
-                        onDoubleClicked: { fileDialog.selected = modelData; accept() }
+                        onClicked: { fileDialog.selected = modelData.jsonFileName; accept() }
                     }
                 }
                 Label {
-                    text: "foo"
+                    text: modelData.displayName
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
-
             }
-
-            highlight: Rectangle {
-                color: "grey"
-            }
-            highlightFollowsCurrentItem: true
-
-            model: fileDialog.files
         }
     }
 
     function show(fileList, imgSz)
     {
-        files = fileList;
+        grid.model = fileList;
         imgSize = imgSz;
         open();
     }

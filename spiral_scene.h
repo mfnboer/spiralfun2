@@ -4,27 +4,13 @@
 
 #include "circle.h"
 #include "player.h"
+#include "spiral_config.h"
 #include <QQuickItem>
 #include <memory>
 #include <cstdint>
 #include <unordered_map>
-#include <vector>
 
 namespace SpiralFun {
-
-struct CircleConfig
-{
-    qreal mRelRadius;
-    int mSpeed;
-    bool mDraw;
-    QColor mColor;
-};
-
-const std::initializer_list<CircleConfig> DEFAULT_CONFIG = {
-    { 4.0, 0, false, Qt::blue },
-    { 2.0, 1, false, Qt::green },
-    { 0.2, -5, true, Qt::white }
-};
 
 class SpiralScene : public QQuickItem
 {
@@ -32,7 +18,7 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(QString VERSION MEMBER VERSION CONSTANT)
     Q_PROPERTY(int MIN_CIRCLES MEMBER MIN_CIRCLES CONSTANT)
     Q_PROPERTY(int MAX_CIRCLES MEMBER MAX_CIRCLES CONSTANT)
-    Q_PROPERTY(int MAX_DIAMETER MEMBER MAX_DIAMETER CONSTANT)
+    Q_PROPERTY(int MAX_DIAMETER MEMBER MAX_DIAMETER NOTIFY maxDiameterChanged)
     Q_PROPERTY(int MAX_ROTATIONS MEMBER MAX_ROTATIONS CONSTANT)
     Q_PROPERTY(int CFG_IMAGE_SIZE MEMBER CFG_IMAGE_SIZE CONSTANT)
     Q_PROPERTY(int numCircles READ getNumCircles WRITE setNumCircles NOTIFY numCirclesChanged)
@@ -58,7 +44,7 @@ public:
 
 public slots:
     void init();
-    void setupCircles(const std::vector<CircleConfig>& config = DEFAULT_CONFIG);
+    void setupCircles(const SpiralFun::CircleConfigList& config = DEFAULT_CONFIG);
     void setupExample(const QString& example);
     void circleUp();
     void circleDown();
@@ -67,9 +53,11 @@ public slots:
     void saveImage(bool share = false);
     void shareImage();
     void saveConfig();
-    QStringList loadConfig();
+    QObjectList getConfigFileList();
+    void loadConfig(const QString& fileName);
 
 signals:
+    void maxDiameterChanged();
     void currentCircleChanged();
     void currentCircleIndexChanged();
     void numCirclesChanged();
@@ -105,11 +93,12 @@ private:
     uint64_t mLineSegmentCount = 0;
     qreal mScaleFactor = 1.0;
     QString mSavedImageFileName;
+    std::vector<std::unique_ptr<QObject>> mConfigFileList;
 
-    static constexpr int MIN_CIRCLES = 2;
-    static constexpr int MAX_CIRCLES = 10;
-    static constexpr int MAX_DIAMETER = 300;
-    static constexpr int MAX_ROTATIONS = 9999;
+    static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
+    static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;
+    int MAX_DIAMETER = 300;
+    static constexpr int MAX_ROTATIONS = SpiralConfig::MAX_SPEED;
     static constexpr int CFG_IMAGE_SIZE = 150;
     static constexpr const char* VERSION = APP_VERSION;
 };

@@ -56,8 +56,6 @@ ApplicationWindow {
                 Material.background: "transparent"
                 anchors.top: parent.top
                 anchors.right: parent.right
-                enabled: scene.donePlaying()
-                visible: scene.donePlaying()
                 onClicked: { sceneMoreMenu.currentIndex = -1; sceneMoreMenu.open(); }
             }
 
@@ -78,11 +76,46 @@ ApplicationWindow {
 
                 MenuItem {
                     text: "Save image"
+                    enabled: scene.donePlaying()
                     onTriggered: scene.saveImage()
                 }
                 MenuItem {
+                    text: "Load config"
+                    enabled: scene.notPlaying()
+                    onTriggered: {
+                        var component = Qt.createComponent("file_dialog.qml");
+                        var obj = component.createObject(root);
+                        obj.onAccepted.connect(() => scene.loadConfig(obj.selected));
+                        obj.show(scene.getConfigFileList(), scene.CFG_IMAGE_SIZE);
+                    }
+                }
+                MenuItem {
                     text: "Save config"
+                    enabled: scene.donePlaying()
                     onTriggered: scene.saveConfig()
+                }
+                MenuItem {
+                    text: "Examples"
+                    enabled: scene.notPlaying()
+                    onTriggered: {
+                        var win = sceneMoreMenu.showWindow("examples.qml");
+                        win.onAccepted.connect(() => scene.setupExample(win.selected));
+                    }
+                }
+                MenuItem {
+                    text: "Help"
+                    onTriggered: sceneMoreMenu.showWindow("help.qml")
+                }
+                MenuItem {
+                    text: "About"
+                    onTriggered: sceneMoreMenu.showWindow("about.qml")
+                }
+
+                function showWindow(qmlFile) {
+                    var component = Qt.createComponent(qmlFile);
+                    var obj = component.createObject(root);
+                    obj.open();
+                    return obj;
                 }
             }
         }
@@ -189,69 +222,17 @@ ApplicationWindow {
             onValueChanged: scene.numCircles = value
             Keys.onReturnPressed:  Qt.inputMethod.hide()
         }
-        RowLayout {
-            id: buttonRow
+        Button {
+            id: playButton
+            icon.name: scene.playStateIcon()
+            Layout.fillWidth: true
             Layout.columnSpan: 2
-            Button {
-                id: playButton
-                icon.name: scene.playStateIcon()
-                Layout.fillWidth: true
-                onClicked: {
-                    if (scene.playState === SpiralScene.NOT_PLAYING) {
-                        scene.play();
-                    } else {
-                        scene.stop();
-                    }
+            onClicked: {
+                if (scene.playState === SpiralScene.NOT_PLAYING) {
+                    scene.play();
+                } else {
+                    scene.stop();
                 }
-            }
-            Button {
-                id: helpButton
-                icon.name: "help"
-                enabled: scene.notPlaying()
-                Layout.fillWidth: true
-                Layout.rightMargin: 5
-                onClicked: { helpMenu.currentIndex = -1; helpMenu.open(); }
-            }
-        }
-
-        Menu {
-            id: helpMenu
-            x: parent.width - width
-            y: buttonRow.y - height
-
-            MenuItem {
-                text: "Examples"
-                icon.name: "spiral"
-                onTriggered: {
-                    var win = helpMenu.showWindow("examples.qml");
-                    win.onAccepted.connect(() => scene.setupExample(win.selected));
-                }
-            }
-            MenuItem {
-                text: "Help"
-                icon.name: "help"
-                onTriggered: helpMenu.showWindow("help.qml")
-            }
-            MenuItem {
-                text: "About"
-                icon.name: "info"
-                onTriggered: helpMenu.showWindow("about.qml")
-            }
-            MenuItem {
-                text: "LOAD"
-                onTriggered: {
-                    var component = Qt.createComponent("file_dialog.qml");
-                    var obj = component.createObject(root);
-                    obj.onAccepted.connect(() => console.debug("Selected:", obj.selected))
-                    obj.show(scene.loadConfig(), scene.CFG_IMAGE_SIZE);
-                }
-            }
-
-            function showWindow(qmlFile) {
-                var component = Qt.createComponent(qmlFile);
-                var obj = component.createObject(root);
-                obj.open();
-                return obj;
             }
         }
     }

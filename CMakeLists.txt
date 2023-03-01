@@ -103,6 +103,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             "images/example2.png"
             "images/example3.png"
             "images/example4.png"
+            "images/question_mark.png"
             "qtquickcontrols2.conf"
     )
 
