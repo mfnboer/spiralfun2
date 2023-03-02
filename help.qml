@@ -17,9 +17,8 @@ Dialog {
             text: "Spiral lines are drawn by circles rotating around each other. " +
                   "You can create up to 10 circles (number in the 'Circles' field)." +
                   "<p>" +
-                  "The first circle is stationary, the second cirle makes 1 rotation. " +
-                  "For the remaining circles you can set how many rotations to make in" +
-                  "which direction." +
+                  "The first circle is stationary. For the remaining circles you can " +
+                  "set how many rotations to make in which direction." +
                   "<p>" +
                   "For each circle you can set its diameter, its color and whether it " +
                   "should draw (the draw line checkbox) a line from its center while rotating." +

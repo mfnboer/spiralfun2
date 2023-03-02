@@ -1,10 +1,8 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include <QApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
-#include <QQuickView>
-
-using namespace std::chrono_literals;
 
 int main(int argc, char *argv[])
 {
@@ -22,11 +20,5 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-#if 0
-    QQuickView view;
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.setSource(QUrl("qrc:/SpiralFun/main.qml"));
-    view.show();
-#endif
     return app.exec();
 }

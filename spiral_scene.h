@@ -81,17 +81,18 @@ private:
     void resetCircles();
     void resetScene();
     void setPlayState(PlayState state);
-    uint64_t calcTotalLineSements() const;
-
     QSGNode* createLineNode(const Circle::Line& line);
+    void updateSceneRect(const QPointF& p);
+
     std::unordered_map<QObject*, Circle::Line> mLines;
     bool mClearScene = false;
+    QRectF mSceneRect;
+    uint64_t mLineSegmentCount = 0;
     CircleList mCircles;
     qreal mDefaultCircleRadius = 10.0;
     unsigned mCurrentIndex = 0;
     std::unique_ptr<Player> mPlayer;
     PlayState mPlayState = NOT_PLAYING;
-    uint64_t mLineSegmentCount = 0;
     qreal mScaleFactor = 1.0;
     QString mSavedImageFileName;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;

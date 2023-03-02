@@ -240,7 +240,13 @@ void SpiralScene::play()
     QObject::connect(mPlayer.get(), &Player::done, this, [this]{
             removeCirclesFromScene();
             setPlayState(DONE_PLAYING);
-            qDebug() << "Line segments drawn:" << calcTotalLineSements();
+
+            // Stats are only complete after rendering is done.
+            QObject::connect(window(), &QQuickWindow::afterRendering, this, ([this]{
+                qDebug() << "Line segments drawn:" << mLineSegmentCount;
+                qDebug() << "Scene rect:" << mSceneRect;
+            }), Qt::SingleShotConnection);
+            update();
     });
     mPlayer->play();
     setPlayState(PLAYING);
@@ -258,20 +264,6 @@ void SpiralScene::setPlayState(PlayState state)
 {
     mPlayState = state;
     emit playStateChanged();
-}
-
-uint64_t SpiralScene::calcTotalLineSements() const
-{
-    uint64_t total = mLineSegmentCount;
-
-    // Not all line segements may be rendered yet. Add what is buffered.
-    for (const auto& [_, line] : mLines)
-    {
-        if (line.mLinePoints.size() > 0)
-            total += line.mLinePoints.size() - 1;
-    }
-
-    return total;
 }
 
 void SpiralScene::addCirclesToScene()
@@ -353,6 +345,7 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     {
         delete sceneRoot;
         sceneRoot = new QSGNode;
+        mSceneRect = {};
         mClearScene = false;
     }
 
@@ -376,7 +369,6 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         line.mLinePoints.push_back(p);
     }
 
-    mClearScene = false;
     return sceneRoot;
 }
 
@@ -392,16 +384,37 @@ QSGNode* SpiralScene::createLineNode(const Circle::Line& line)
     material->setColor(line.mColor);
     node->setMaterial(material);
     node->setFlag(QSGNode::OwnsMaterial);
+
     auto* vertices = geometry->vertexDataAsPoint2D();
     for (int unsigned i = 0; i < line.mLinePoints.size(); ++i)
     {
         const QPointF& p = line.mLinePoints[i];
         vertices[i].set(p.x(), p.y());
+        updateSceneRect(p);
     }
 
     node->markDirty(QSGNode::DirtyGeometry);
     mLineSegmentCount += line.mLinePoints.size() - 1;
     return node;
+}
+
+void SpiralScene::updateSceneRect(const QPointF& p)
+{
+    if (mSceneRect.isNull())
+    {
+        mSceneRect = QRectF(p, QSizeF(1, 1));
+        return;
+    }
+
+    if (p.x() < mSceneRect.left())
+        mSceneRect.setLeft(p.x());
+    else if (p.x() > mSceneRect.right())
+        mSceneRect.setRight(p.x());
+
+    if (p.y() < mSceneRect.top())
+        mSceneRect.setTop(p.y());
+    else if (p.y() > mSceneRect.bottom())
+        mSceneRect.setBottom(p.y());
 }
 
 void SpiralScene::touchEvent(QTouchEvent* event)

@@ -195,12 +195,12 @@ ApplicationWindow {
         }
         SpinBox {
             id: rotationsSpinBox
-            from: 1; to: scene.MAX_ROTATIONS
+            from: 0; to: scene.MAX_ROTATIONS
             editable: true
             value: scene.currentCircle.rotations
             textFromValue: (value, locale) => { return value.toString(); }
             Layout.fillWidth: true
-            enabled: scene.currentCircleIndex > 1 && scene.notPlaying()
+            enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
             onValueChanged: scene.currentCircle.rotations = value
             Keys.onReturnPressed:  Qt.inputMethod.hide()
         }

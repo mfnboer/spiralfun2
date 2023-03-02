@@ -260,12 +260,6 @@ bool SpiralConfig::isValid(const CircleConfigList& cfgList) const
         return false;
     }
 
-    if (cfgList[1].mSpeed != 1)
-    {
-        qWarning() << "Speed of seconds circle must be 1";
-        return false;
-    }
-
     for (unsigned i = 0; i < cfgList.size(); ++i)
     {
         const CircleConfig& cfg = cfgList[i];
