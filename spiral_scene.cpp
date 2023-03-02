@@ -353,11 +353,16 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     {
         delete sceneRoot;
         sceneRoot = new QSGNode;
-        mClearScene = false;
     }
 
     for (auto& [_, line] : mLines)
     {
+        if (mClearScene && line.mColorMaterial)
+        {
+            delete line.mColorMaterial;
+            line.mColorMaterial = nullptr;
+        }
+
         if (line.mLinePoints.size() < 2)
             continue;
 
@@ -376,10 +381,11 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         line.mLinePoints.push_back(p);
     }
 
+    mClearScene = false;
     return sceneRoot;
 }
 
-QSGNode* SpiralScene::createLineNode(const Circle::Line& line)
+QSGNode* SpiralScene::createLineNode(Circle::Line& line)
 {
     auto* node = new QSGGeometryNode;
     auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), line.mLinePoints.size());
@@ -387,11 +393,14 @@ QSGNode* SpiralScene::createLineNode(const Circle::Line& line)
     geometry->setDrawingMode(QSGGeometry::DrawLineStrip);
     node->setGeometry(geometry);
     node->setFlag(QSGNode::OwnsGeometry);
-    auto* material = new QSGFlatColorMaterial;
-    material->setColor(line.mColor);
-    node->setMaterial(material);
-    node->setFlag(QSGNode::OwnsMaterial);
 
+    if (!line.mColorMaterial)
+    {
+        line.mColorMaterial = new QSGFlatColorMaterial;
+        line.mColorMaterial->setColor(line.mColor);
+    }
+
+    node->setMaterial(line.mColorMaterial);
     auto* vertices = geometry->vertexDataAsPoint2D();
     for (int unsigned i = 0; i < line.mLinePoints.size(); ++i)
     {
