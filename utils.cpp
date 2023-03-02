@@ -84,7 +84,12 @@ QString getSpiralCongifPath()
 
     const QString cfgPath = pathObj.toString();
     qDebug() << "Spiral config path:" << cfgPath;
-    // TODO: create .nomedia file to avoid this directory to show up in the gallery
+
+    // The .nomedia file indicates that the images in the directoy should not
+    // be picked up by the media scanner
+    QFile nomedia(cfgPath + "/.nomedia");
+    if (!nomedia.exists())
+        nomedia.open(QIODevice::WriteOnly);
 #else
     auto path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     const QString cfgPath = path + "/" + SPIRAL_CONFIG_SUB_DIR;
