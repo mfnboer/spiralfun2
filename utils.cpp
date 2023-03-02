@@ -130,4 +130,24 @@ void scanMediaFile(const QString& fileName, bool share)
 #endif
 }
 
+QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize)
+{
+    const QSize sz = scaledImg.size();
+    QPointF center = sceneRect.center();
+    center.rx() *= qreal(sz.width()) / origSize.width();
+    center.ry() *= qreal(sz.height()) / origSize.height();
+    const int x = std::max(center.x() - thumbnailSize / 2.0, 0.0);
+    const int y = std::max(center.y() - thumbnailSize / 2.0, 0.0);
+    const QImage thumbnail = scaledImg.copy(x, y, thumbnailSize, thumbnailSize);
+    return thumbnail;
+}
+
+QImage extractSpiral(const QImage& grabbedImg, const QRectF& sceneRect, int margin, qreal devicePixelRatio)
+{
+    QRectF cutRect = sceneRect.adjusted(-margin, -margin, margin, margin);
+    cutRect = QRectF(cutRect.topLeft() * devicePixelRatio, cutRect.size() * devicePixelRatio);
+    const QImage spiral = grabbedImg.copy(cutRect.toRect());
+    return spiral;
+}
+
 }

@@ -248,8 +248,7 @@ ApplicationWindow {
     function showMessage(message) {
         var component = Qt.createComponent("message.qml");
         var obj = component.createObject(root);
-        obj.msg = message
-        obj.open();
+        obj.show(message);
     }
 
     Component.onCompleted: {

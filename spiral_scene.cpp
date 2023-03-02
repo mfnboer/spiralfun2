@@ -2,8 +2,9 @@
 // License: GPLv3
 #include "spiral_scene.h"
 #include "circle.h"
-#include "utils.h"
+#include "exception.h"
 #include "player.h"
+#include "utils.h"
 #include <QFile>
 #include <QQmlEngine>
 #include <QQuickItemGrabResult>
@@ -475,8 +476,9 @@ void SpiralScene::saveImage(bool share)
 
     const QString fileName = picPath + "/" + Utils::createPictureFileName();
     QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
-        [this, grabResult, fileName, share]{
-            if (grabResult->saveToFile(fileName))
+        [this, grabResult, fileName, dpr, share]{
+            const QImage img = Utils::extractSpiral(grabResult->image(), mSceneRect, 20, dpr);
+            if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
                 Utils::scanMediaFile(fileName, share);
@@ -506,8 +508,6 @@ void SpiralScene::shareImage()
 
 void SpiralScene::saveConfig()
 {
-    // TODO: determine the bounding rectangle of the spiral and cut a nice square around the
-    //       center of the spirall.
     const QSize imageSize = size().scaled(CFG_IMAGE_SIZE, CFG_IMAGE_SIZE, Qt::KeepAspectRatioByExpanding).toSize();
     auto grabResult = grabToImage(imageSize);
     if (!grabResult)
@@ -519,13 +519,9 @@ void SpiralScene::saveConfig()
     QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
         [this, grabResult]{
             const QImage img = grabResult->image();
-            const QSize sz = img.size();
-            const int x = sz.width() <= CFG_IMAGE_SIZE ? 0 : (sz.width() - CFG_IMAGE_SIZE) / 2;
-            const int y = sz.height() <= CFG_IMAGE_SIZE ? 0 : (sz.height() - CFG_IMAGE_SIZE) / 2;
-            QImage imgRect = img.copy(x, y, CFG_IMAGE_SIZE, CFG_IMAGE_SIZE);
-
+            const QImage thumbnail = Utils::createThumbnail(img, size(), mSceneRect, CFG_IMAGE_SIZE);
             SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-            cfg.save(imgRect);
+            cfg.save(thumbnail);
         });
 }
 
@@ -546,10 +542,14 @@ QObjectList SpiralScene::getConfigFileList()
 void SpiralScene::loadConfig(const QString& fileName)
 {
     SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-    const CircleConfigList circleCfgList = cfg.load(fileName);
 
-    if (!circleCfgList.empty())
-        setupCircles(circleCfgList);
+    try {
+        const CircleConfigList circleCfgList = cfg.load(fileName);
+        if (!circleCfgList.empty())
+            setupCircles(circleCfgList);
+    } catch (RuntimeException& e) {
+        emit message(e.msg());
+    }
 }
 
 void SpiralScene::deleteConfig(const QStringList& fileNameList)

@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 
 Dialog {
-    property string msg: ""
-
     id: msgDialog
     modal: false
     standardButtons: Dialog.Ok
@@ -11,8 +9,12 @@ Dialog {
     onAccepted: destroy()
 
     Label {
-        Layout.maximumWidth: parent.width
+        id: msgLabel
         wrapMode: Text.WordWrap
-        text: msgDialog.msg
+    }
+
+    function show(msg) {
+        msgLabel.text = msg;
+        open();
     }
 }

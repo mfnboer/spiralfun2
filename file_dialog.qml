@@ -100,8 +100,7 @@ Dialog {
         accept();
     }
 
-    function show(fileList, imgSz)
-    {
+    function show(fileList, imgSz) {
         grid.model = fileList;
         imgSize = imgSz;
         open();

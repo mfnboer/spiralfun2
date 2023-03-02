@@ -55,7 +55,7 @@ private:
     QJsonDocument createJsonDoc() const;
     CircleConfigList createConfig(const QJsonDocument& doc) const;
     bool checkField(const QJsonObject& object, const QString& key, QJsonValue::Type type) const;
-    bool isValid(const CircleConfigList& cfgList) const;
+    bool isValid(const CircleConfigList& cfgList, QString& error) const;
 
     const CircleList& mCircles;
     const qreal mDefaultRadius;

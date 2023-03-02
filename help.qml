@@ -21,7 +21,7 @@ Dialog {
                   "set how many rotations to make in which direction." +
                   "<p>" +
                   "For each circle you can set its diameter, its color and whether it " +
-                  "should draw (the draw line checkbox) a line from its center while rotating." +
+                  "should draw a line from its center while rotating." +
                   "<p>" +
                   "To select a circle you can tap it or navigate to it with the arrow buttons."
         }

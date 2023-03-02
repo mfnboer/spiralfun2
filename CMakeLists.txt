@@ -22,8 +22,7 @@ endif()
 set(PROJECT_SOURCES
         circle.h
         circle.cpp
-        utils.h
-        utils.cpp
+        exception.h
         main.cpp
         player.h
         player.cpp
@@ -31,6 +30,8 @@ set(PROJECT_SOURCES
         spiral_config.cpp
         spiral_scene.h
         spiral_scene.cpp
+        utils.h
+        utils.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "spiral_config.h"
+#include "exception.h"
 #include "utils.h"
 #include <QDir>
 #include <QFile>
@@ -211,8 +212,12 @@ CircleConfigList SpiralConfig::createConfig(const QJsonDocument& doc) const
         circleCfgList.push_back(circleCfg);
     }
 
-    if (!isValid(circleCfgList))
-        return {};
+    QString error;
+    if (!isValid(circleCfgList, error))
+    {
+        qDebug() << error;
+        throw RuntimeException("Malformed config file: " + error);
+    }
 
     return circleCfgList;
 }
@@ -234,29 +239,29 @@ bool SpiralConfig::checkField(const QJsonObject& object, const QString& key, QJs
     return true;
 }
 
-bool SpiralConfig::isValid(const CircleConfigList& cfgList) const
+bool SpiralConfig::isValid(const CircleConfigList& cfgList, QString& error) const
 {
     if (cfgList.size() < MIN_CIRCLES)
     {
-        qWarning() << "Config must contain at least" << MIN_CIRCLES << "circles";
+        error = QString("Config must contain at least %1 circles").arg(MIN_CIRCLES);
         return false;
     }
 
     if (cfgList.size() > MAX_CIRCLES)
     {
-        qWarning() << "Config must contain at most" << MAX_CIRCLES << "circles";
+        error = QString("Config must contain at most %1 circles").arg(MAX_CIRCLES);
         return false;
     }
 
     if (cfgList[0].mSpeed != 0)
     {
-        qWarning() << "Speed of first circle must be 0";
+        error = QString("Circle[0] speed(%1) must be 0").arg(cfgList[0].mSpeed);
         return false;
     }
 
     if (cfgList[0].mDraw)
     {
-        qWarning() << "First circle cannot draw";
+        error = "Circle[0] cannot draw";
         return false;
     }
 
@@ -265,17 +270,17 @@ bool SpiralConfig::isValid(const CircleConfigList& cfgList) const
         const CircleConfig& cfg = cfgList[i];
         if (!cfg.mColor.isValid())
         {
-            qWarning() << "Circle" << i << "invalid color";
+            error = QString("Circle[%1] invalid color").arg(i);
             return false;
         }
         if (cfg.mRelRadius > MAX_REL_RADIUS)
         {
-            qWarning() << "Circle" << i << "radius >" << MAX_REL_RADIUS;
+            error = QString("Circle[%1] radius(%2) > %3").arg(i).arg(cfg.mRelRadius).arg(MAX_REL_RADIUS);
             return false;
         }
         if (std::abs(cfg.mSpeed) > MAX_SPEED)
         {
-            qWarning() << "Circle" << i << "speed >" << MAX_SPEED;
+            error = QString("Circle[%1] speed(%2) > %3").arg(i).arg(cfg.mSpeed).arg(MAX_SPEED);
             return false;
         }
     }
