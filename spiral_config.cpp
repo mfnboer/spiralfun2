@@ -83,40 +83,33 @@ QJsonDocument SpiralConfig::createJsonDoc() const
     return doc;
 }
 
-bool SpiralConfig::save(const QImage& img) const
+void SpiralConfig::save(const QImage& img) const
 {
     const QString path = Utils::getSpiralCongifPath();
     if (path.isNull())
-        return false;
+        throw RuntimeException("Failed to access storage.");
 
     const QString baseName = Utils::createDateTimeName();
     const QString cfgFileName = path + QString("/SPIRAL_%1.json").arg(baseName);
     QFile file(cfgFileName);
     if (!file.open(QIODevice::WriteOnly))
-    {
-        qWarning() << "Failed to create:" << cfgFileName;
-        return false;
-    }
+        throw RuntimeException(QString("Failed to create: %1").arg(cfgFileName));
+
     qDebug() << "Cfg file:" << cfgFileName;
 
     const auto json = createJsonDoc();
     if (file.write(json.toJson()) == -1)
-    {
-        qWarning() << "Failed to write:" << cfgFileName;
-        return false;
-    }
+        throw RuntimeException(QString("Failed to write: %1").arg(cfgFileName));
+
     file.close();
 
     const QString imgFileName = path + QString("/IMG_%1.jpg").arg(baseName);
     qDebug() << "Image file:" << cfgFileName;
     if (!img.save(imgFileName))
     {
-        qWarning() << "Failed to save:" << imgFileName;
         file.remove();
-        return false;
+        throw RuntimeException(QString("Failed to save: %1").arg(imgFileName));
     }
-
-    return true;
 }
 
 QObjectList SpiralConfig::getConfigFiles() const
@@ -145,18 +138,12 @@ CircleConfigList SpiralConfig::load(const QString& fileName) const
 {
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly))
-    {
-        qWarning() << "Cannot open file:" << fileName;
-        return {};
-    }
+        throw RuntimeException(QString("Cannot open file: %1").arg(fileName));
 
     const QByteArray data = file.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (doc.isNull())
-    {
-        qWarning() << "Not a valid config file:" << fileName;
-        return {};
-    }
+        throw RuntimeException(QString("Not a valid config file: %1").arg(fileName));
 
     return createConfig(doc);
 }
@@ -178,31 +165,23 @@ void SpiralConfig::remove(const QStringList& fileNameList) const
 CircleConfigList SpiralConfig::createConfig(const QJsonDocument& doc) const
 {
     if (!doc.isObject())
-    {
-        qWarning() << "JSON document is not an object";
-        return {};
-    }
+        throw RuntimeException("JSON document is not an object");
 
     QJsonObject root = doc.object();
     QJsonValue circlesValue = root["Circles"];
+
     if (!circlesValue.isArray())
-    {
-        qWarning() << "JSON Circles array missing";
-        return {};
-    }
+        throw RuntimeException("JSON Circles array missing");
 
     CircleConfigList circleCfgList;
     QJsonArray circlesArray = circlesValue.toArray();
     for (const QJsonValue& val : circlesArray)
     {
         QJsonObject circle = val.toObject();
-        if (!checkField(circle, "Color", QJsonValue::String) &&
-            !checkField(circle, "Draw", QJsonValue::Bool) &&
-            !checkField(circle, "Radius", QJsonValue::Double) &&
-            !checkField(circle, "Speed", QJsonValue::Double))
-        {
-            return {};
-        }
+        checkField(circle, "Color", QJsonValue::String);
+        checkField(circle, "Draw", QJsonValue::Bool);
+        checkField(circle, "Radius", QJsonValue::Double);
+        checkField(circle, "Speed", QJsonValue::Double);
 
         CircleConfig circleCfg;
         circleCfg.mColor = QColor(circle["Color"].toString());
@@ -222,21 +201,13 @@ CircleConfigList SpiralConfig::createConfig(const QJsonDocument& doc) const
     return circleCfgList;
 }
 
-bool SpiralConfig::checkField(const QJsonObject& object, const QString& key, QJsonValue::Type type) const
+void SpiralConfig::checkField(const QJsonObject& object, const QString& key, QJsonValue::Type type) const
 {
     if (!object.contains(key))
-    {
-        qWarning() << "JSON field missing:" << key;
-        return false;
-    }
+        throw RuntimeException(QString("JSON field missing: %1").arg(key));
 
     if (object.value(key).type() != type)
-    {
-        qWarning() << "JSON field" << key << "does not have type:" << type;
-        return false;
-    }
-
-    return true;
+        throw RuntimeException(QString("JSON field %1 does not have type: %2").arg(key).arg(type));
 }
 
 bool SpiralConfig::isValid(const CircleConfigList& cfgList, QString& error) const

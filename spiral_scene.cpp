@@ -467,7 +467,14 @@ void SpiralScene::saveImage(bool share)
         return;
     }
 
-    const QString picPath = Utils::getPicturesPath();
+    QString picPath;
+    try {
+        picPath = Utils::getPicturesPath();
+    } catch (RuntimeException& e) {
+        emit message(e.msg());
+        return;
+    }
+
     if (picPath.isNull())
     {
         emit message("Cannot save file.");
@@ -521,7 +528,12 @@ void SpiralScene::saveConfig()
             const QImage img = grabResult->image();
             const QImage thumbnail = Utils::createThumbnail(img, size(), mSceneRect, CFG_IMAGE_SIZE);
             SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-            cfg.save(thumbnail);
+
+            try {
+                cfg.save(thumbnail);
+            } catch (RuntimeException& e) {
+                emit message(e.msg());
+            }
         });
 }
 
@@ -529,7 +541,14 @@ QObjectList SpiralScene::getConfigFileList()
 {
     mConfigFileList.clear();
     SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-    QObjectList l = cfg.getConfigFiles();
+
+    QObjectList l;
+    try {
+        l = cfg.getConfigFiles();
+    } catch (RuntimeException& e) {
+        emit message(e.msg());
+        return {};
+    }
 
     // The listview in QML needs raw pointers.
     // Wrap them in unique pointers so we can cleanup next time.

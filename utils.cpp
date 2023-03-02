@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "utils.h"
+#include "exception.h"
 #include <QDir>
 #include <QJniObject>
 #include <QStandardPaths>
@@ -37,7 +38,7 @@ namespace SpiralFun::Utils {
 QString getPicturesPath()
 {
     if (!checkStoragePermission())
-        return QString();
+        throw RuntimeException("No permission to access storage.");
 
 #if defined(Q_OS_ANDROID)
     auto jsSubDir = QJniObject::fromString(PICTURES_SUB_DIR);
@@ -46,21 +47,16 @@ QString getPicturesPath()
                                                          "(Ljava/lang/String;)Ljava/lang/String;",
                                                          jsSubDir.object<jstring>());
     if (!pathObj.isValid())
-    {
-        qWarning() << "Cannot create pictures path.";
-        return QString();
-    }
+        throw RuntimeException("Cannot create pictures storage path.");
 
     const QString picPath = pathObj.toString();
     qDebug() << "Pictures path:" << picPath;
 #else
     auto path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
     const QString picPath = path + "/" + PICTURES_SUB_DIR;
+
     if (!QDir().mkpath(picPath))
-    {
-        qWarning() << "Failed to create path:" << picPath;
-        return QString();
-    }
+        throw RuntimeException(QString("Failed to create path: %1").arg(picPath));
 #endif
 
     return picPath;
@@ -68,7 +64,7 @@ QString getPicturesPath()
 
 QString getSpiralCongifPath()
 {    if (!checkStoragePermission())
-        return QString();
+        throw RuntimeException("No permission to access storage.");
 
 #if defined(Q_OS_ANDROID)
     auto jsSubDir = QJniObject::fromString(SPIRAL_CONFIG_SUB_DIR);
@@ -77,10 +73,7 @@ QString getSpiralCongifPath()
                                                          "(Ljava/lang/String;)Ljava/lang/String;",
                                                          jsSubDir.object<jstring>());
     if (!pathObj.isValid())
-    {
-        qWarning() << "Cannot create spiral config path.";
-        return QString();
-    }
+        throw RuntimeException("Cannot create spiral config storage path.");
 
     const QString cfgPath = pathObj.toString();
     qDebug() << "Spiral config path:" << cfgPath;
@@ -94,10 +87,7 @@ QString getSpiralCongifPath()
     auto path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     const QString cfgPath = path + "/" + SPIRAL_CONFIG_SUB_DIR;
     if (!QDir().mkpath(cfgPath))
-    {
-        qWarning() << "Failed to create path:" << cfgPath;
-        return QString();
-    }
+        throw RuntimeException(QString("Failed to create path: %1").arg(cfgPath));
 #endif
 
     return cfgPath;

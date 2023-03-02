@@ -46,7 +46,7 @@ public:
 
     SpiralConfig(const CircleList& circles, qreal defaultRadius);
 
-    bool save(const QImage& img) const;
+    void save(const QImage& img) const;
     QObjectList getConfigFiles() const;
     CircleConfigList load(const QString& fileName) const;
     void remove(const QStringList& fileNameList) const;
@@ -54,7 +54,7 @@ public:
 private:
     QJsonDocument createJsonDoc() const;
     CircleConfigList createConfig(const QJsonDocument& doc) const;
-    bool checkField(const QJsonObject& object, const QString& key, QJsonValue::Type type) const;
+    void checkField(const QJsonObject& object, const QString& key, QJsonValue::Type type) const;
     bool isValid(const CircleConfigList& cfgList, QString& error) const;
 
     const CircleList& mCircles;
