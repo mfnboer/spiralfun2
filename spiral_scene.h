@@ -83,7 +83,7 @@ private:
     void setPlayState(PlayState state);
     uint64_t calcTotalLineSements() const;
 
-    QSGNode* createLineNode(Circle::Line& line);
+    QSGNode* createLineNode(const Circle::Line& line);
     std::unordered_map<QObject*, Circle::Line> mLines;
     bool mClearScene = false;
     CircleList mCircles;

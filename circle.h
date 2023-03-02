@@ -31,7 +31,6 @@ public:
           std::vector<QPointF> mLinePoints;
           QColor mColor;
           QSGNode* mRoot = nullptr;
-          QSGFlatColorMaterial* mColorMaterial = nullptr;
 
           void addPoint(const QPointF& p) { mLinePoints.push_back(p); }
     };
