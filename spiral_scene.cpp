@@ -351,7 +351,8 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 
     if (mClearScene)
     {
-        sceneRoot->removeAllChildNodes();
+        delete sceneRoot;
+        sceneRoot = new QSGNode;
         mClearScene = false;
     }
 
