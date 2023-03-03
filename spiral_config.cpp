@@ -92,10 +92,17 @@ void SpiralConfig::save(const QImage& img) const
     const QString baseName = Utils::createDateTimeName();
     const QString cfgFileName = path + QString("/SPIRAL_%1.json").arg(baseName);
     QFile file(cfgFileName);
+    qDebug() << "Cfg file:" << cfgFileName;
+    if (file.exists())
+        throw RuntimeException(QString("File already exists: %1").arg(cfgFileName));
+
+    const QString imgFileName = path + QString("/IMG_%1.jpg").arg(baseName);
+    qDebug() << "Image file:" << imgFileName;
+    if (QFile::exists(imgFileName))
+        throw RuntimeException(QString("File already exists: %1").arg(imgFileName));
+
     if (!file.open(QIODevice::WriteOnly))
         throw RuntimeException(QString("Failed to create: %1").arg(cfgFileName));
-
-    qDebug() << "Cfg file:" << cfgFileName;
 
     const auto json = createJsonDoc();
     if (file.write(json.toJson()) == -1)
@@ -103,8 +110,6 @@ void SpiralConfig::save(const QImage& img) const
 
     file.close();
 
-    const QString imgFileName = path + QString("/IMG_%1.jpg").arg(baseName);
-    qDebug() << "Image file:" << cfgFileName;
     if (!img.save(imgFileName))
     {
         file.remove();

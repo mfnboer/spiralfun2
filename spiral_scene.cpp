@@ -482,6 +482,12 @@ void SpiralScene::saveImage(bool share)
     }
 
     const QString fileName = picPath + "/" + Utils::createPictureFileName();
+    if (QFile::exists(fileName))
+    {
+        emit message(QString("Failed to create: %1").arg(fileName));
+        return;
+    }
+
     QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
         [this, grabResult, fileName, dpr, share]{
             const QImage img = Utils::extractSpiral(grabResult->image(), mSceneRect, 20, dpr);
