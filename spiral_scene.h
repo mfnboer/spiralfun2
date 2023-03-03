@@ -32,6 +32,7 @@ public:
     Q_ENUM(PlayState)
 
     explicit SpiralScene(QQuickItem *parent = nullptr);
+    ~SpiralScene();
 
     int getNumCircles() const { return mCircles.size(); }
     SpiralFun::Circle* getCurrentCircle() const;
@@ -80,6 +81,7 @@ private:
     void removeCirclesFromScene();
     void resetCircles();
     void resetScene();
+    void deleteShareImageFile();
     void setPlayState(PlayState state);
     QSGNode* createLineNode(const Circle::Line& line);
     void updateSceneRect(const QPointF& p);
@@ -94,7 +96,7 @@ private:
     std::unique_ptr<Player> mPlayer;
     PlayState mPlayState = NOT_PLAYING;
     qreal mScaleFactor = 1.0;
-    QString mSavedImageFileName;
+    QString mShareImageFileNameSaved;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;

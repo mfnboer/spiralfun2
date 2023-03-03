@@ -98,9 +98,9 @@ QString createDateTimeName()
     return QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
 }
 
-QString createPictureFileName()
+QString createPictureFileName(bool forSharing)
 {
-    return QString("IMG_%1.jpg").arg(createDateTimeName());
+    return forSharing ? "_TMP_SHARE.jpg" : QString("IMG_%1.jpg").arg(createDateTimeName());
 }
 
 void scanMediaFile(const QString& fileName, bool share)

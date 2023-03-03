@@ -26,6 +26,11 @@ SpiralScene::SpiralScene(QQuickItem *parent) :
     setupCircles();
 }
 
+SpiralScene::~SpiralScene()
+{
+    deleteShareImageFile();
+}
+
 void SpiralScene::init()
 {
     const qreal minDimension = std::min(width(), height());
@@ -303,7 +308,17 @@ void SpiralScene::resetScene()
     mScaleFactor = 1.0;
     setScale(mScaleFactor);
     update();
-    mSavedImageFileName.clear();
+    deleteShareImageFile();
+}
+
+void SpiralScene::deleteShareImageFile()
+{
+    if (mShareImageFileNameSaved.isNull())
+        return;
+
+    QFile::remove(mShareImageFileNameSaved);
+    qDebug() << "Deteled share image file:" << mShareImageFileNameSaved;
+    mShareImageFileNameSaved.clear();
 }
 
 void SpiralScene::selectCircle(Circle* circle)
@@ -481,8 +496,8 @@ void SpiralScene::saveImage(bool share)
         return;
     }
 
-    const QString fileName = picPath + "/" + Utils::createPictureFileName();
-    if (QFile::exists(fileName))
+    const QString fileName = picPath + "/" + Utils::createPictureFileName(share);
+    if (!share && QFile::exists(fileName))
     {
         emit message(QString("Failed to create: %1").arg(fileName));
         return;
@@ -495,7 +510,9 @@ void SpiralScene::saveImage(bool share)
             {
                 qDebug() << "Saved file:" << fileName;
                 Utils::scanMediaFile(fileName, share);
-                mSavedImageFileName = fileName;
+
+                if (share)
+                    mShareImageFileNameSaved = fileName;
             }
             else
             {
@@ -508,10 +525,10 @@ void SpiralScene::saveImage(bool share)
 
 void SpiralScene::shareImage()
 {
-    if (!mSavedImageFileName.isNull() && QFile::exists(mSavedImageFileName))
+    if (!mShareImageFileNameSaved.isNull() && QFile::exists(mShareImageFileNameSaved))
     {
-        qDebug() << "File already saved, share saved file:" << mSavedImageFileName;
-        Utils::scanMediaFile(mSavedImageFileName, true);
+        qDebug() << "File already saved, share saved file:" << mShareImageFileNameSaved;
+        Utils::scanMediaFile(mShareImageFileNameSaved, true);
     }
     else
     {
