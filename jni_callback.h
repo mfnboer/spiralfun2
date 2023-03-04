@@ -12,9 +12,11 @@ public:
     static JNICallbackListener& getInstance();
 
     void handleViewUriReceived(const QString& uri);
+    void handleMediaScannerFinished();
 
 signals:
     void viewUriReceived(const QString uri);
+    void mediaScannerFinished();
 
 private:
     JNICallbackListener();

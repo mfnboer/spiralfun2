@@ -25,6 +25,7 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(SpiralFun::Circle* currentCircle READ getCurrentCircle NOTIFY currentCircleChanged)
     Q_PROPERTY(int currentCircleIndex READ getCurrentCircleIndex NOTIFY currentCircleIndexChanged)
     Q_PROPERTY(SpiralScene::PlayState playState READ getPlayState NOTIFY playStateChanged)
+    Q_PROPERTY(bool sharingInProgress MEMBER mSharingInProgress NOTIFY sharingInProgressChanged)
     QML_ELEMENT
 
 public:
@@ -51,7 +52,7 @@ public slots:
     void circleDown();
     void play();
     void stop();
-    void saveImage(bool share = false);
+    bool saveImage(bool share = false);
     void shareImage();
     void saveConfig();
     QObjectList getConfigFileList();
@@ -64,6 +65,7 @@ signals:
     void currentCircleIndexChanged();
     void numCirclesChanged();
     void playStateChanged();
+    void sharingInProgressChanged();
     void message(const QString message);
 
 protected:
@@ -81,7 +83,9 @@ private:
     void removeCirclesFromScene();
     void resetCircles();
     void resetScene();
-    void scanMediaFile(const QString& fileName, bool share) const;
+    void scanMediaFile(const QString& fileName, bool share);
+    void handleMediaScannerFinished();
+    void setSharingInProgress(bool inProgress);
     void deleteShareImageFile();
     void handleReceivedAndroidIntent(const QString& uri);
     void setPlayState(PlayState state);
@@ -100,6 +104,7 @@ private:
     qreal mScaleFactor = 1.0;
     QString mShareImageFileNameSaved;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
+    bool mSharingInProgress = false;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;

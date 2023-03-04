@@ -18,6 +18,8 @@ public class QAndroidUtils
     private static final String LOGTAG = "spiralfun.QAndroidUtils";
     private static final String APP_NAME = "Spiral Fun";
 
+    public static native void emitMediaScannerFinished();
+
     private static String getPath(String type, String subDir)
     {
         File path = Environment.getExternalStoragePublicDirectory(type);
@@ -52,6 +54,7 @@ public class QAndroidUtils
                         Log.d(LOGTAG, "Scanned " + path + ":");
                         Log.d(LOGTAG, "-> uri=" + uri);
                         sharePicture(uri, configAppUri);
+                        emitMediaScannerFinished();
                     }
                 } : null
             );
@@ -61,12 +64,17 @@ public class QAndroidUtils
         if (QtNative.activity() == null)
             return;
 
+        if (uri == null) {
+            Log.d(LOGTAG, "media scanner failed");
+            return;
+        }
+
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_SUBJECT, APP_NAME);
         intent.putExtra(Intent.EXTRA_TEXT,
-            "[TEST] Created with Spiral Fun\n" +
-            "[TEST] Click to start or download the app (Android only):\n" +
+            "Created with Spiral Fun\n" +
+            "Click to start or get the app from the play store (Android only):\n" +
             configAppUri);
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.setType("image/jpg");

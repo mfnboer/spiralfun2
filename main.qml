@@ -126,6 +126,11 @@ ApplicationWindow {
                     return obj;
                 }
             }
+
+            BusyIndicator {
+                running: scene.sharingInProgress
+                anchors.centerIn: parent
+            }
         }
 
         // Row 2

@@ -48,10 +48,13 @@ void SpiralScene::init()
     // Now the window size is known, setup with proper position and sizes
     setupCircles();
 
-    // Handle possibly pending intent from Android.
     auto& jniCallbackListener = JNICallbackListener::getInstance();
     QObject::connect(&jniCallbackListener, &JNICallbackListener::viewUriReceived,
                      this, [this](const QString& uri){ handleReceivedAndroidIntent(uri); });
+    QObject::connect(&jniCallbackListener, &JNICallbackListener::mediaScannerFinished,
+                     this, [this]{ handleMediaScannerFinished(); });
+
+    // Handle possibly pending intent from Android.
     Utils::handlePendingIntent();
 }
 
@@ -481,7 +484,7 @@ void SpiralScene::touchEvent(QTouchEvent* event)
     event->accept();
 }
 
-void SpiralScene::saveImage(bool share)
+bool SpiralScene::saveImage(bool share)
 {
     const qreal dpr = window()->effectiveDevicePixelRatio();
     const QSize imageSize = (size() * dpr).toSize();
@@ -489,7 +492,7 @@ void SpiralScene::saveImage(bool share)
     if (!grabResult)
     {
         emit message("Failed to grab image.");
-        return;
+        return false;
     }
 
     QString picPath;
@@ -497,20 +500,20 @@ void SpiralScene::saveImage(bool share)
         picPath = Utils::getPicturesPath();
     } catch (RuntimeException& e) {
         emit message(e.msg());
-        return;
+        return false;
     }
 
     if (picPath.isNull())
     {
         emit message("Cannot save file.");
-        return;
+        return false;
     }
 
     const QString fileName = picPath + "/" + Utils::createPictureFileName(share);
     if (!share && QFile::exists(fileName))
     {
         emit message(QString("Failed to create: %1").arg(fileName));
-        return;
+        return false;
     }
 
     QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
@@ -527,14 +530,16 @@ void SpiralScene::saveImage(bool share)
             else
             {
                 emit message(QString("Failed to save: %1").arg(fileName));
+                setSharingInProgress(false);
             }
         });
 
-    return;
+    return true;
 }
 
 void SpiralScene::shareImage()
 {
+    setSharingInProgress(true);
     if (!mShareImageFileNameSaved.isNull() && QFile::exists(mShareImageFileNameSaved))
     {
         qDebug() << "File already saved, share saved file:" << mShareImageFileNameSaved;
@@ -542,11 +547,12 @@ void SpiralScene::shareImage()
     }
     else
     {
-        saveImage(true);
+        if (!saveImage(true))
+            setSharingInProgress(false);
     }
 }
 
-void SpiralScene::scanMediaFile(const QString& fileName, bool share) const
+void SpiralScene::scanMediaFile(const QString& fileName, bool share)
 {
     QString configAppUri = "";
     if (share)
@@ -555,6 +561,21 @@ void SpiralScene::scanMediaFile(const QString& fileName, bool share) const
         configAppUri = cfg.getConfigAppUri();
     }
     Utils::scanMediaFile(fileName, share, configAppUri);
+}
+
+void SpiralScene::handleMediaScannerFinished()
+{
+    setSharingInProgress(false);
+}
+
+void SpiralScene::setSharingInProgress(bool inProgress)
+{
+    if (inProgress != mSharingInProgress)
+    {
+        qDebug() << "Sharing in progress:" << inProgress;
+        mSharingInProgress = inProgress;
+        emit sharingInProgressChanged();
+    }
 }
 
 void SpiralScene::handleReceivedAndroidIntent(const QString& uri)

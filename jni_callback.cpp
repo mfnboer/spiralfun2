@@ -19,6 +19,14 @@ void _handleViewUriReceived(JNIEnv* env, jobject, jstring jsUri)
     if (instance)
         instance->handleViewUriReceived(uri);
 }
+
+void _handleMediaScannerFinished()
+{
+    qDebug() << "Media scanner finished";
+    auto& instance = *gTheInstance;
+    if (instance)
+        instance->handleMediaScannerFinished();
+}
 #endif
 }
 
@@ -34,17 +42,28 @@ JNICallbackListener& JNICallbackListener::getInstance()
 JNICallbackListener::JNICallbackListener() : QObject()
 {
 #if defined(Q_OS_ANDROID)
-    const JNINativeMethod callbacks[] = {
-        { "emitViewUriReceived", "(Ljava/lang/String;)V", reinterpret_cast<void *>(_handleViewUriReceived)}
-    };
     QJniEnvironment jni;
-    jni.registerNativeMethods("com/gmail/mfnboer/QSpiralFunActivity", callbacks, 1);
+
+    const JNINativeMethod spiralFunActivityCallbacks[] = {
+        { "emitViewUriReceived", "(Ljava/lang/String;)V", reinterpret_cast<void *>(_handleViewUriReceived) }
+    };
+    jni.registerNativeMethods("com/gmail/mfnboer/QSpiralFunActivity", spiralFunActivityCallbacks, 1);
+
+    const JNINativeMethod androidUtilsCallbacks[] = {
+        { "emitMediaScannerFinished", "()V", reinterpret_cast<void *>(_handleMediaScannerFinished) }
+    };
+    jni.registerNativeMethods("com/gmail/mfnboer/QAndroidUtils", androidUtilsCallbacks, 1);
 #endif
 }
 
 void JNICallbackListener::handleViewUriReceived(const QString& uri)
 {
     emit viewUriReceived(uri);
+}
+
+void JNICallbackListener::handleMediaScannerFinished()
+{
+    emit mediaScannerFinished();
 }
 
 }
