@@ -132,8 +132,8 @@ void Circle::rotate(const QPointF& rotationCenter, qreal angle, bool clockwise)
 {
     const QLineF line(rotationCenter, mCenter);
     const qreal d = line.length();
-    const qreal oldAngle = line.angle();
-    const qreal newAngle = qDegreesToRadians(oldAngle) + angle * (clockwise ? -1 : 1);
+    const qreal oldAngle = qDegreesToRadians(line.angle());
+    const qreal newAngle = oldAngle + angle * (clockwise ? -1 : 1);
     const qreal x = qCos(newAngle) * d + rotationCenter.x();
     const qreal y = -qSin(newAngle) * d + rotationCenter.y();
 

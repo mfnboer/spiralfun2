@@ -15,7 +15,7 @@ import android.util.Log;
 
 public class QAndroidUtils
 {
-    private static final String TAG = "QAndroidUtils";
+    private static final String LOGTAG = "spiralfun.QAndroidUtils";
     private static final String APP_NAME = "Spiral Fun";
 
     private static String getPath(String type, String subDir)
@@ -26,7 +26,7 @@ public class QAndroidUtils
         try {
             appPath.mkdirs();
         } catch (SecurityException e) {
-            Log.w(TAG, "Could not create path: " + appPath + " details: " + e.getMessage());
+            Log.w(LOGTAG, "Could not create path: " + appPath + " details: " + e.getMessage());
             return null;
         }
 
@@ -42,22 +42,22 @@ public class QAndroidUtils
     }
 
     // Make a media file show up in the gallery
-    public static void scanMediaFile(String fileName, boolean share) {
-        Log.d(TAG, "Scan media file=" + fileName + " share=" + share);
+    public static void scanMediaFile(String fileName, boolean share, String configAppUri) {
+        Log.d(LOGTAG, "Scan media file=" + fileName + " share=" + share);
 
         MediaScannerConnection.scanFile(QtNative.getContext(),
                 new String[]{ fileName }, null,
                 share ? new MediaScannerConnection.OnScanCompletedListener() {
                     public void onScanCompleted(String path, Uri uri) {
-                        Log.d(TAG, "Scanned " + path + ":");
-                        Log.d(TAG, "-> uri=" + uri);
-                        sharePicture(uri);
+                        Log.d(LOGTAG, "Scanned " + path + ":");
+                        Log.d(LOGTAG, "-> uri=" + uri);
+                        sharePicture(uri, configAppUri);
                     }
                 } : null
             );
     }
 
-    public static void sharePicture(Uri uri) {
+    public static void sharePicture(Uri uri, String configAppUri) {
         if (QtNative.activity() == null)
             return;
 
@@ -66,7 +66,8 @@ public class QAndroidUtils
         intent.putExtra(Intent.EXTRA_SUBJECT, APP_NAME);
         intent.putExtra(Intent.EXTRA_TEXT,
             "[TEST] Created with Spiral Fun\n" +
-            "Get app for Android: https://play.google.com/store/apps/details?id=com.gmail.mfnboer.spiralfun");
+            "[TEST] Click to start or download the app (Android only):\n" +
+            configAppUri);
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.setType("image/jpg");
         QtNative.activity().startActivity(Intent.createChooser(intent, "Share spiral using"));

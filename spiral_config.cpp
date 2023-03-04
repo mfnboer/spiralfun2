@@ -3,17 +3,21 @@
 #include "spiral_config.h"
 #include "exception.h"
 #include "utils.h"
+#include <QCborMap>
 #include <QDir>
 #include <QFile>
 #include <QImage>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QSharedPointer>
+#include <QUrl>
+#include <QUrlQuery>
 
 namespace SpiralFun {
 
 namespace {
 constexpr int CONFIG_VERSION = 1;
+constexpr const char* APP_URI = "https://mfnboer.home.xs4all.nl/spiralfun";
 }
 
 const std::initializer_list<CircleConfig> DEFAULT_CONFIG = {
@@ -165,6 +169,59 @@ void SpiralConfig::remove(const QStringList& fileNameList) const
         QFile::remove(imgFileName);
         QFile::remove(jsonFileName);
     }
+}
+
+QString SpiralConfig::getConfigAppUri() const
+{
+    const auto json = createJsonDoc();
+    const QByteArray cbor = QCborValue::fromJsonValue(json.object()).toCbor(QCborValue::UseIntegers);
+    const QByteArray b64 = cbor.toBase64(QByteArray::Base64UrlEncoding);
+    const QString uri = QString(APP_URI) + "?c=" + b64;
+    return uri;
+}
+
+CircleConfigList SpiralConfig::decodeConfigAppUri(const QString& uriString) const
+{
+    QUrl uri(uriString, QUrl::StrictMode);
+    if (!uri.isValid())
+        throw RuntimeException("invalid URI");
+
+   // URI without query simply starts the app
+    if (!uri.hasQuery())
+        return {};
+
+    const QUrlQuery query(uri);
+    if (!query.hasQueryItem("c"))
+        throw RuntimeException("config missing");
+
+    const QString b64Config = query.queryItemValue("c");
+    try {
+        QJsonDocument doc = decodeBase64Config(b64Config);
+        qDebug() << doc;
+        return createConfig(doc);
+    } catch (RuntimeException &e) {
+        qDebug() << e.msg();
+        throw RuntimeException("invalid config");
+    }
+}
+
+QJsonDocument SpiralConfig::decodeBase64Config(QString b64Config) const
+{
+    const QByteArray configCBOR = QByteArray::fromBase64(b64Config.toUtf8(),
+            QByteArray::Base64UrlEncoding | QByteArray::AbortOnBase64DecodingErrors);
+    if (configCBOR.isEmpty())
+        throw RuntimeException("cannot decode base64");
+
+    QCborParserError error;
+    QCborValue configCborVal = QCborValue::fromCbor(configCBOR, &error);
+    if (error.error != QCborError::NoError)
+        throw RuntimeException("cannot decode CBOR");
+
+    if (!configCborVal.isMap())
+        throw RuntimeException("no map found in CBOR");
+
+    QJsonObject jsonObj = configCborVal.toMap().toJsonObject();
+    return QJsonDocument(jsonObj);
 }
 
 CircleConfigList SpiralConfig::createConfig(const QJsonDocument& doc) const

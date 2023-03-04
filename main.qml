@@ -253,6 +253,5 @@ ApplicationWindow {
 
     Component.onCompleted: {
         scene.init();
-        scene.setupCircles();
     }
 }

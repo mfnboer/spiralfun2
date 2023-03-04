@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         circle.h
         circle.cpp
         exception.h
+        jni_callback.h
+        jni_callback.cpp
         main.cpp
         player.h
         player.cpp
@@ -54,6 +56,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             message.qml
         RESOURCES
             "android/src/com/gmail/mfnboer/QAndroidUtils.java"
+            "android/src/com/gmail/mfnboer/QSpiralFunActivity.java"
             "icons/spiralfun/20x20/arrow_downward.png"
             "icons/spiralfun/20x20/arrow_upward.png"
             "icons/spiralfun/20x20/home.png"

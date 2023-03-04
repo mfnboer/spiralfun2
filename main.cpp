@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");
     QIcon::setThemeName("spiralfun");
+
     QQmlApplicationEngine engine;
     const QUrl url("qrc:/main.qml");
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
@@ -19,6 +20,5 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
     engine.load(url);
-
     return app.exec();
 }

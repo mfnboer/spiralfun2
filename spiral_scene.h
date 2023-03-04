@@ -34,6 +34,7 @@ public:
     explicit SpiralScene(QQuickItem *parent = nullptr);
     ~SpiralScene();
 
+    void setupCircles(const SpiralFun::CircleConfigList& config = DEFAULT_CONFIG);
     int getNumCircles() const { return mCircles.size(); }
     SpiralFun::Circle* getCurrentCircle() const;
     int getCurrentCircleIndex() const { return mCurrentIndex; }
@@ -45,7 +46,6 @@ public:
 
 public slots:
     void init();
-    void setupCircles(const SpiralFun::CircleConfigList& config = DEFAULT_CONFIG);
     void setupExample(const QString& example);
     void circleUp();
     void circleDown();
@@ -81,7 +81,9 @@ private:
     void removeCirclesFromScene();
     void resetCircles();
     void resetScene();
+    void scanMediaFile(const QString& fileName, bool share) const;
     void deleteShareImageFile();
+    void handleReceivedAndroidIntent(const QString& uri);
     void setPlayState(PlayState state);
     QSGNode* createLineNode(const Circle::Line& line);
     void updateSceneRect(const QPointF& p);

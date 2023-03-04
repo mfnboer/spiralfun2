@@ -3,6 +3,7 @@
 #include "spiral_scene.h"
 #include "circle.h"
 #include "exception.h"
+#include "jni_callback.h"
 #include "player.h"
 #include "utils.h"
 #include <QFile>
@@ -43,6 +44,15 @@ void SpiralScene::init()
 
     qDebug() << "Scene size:" << size() << "default-radius:" << mDefaultCircleRadius << "max-diameter:" << MAX_DIAMETER;
     qDebug() << "Screen:" << window()->screen()->size() << "dpr:" << window()->devicePixelRatio() << window()->screen()->devicePixelRatio();
+
+    // Now the window size is known, setup with proper position and sizes
+    setupCircles();
+
+    // Handle possibly pending intent from Android.
+    auto& jniCallbackListener = JNICallbackListener::getInstance();
+    QObject::connect(&jniCallbackListener, &JNICallbackListener::viewUriReceived,
+                     this, [this](const QString& uri){ handleReceivedAndroidIntent(uri); });
+    Utils::handlePendingIntent();
 }
 
 void SpiralScene::setupCircles(const CircleConfigList& config)
@@ -509,7 +519,7 @@ void SpiralScene::saveImage(bool share)
             if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
-                Utils::scanMediaFile(fileName, share);
+                scanMediaFile(fileName, share);
 
                 if (share)
                     mShareImageFileNameSaved = fileName;
@@ -528,11 +538,38 @@ void SpiralScene::shareImage()
     if (!mShareImageFileNameSaved.isNull() && QFile::exists(mShareImageFileNameSaved))
     {
         qDebug() << "File already saved, share saved file:" << mShareImageFileNameSaved;
-        Utils::scanMediaFile(mShareImageFileNameSaved, true);
+        scanMediaFile(mShareImageFileNameSaved, true);
     }
     else
     {
         saveImage(true);
+    }
+}
+
+void SpiralScene::scanMediaFile(const QString& fileName, bool share) const
+{
+    QString configAppUri = "";
+    if (share)
+    {
+        SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+        configAppUri = cfg.getConfigAppUri();
+    }
+    Utils::scanMediaFile(fileName, share, configAppUri);
+}
+
+void SpiralScene::handleReceivedAndroidIntent(const QString& uri)
+{
+    stop();
+
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    try {
+        CircleConfigList circleCfg = cfg.decodeConfigAppUri(uri);
+        if (!circleCfg.empty())
+        {
+            setupCircles(circleCfg);
+        }
+    } catch (RuntimeException& e) {
+        emit message(QString("Broken link: %1").arg(e.msg()));
     }
 }
 

@@ -31,6 +31,7 @@ bool checkStoragePermission()
 #endif
     return true;
 }
+
 }
 
 namespace SpiralFun::Utils {
@@ -103,20 +104,38 @@ QString createPictureFileName(bool forSharing)
     return forSharing ? "_TMP_SHARE.jpg" : QString("IMG_%1.jpg").arg(createDateTimeName());
 }
 
-void scanMediaFile(const QString& fileName, bool share)
+void scanMediaFile(const QString& fileName, bool share, const QString& configAppUri)
 {
 #if defined(Q_OS_ANDROID)
     auto jsFileName = QJniObject::fromString(fileName);
     jboolean jsShare = share;
+    auto jsConfigAppUri = QJniObject::fromString(configAppUri);
     QJniObject::callStaticMethod<void>("com/gmail/mfnboer/QAndroidUtils",
                                        "scanMediaFile",
-                                       "(Ljava/lang/String;Z)V",
-                                       jsFileName.object<jstring>(), jsShare);
+                                       "(Ljava/lang/String;ZLjava/lang/String;)V",
+                                       jsFileName.object<jstring>(),
+                                       jsShare,
+                                       jsConfigAppUri.object<jstring>());
 #else
+    (void)encodedConfig;
     if (share)
     {
         qWarning() << "Sharing not supported:" << fileName;
     }
+#endif
+}
+
+void handlePendingIntent()
+{
+#if defined(Q_OS_ANDROID)
+    if (!QNativeInterface::QAndroidApplication::isActivityContext())
+    {
+        qWarning() << "Cannot find Android activity";
+        return;
+    }
+
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    activity.callMethod<void>("handlePendingIntent");
 #endif
 }
 

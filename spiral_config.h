@@ -50,12 +50,15 @@ public:
     QObjectList getConfigFiles() const;
     CircleConfigList load(const QString& fileName) const;
     void remove(const QStringList& fileNameList) const;
+    QString getConfigAppUri() const;
+    CircleConfigList decodeConfigAppUri(const QString& uriString) const;
 
 private:
     QJsonDocument createJsonDoc() const;
     CircleConfigList createConfig(const QJsonDocument& doc) const;
     void checkField(const QJsonObject& object, const QString& key, QJsonValue::Type type) const;
     bool isValid(const CircleConfigList& cfgList, QString& error) const;
+    QJsonDocument decodeBase64Config(QString b64Config) const;
 
     const CircleList& mCircles;
     const qreal mDefaultRadius;
