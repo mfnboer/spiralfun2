@@ -1,29 +1,24 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
-#include "appwindow.h"
 #include <QApplication>
-#include <QTimer>
-#include <chrono>
-
-using namespace std::chrono_literals;
+#include <QIcon>
+#include <QQmlApplicationEngine>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    qputenv("QT_SCALE_FACTOR", "0.9");
+    QApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");
+    QIcon::setThemeName("spiralfun");
 
-    SpiralFun::AppWindow appWin;
-    appWin.showMaximized();
-    appWin.show();
+    QQmlApplicationEngine engine;
+    const QUrl url("qrc:/main.qml");
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
 
-    // Wait with initialization for window to be shown.
-    QTimer timer;
-    timer.setSingleShot(true);
-    QObject::connect(&timer, &QTimer::timeout, &timer, [&appWin]{
-        appWin.init();
-        appWin.setupCircles();
-    });
-    timer.start(100ms);
-
-    return a.exec();
+    engine.load(url);
+    return app.exec();
 }

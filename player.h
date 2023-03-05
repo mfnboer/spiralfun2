@@ -2,37 +2,40 @@
 // License: GPLv3
 #pragma once
 
+#include "circle.h"
 #include <QTime>
 #include <QTimer>
-#include <chrono>
+
 
 namespace SpiralFun {
-
-using namespace std::chrono_literals;
-
-class AppWindow;
 
 class Player : public QObject
 {
     Q_OBJECT
 
 public:
-    Player(AppWindow* appWin);
+    explicit Player(const CircleList &circles);
 
     void play();
 
 signals:
     void done();
+    void refreshScene();
 
 private:
     void advance();
+    void advanceCircles(qreal angle);
+    void advanceCircle(unsigned index, qreal angle);
+    void forceDraw();
 
-    AppWindow* mAppWin;
-    QTimer mTimer;
+    const CircleList& mCircles;
+    QTimer mPlayTimer;
+    QTimer mSceneRefreshTimer;
     qreal mAngle = 0.0;
     const qreal mStepAngle = qDegreesToRadians(0.05);
-    const unsigned mStepsPerInterval = 32;
+    const unsigned mStepsPerInterval = 1;
     int mStartTime;
+    int mCycles;
 };
 
 }
