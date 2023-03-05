@@ -2,6 +2,7 @@
 // License: GPLv3
 #include "utils.h"
 #include "exception.h"
+#include "jni_callback.h"
 #include <QDir>
 #include <QJniObject>
 #include <QStandardPaths>
@@ -114,6 +115,7 @@ void scanMediaFile(const QString& fileName)
                                        jsFileName.object<jstring>());
 #else
     qDebug() << "No need to scan media:" << fileName;
+    JNICallbackListener::getInstance().handleMediaScannerFinished({});
 #endif
 }
 

@@ -4,7 +4,7 @@
     <!-- %%INSERT_FEATURES -->
     <supports-screens android:anyDensity="true" android:largeScreens="true" android:normalScreens="true" android:smallScreens="true"/>
     <application android:name="org.qtproject.qt.android.bindings.QtApplication" android:hardwareAccelerated="true" android:label="Spiral Fun" android:requestLegacyExternalStorage="true" android:allowNativeHeapPointerTagging="false" android:allowBackup="true" android:fullBackupOnly="false" android:icon="@drawable/icon">
-        <activity android:name="com.gmail.mfnboer.QSpiralFunActivity" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:label="Spiral Fun" android:launchMode="singleTop" android:screenOrientation="portrait" android:exported="true">
+        <activity android:name="com.gmail.mfnboer.QSpiralFunActivity" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density" android:label="Spiral Fun" android:launchMode="singleTop" android:screenOrientation="unspecified" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -16,9 +16,9 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-		<data android:scheme="https"/>
-		<data android:scheme="http"/>
-		<data android:host="mfnboer.home.xs4all.nl" android:pathPrefix="/spiralfun/view"/>
+                <data android:scheme="https"/>
+                <data android:scheme="http"/>
+                <data android:host="mfnboer.home.xs4all.nl" android:pathPrefix="/spiralfun/view"/>
             </intent-filter>
         </activity>
     </application>

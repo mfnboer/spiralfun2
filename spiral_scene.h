@@ -73,6 +73,8 @@ protected:
     void touchEvent(QTouchEvent* event) override;
 
 private:
+    void calcDefaultRadiusSize();
+    void handleWindowSizeChanged();
     SpiralFun::Circle* addCircle(qreal radius);
     std::optional<unsigned> findCircle(const Circle* circle);
     void handleDiameterChange(Circle* circle, int oldDiameter);

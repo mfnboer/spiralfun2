@@ -34,6 +34,25 @@ SpiralScene::~SpiralScene()
 
 void SpiralScene::init()
 {
+    calcDefaultRadiusSize();
+
+    // Now the window size is known, setup with proper position and sizes
+    setupCircles();
+    QObject::connect(this, &QQuickItem::widthChanged, this, [this]{ handleWindowSizeChanged(); });
+    QObject::connect(this, &QQuickItem::heightChanged, this, [this]{ handleWindowSizeChanged(); });
+
+    auto& jniCallbackListener = JNICallbackListener::getInstance();
+    QObject::connect(&jniCallbackListener, &JNICallbackListener::viewUriReceived,
+                     this, [this](const QString& uri){ handleReceivedAndroidIntent(uri); });
+    QObject::connect(&jniCallbackListener, &JNICallbackListener::mediaScannerFinished,
+                     this, [this](const QString& uri){ handleMediaScannerFinished(uri); });
+
+    // Handle possibly pending intent from Android.
+    Utils::handlePendingIntent();
+}
+
+void SpiralScene::calcDefaultRadiusSize()
+{
     const qreal minDimension = std::min(width(), height());
     mDefaultCircleRadius = minDimension / 2.0 / (MAX_CIRCLES * 2 - 1);
     const int oldMaxDiameter = MAX_DIAMETER;
@@ -44,18 +63,12 @@ void SpiralScene::init()
 
     qDebug() << "Scene size:" << size() << "default-radius:" << mDefaultCircleRadius << "max-diameter:" << MAX_DIAMETER;
     qDebug() << "Screen:" << window()->screen()->size() << "dpr:" << window()->devicePixelRatio() << window()->screen()->devicePixelRatio();
+}
 
-    // Now the window size is known, setup with proper position and sizes
-    setupCircles();
-
-    auto& jniCallbackListener = JNICallbackListener::getInstance();
-    QObject::connect(&jniCallbackListener, &JNICallbackListener::viewUriReceived,
-                     this, [this](const QString& uri){ handleReceivedAndroidIntent(uri); });
-    QObject::connect(&jniCallbackListener, &JNICallbackListener::mediaScannerFinished,
-                     this, [this](const QString& uri){ handleMediaScannerFinished(uri); });
-
-    // Handle possibly pending intent from Android.
-    Utils::handlePendingIntent();
+void SpiralScene::handleWindowSizeChanged()
+{
+    calcDefaultRadiusSize();
+    stop();
 }
 
 void SpiralScene::setupCircles(const CircleConfigList& config)
@@ -302,7 +315,9 @@ void SpiralScene::resetCircles()
     if (mCircles.empty())
         return;
 
-    QPointF center = mCircles[0]->getCenter();
+    QPointF center = boundingRect().center();
+    mCircles[0]->setCenter(center);
+
     for (unsigned i = 1; i < mCircles.size(); ++i)
     {
         auto& circle = mCircles[i];
