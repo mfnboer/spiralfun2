@@ -1,6 +1,13 @@
-next
-----
+2.0
+---
 * Add armeabi-v7a support
+* Material UI created in QML
+* New features:
+  - Save image to gallery
+  - Save configuration to replay later
+  - Share images and configurations on social media
+  - Set more than one rotation for second circle
+  - Allow 0 rotations
 
 1.0
 ---
