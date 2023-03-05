@@ -18,6 +18,13 @@ namespace SpiralFun {
 namespace {
 constexpr int CONFIG_VERSION = 1;
 constexpr const char* APP_URI = "https://mfnboer.home.xs4all.nl/spiralfun";
+constexpr const char* KEY_CONFIG_VERSION = "V";
+constexpr const char* KEY_APP_VERSION = "A";
+constexpr const char* KEY_CIRCLES = "C";
+constexpr const char* KEY_RADIUS = "R";
+constexpr const char* KEY_SPEED = "S";
+constexpr const char* KEY_DRAW = "D";
+constexpr const char* KEY_COLOR = "C";
 }
 
 const std::initializer_list<CircleConfig> DEFAULT_CONFIG = {
@@ -64,23 +71,23 @@ SpiralConfig::SpiralConfig(const CircleList& circles, qreal defaultRadius) :
 QJsonDocument SpiralConfig::createJsonDoc() const
 {
     QJsonObject root;
-    root.insert("ConfigVersion", CONFIG_VERSION);
-    root.insert("AppVersion", APP_VERSION);
+    root.insert(KEY_CONFIG_VERSION, CONFIG_VERSION);
+    root.insert(KEY_APP_VERSION, APP_VERSION);
 
     QJsonArray circles;
     for (const auto& c : mCircles)
     {
         QJsonObject circle;
         qreal relRadius = std::round((c->getRadius() / mDefaultRadius) * 100) / 100.0;
-        circle.insert("Radius", relRadius);
-        circle.insert("Speed", c->getSpeed());
-        circle.insert("Draw", c->getDraw());
-        circle.insert("Color", c->getColor().name(QColor::HexRgb));
+        circle.insert(KEY_RADIUS, relRadius);
+        circle.insert(KEY_SPEED, c->getSpeed());
+        circle.insert(KEY_DRAW, c->getDraw() ? 1 : 0);
+        circle.insert(KEY_COLOR, c->getColor().name(QColor::HexRgb));
 
         circles.push_back(circle);
     }
 
-    root.insert("Circles", circles);
+    root.insert(KEY_CIRCLES, circles);
     QJsonDocument doc;
     doc.setObject(root);
 
@@ -109,7 +116,7 @@ void SpiralConfig::save(const QImage& img) const
         throw RuntimeException(QString("Failed to create: %1").arg(cfgFileName));
 
     const auto json = createJsonDoc();
-    if (file.write(json.toJson()) == -1)
+    if (file.write(json.toJson(QJsonDocument::Compact)) == -1)
         throw RuntimeException(QString("Failed to write: %1").arg(cfgFileName));
 
     file.close();
@@ -207,13 +214,13 @@ CircleConfigList SpiralConfig::decodeConfigAppUri(const QString& uriString) cons
 
 QJsonDocument SpiralConfig::decodeBase64Config(QString b64Config) const
 {
-    const QByteArray configCBOR = QByteArray::fromBase64(b64Config.toUtf8(),
+    const auto configCBOR = QByteArray::fromBase64Encoding(b64Config.toUtf8(),
             QByteArray::Base64UrlEncoding | QByteArray::AbortOnBase64DecodingErrors);
-    if (configCBOR.isEmpty())
+    if (!configCBOR)
         throw RuntimeException("cannot decode base64");
 
     QCborParserError error;
-    QCborValue configCborVal = QCborValue::fromCbor(configCBOR, &error);
+    QCborValue configCborVal = QCborValue::fromCbor(*configCBOR, &error);
     if (error.error != QCborError::NoError)
         throw RuntimeException("cannot decode CBOR");
 
@@ -230,26 +237,26 @@ CircleConfigList SpiralConfig::createConfig(const QJsonDocument& doc) const
         throw RuntimeException("JSON document is not an object");
 
     QJsonObject root = doc.object();
-    QJsonValue circlesValue = root["Circles"];
+    QJsonValue circlesValue = root[KEY_CIRCLES];
 
     if (!circlesValue.isArray())
-        throw RuntimeException("JSON Circles array missing");
+        throw RuntimeException("JSON circles array missing");
 
     CircleConfigList circleCfgList;
     QJsonArray circlesArray = circlesValue.toArray();
     for (const QJsonValue& val : circlesArray)
     {
         QJsonObject circle = val.toObject();
-        checkField(circle, "Color", QJsonValue::String);
-        checkField(circle, "Draw", QJsonValue::Bool);
-        checkField(circle, "Radius", QJsonValue::Double);
-        checkField(circle, "Speed", QJsonValue::Double);
+        checkField(circle, KEY_COLOR, QJsonValue::String);
+        checkField(circle, KEY_DRAW, QJsonValue::Double);
+        checkField(circle, KEY_RADIUS, QJsonValue::Double);
+        checkField(circle, KEY_SPEED, QJsonValue::Double);
 
         CircleConfig circleCfg;
-        circleCfg.mColor = QColor(circle["Color"].toString());
-        circleCfg.mDraw = circle["Draw"].toBool();
-        circleCfg.mRelRadius = circle["Radius"].toDouble();
-        circleCfg.mSpeed = circle["Speed"].toInt();
+        circleCfg.mColor = QColor(circle[KEY_COLOR].toString());
+        circleCfg.mDraw = (circle[KEY_DRAW].toInt() != 0);
+        circleCfg.mRelRadius = circle[KEY_RADIUS].toDouble();
+        circleCfg.mSpeed = circle[KEY_SPEED].toInt();
         circleCfgList.push_back(circleCfg);
     }
 

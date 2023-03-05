@@ -117,7 +117,7 @@ void scanMediaFile(const QString& fileName, bool share, const QString& configApp
                                        jsShare,
                                        jsConfigAppUri.object<jstring>());
 #else
-    (void)encodedConfig;
+    (void)configAppUri;
     if (share)
     {
         qWarning() << "Sharing not supported:" << fileName;

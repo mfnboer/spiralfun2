@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(spiralfun VERSION 1.0 LANGUAGES CXX)
+project(spiralfun VERSION 2.0 LANGUAGES CXX)
+set(VERSION_CODE 2)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -44,7 +45,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
     qt_add_qml_module(spiralfun
         URI SpiralFun
-        VERSION 1.0
+        VERSION ${PROJECT_VERSION}
         NO_RESOURCE_TARGET_PATH
         QML_FILES
             about.qml
@@ -98,6 +99,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
                  ${CMAKE_CURRENT_SOURCE_DIR}/android)
    set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_TARGET_SDK_VERSION 31)
+   set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_VERSION_NAME ${PROJECT_VERSION})
+   set_property(TARGET spiralfun APPEND PROPERTY QT_ANDROID_VERSION_CODE ${VERSION_CODE})
 
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
