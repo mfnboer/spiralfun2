@@ -17,7 +17,9 @@ namespace SpiralFun {
 
 namespace {
 constexpr int CONFIG_VERSION = 1;
+constexpr int MAX_URI_LENGTH = 2000;
 constexpr const char* APP_URI = "https://mfnboer.home.xs4all.nl/spiralfun";
+constexpr const char* VIEW_PATH = "/view";
 constexpr const char* KEY_CONFIG_VERSION = "V";
 constexpr const char* KEY_APP_VERSION = "A";
 constexpr const char* KEY_CIRCLES = "C";
@@ -183,7 +185,14 @@ QString SpiralConfig::getConfigAppUri() const
     const auto json = createJsonDoc();
     const QByteArray cbor = QCborValue::fromJsonValue(json.object()).toCbor(QCborValue::UseIntegers);
     const QByteArray b64 = cbor.toBase64(QByteArray::Base64UrlEncoding);
-    const QString uri = QString(APP_URI) + "?c=" + b64;
+    const QString uri = QString(APP_URI) + VIEW_PATH + "?c=" + b64;
+
+    if (uri.length() > MAX_URI_LENGTH)
+    {
+        qWarning() << "Config app uri exceeds maximum length:" << uri.length();
+        return APP_URI;
+    }
+
     return uri;
 }
 

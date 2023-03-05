@@ -16,8 +16,9 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="mfnboer.home.xs4all.nl" android:pathPrefix="/spiralfun"/>
-                <data android:scheme="http" android:host="mfnboer.home.xs4all.nl" android:pathPrefix="/spiralfun"/>
+		<data android:scheme="https"/>
+		<data android:scheme="http"/>
+		<data android:host="mfnboer.home.xs4all.nl" android:pathPrefix="/spiralfun/view"/>
             </intent-filter>
         </activity>
     </application>

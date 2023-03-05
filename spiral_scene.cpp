@@ -473,7 +473,7 @@ void SpiralScene::touchEvent(QTouchEvent* event)
 
         if (touch->touchPointStates() & QEventPoint::Released)
         {
-            // If one finger is temporarily released, remember the current cale factor.
+            // If one finger is temporarily released, remember the current scale factor.
             mScaleFactor *= currentScaleFactor;
             currentScaleFactor = 1.0;
         }
