@@ -18,7 +18,7 @@ public class QAndroidUtils
     private static final String LOGTAG = "spiralfun.QAndroidUtils";
     private static final String APP_NAME = "Spiral Fun";
 
-    public static native void emitMediaScannerFinished();
+    public static native void emitMediaScannerFinished(String uri);
 
     private static String getPath(String type, String subDir)
     {
@@ -44,28 +44,36 @@ public class QAndroidUtils
     }
 
     // Make a media file show up in the gallery
-    public static void scanMediaFile(String fileName, boolean share, String configAppUri) {
-        Log.d(LOGTAG, "Scan media file=" + fileName + " share=" + share);
+    public static void scanMediaFile(String fileName) {
+        Log.d(LOGTAG, "Scan media file=" + fileName);
 
         MediaScannerConnection.scanFile(QtNative.getContext(),
                 new String[]{ fileName }, null,
-                share ? new MediaScannerConnection.OnScanCompletedListener() {
+                new MediaScannerConnection.OnScanCompletedListener() {
                     public void onScanCompleted(String path, Uri uri) {
                         Log.d(LOGTAG, "Scanned " + path + ":");
-                        Log.d(LOGTAG, "-> uri=" + uri);
-                        sharePicture(uri, configAppUri);
-                        emitMediaScannerFinished();
+                        Log.d(LOGTAG, "  uri=" + uri);
+                        String uriString = (uri == null ? null : uri.toString());
+                        emitMediaScannerFinished(uriString);
                     }
-                } : null
+                }
             );
     }
 
-    public static void sharePicture(Uri uri, String configAppUri) {
+    public static void sharePicture(String uriString, String configAppUri) {
         if (QtNative.activity() == null)
             return;
 
+        Uri uri;
+        try {
+            uri = Uri.parse(uriString);
+        } catch (Exception e) {
+            Log.d(LOGTAG, "invalid uri");
+            return;
+        }
+
         if (uri == null) {
-            Log.d(LOGTAG, "media scanner failed");
+            Log.d(LOGTAG, "invalid uri");
             return;
         }
 

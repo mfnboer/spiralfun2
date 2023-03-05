@@ -52,7 +52,7 @@ void SpiralScene::init()
     QObject::connect(&jniCallbackListener, &JNICallbackListener::viewUriReceived,
                      this, [this](const QString& uri){ handleReceivedAndroidIntent(uri); });
     QObject::connect(&jniCallbackListener, &JNICallbackListener::mediaScannerFinished,
-                     this, [this]{ handleMediaScannerFinished(); });
+                     this, [this](const QString& uri){ handleMediaScannerFinished(uri); });
 
     // Handle possibly pending intent from Android.
     Utils::handlePendingIntent();
@@ -322,6 +322,7 @@ void SpiralScene::resetScene()
     setScale(mScaleFactor);
     update();
     deleteShareImageFile();
+    setSharingInProgress(false);
 }
 
 void SpiralScene::deleteShareImageFile()
@@ -522,7 +523,7 @@ bool SpiralScene::saveImage(bool share)
             if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
-                scanMediaFile(fileName, share);
+                Utils::scanMediaFile(fileName);
 
                 if (share)
                     mShareImageFileNameSaved = fileName;
@@ -542,8 +543,8 @@ void SpiralScene::shareImage()
     setSharingInProgress(true);
     if (!mShareImageFileNameSaved.isNull() && QFile::exists(mShareImageFileNameSaved))
     {
-        qDebug() << "File already saved, share saved file:" << mShareImageFileNameSaved;
-        scanMediaFile(mShareImageFileNameSaved, true);
+        qDebug() << "Share file already saved:" << mShareImageFileNameSaved;
+        Utils::scanMediaFile(mShareImageFileNameSaved);
     }
     else
     {
@@ -552,19 +553,14 @@ void SpiralScene::shareImage()
     }
 }
 
-void SpiralScene::scanMediaFile(const QString& fileName, bool share)
+void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
 {
-    QString configAppUri = "";
-    if (share)
-    {
-        SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-        configAppUri = cfg.getConfigAppUri();
-    }
-    Utils::scanMediaFile(fileName, share, configAppUri);
-}
+    if (!mSharingInProgress)
+        return;
 
-void SpiralScene::handleMediaScannerFinished()
-{
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    const QString configAppUri = cfg.getConfigAppUri();
+    Utils::sharePicture(contentUri, configAppUri);
     setSharingInProgress(false);
 }
 

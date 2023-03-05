@@ -104,24 +104,32 @@ QString createPictureFileName(bool forSharing)
     return forSharing ? "_TMP_SHARE.jpg" : QString("IMG_%1.jpg").arg(createDateTimeName());
 }
 
-void scanMediaFile(const QString& fileName, bool share, const QString& configAppUri)
+void scanMediaFile(const QString& fileName)
 {
 #if defined(Q_OS_ANDROID)
     auto jsFileName = QJniObject::fromString(fileName);
-    jboolean jsShare = share;
-    auto jsConfigAppUri = QJniObject::fromString(configAppUri);
     QJniObject::callStaticMethod<void>("com/gmail/mfnboer/QAndroidUtils",
                                        "scanMediaFile",
-                                       "(Ljava/lang/String;ZLjava/lang/String;)V",
-                                       jsFileName.object<jstring>(),
-                                       jsShare,
+                                       "(Ljava/lang/String;)V",
+                                       jsFileName.object<jstring>());
+#else
+    qDebug() << "No need to scan media:" << fileName;
+#endif
+}
+
+void sharePicture(const QString& contentUri, const QString& configAppUri)
+{
+#if defined(Q_OS_ANDROID)
+    auto jsContentUri = QJniObject::fromString(contentUri);
+    auto jsConfigAppUri = QJniObject::fromString(configAppUri);
+    QJniObject::callStaticMethod<void>("com/gmail/mfnboer/QAndroidUtils",
+                                       "sharePicture",
+                                       "(Ljava/lang/String;Ljava/lang/String;)V",
+                                       jsContentUri.object<jstring>(),
                                        jsConfigAppUri.object<jstring>());
 #else
-    (void)configAppUri;
-    if (share)
-    {
-        qWarning() << "Sharing not supported:" << fileName;
-    }
+    qDebug() << "Sharing not supported, content:" << contentUri;
+    qDebug() << "config:" << configAppUri;
 #endif
 }
 

@@ -83,8 +83,7 @@ private:
     void removeCirclesFromScene();
     void resetCircles();
     void resetScene();
-    void scanMediaFile(const QString& fileName, bool share);
-    void handleMediaScannerFinished();
+    void handleMediaScannerFinished(const QString& contentUri);
     void setSharingInProgress(bool inProgress);
     void deleteShareImageFile();
     void handleReceivedAndroidIntent(const QString& uri);
