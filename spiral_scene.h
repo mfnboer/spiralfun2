@@ -4,6 +4,7 @@
 
 #include "circle.h"
 #include "player.h"
+#include "scoped_line.h"
 #include "spiral_config.h"
 #include <QQuickItem>
 #include <memory>
@@ -42,8 +43,7 @@ public:
     PlayState getPlayState() const { return mPlayState; }
     void setNumCircles(int numCircles);
     void selectCircle(Circle* circle);
-    Circle::Line* addLine(QObject* object, const QColor& color, const QPointF& startPoint);
-    void removeLine(QObject* object);
+    ScopedLine addLine(QObject* object, const QColor& color, const QPointF& startPoint);
 
 public slots:
     void init();
@@ -90,10 +90,10 @@ private:
     void deleteShareImageFile();
     void handleReceivedAndroidIntent(const QString& uri);
     void setPlayState(PlayState state);
-    QSGNode* createLineNode(const Circle::Line& line);
+    QSGNode* createLineNode(const Line& line);
     void updateSceneRect(const QPointF& p);
 
-    std::unordered_map<QObject*, Circle::Line> mLines;
+    std::unordered_map<QObject*, Line> mLines;
     bool mClearScene = false;
     QRectF mSceneRect;
     uint64_t mLineSegmentCount = 0;

@@ -368,18 +368,14 @@ void SpiralScene::selectCircle(Circle* circle)
     }
 }
 
-Circle::Line* SpiralScene::addLine(QObject* object, const QColor& color, const QPointF& startPoint)
+ScopedLine SpiralScene::addLine(QObject* object, const QColor& color, const QPointF& startPoint)
 {
-    Circle::Line& line = mLines[object];
+    Q_ASSERT(!mLines.count(object));
+    Line& line = mLines[object];
     line.mColor = color;
     line.mLinePoints.reserve(256);
     line.mLinePoints.push_back(startPoint);
-    return &line;
-}
-
-void SpiralScene::removeLine(QObject* object)
-{
-    mLines.erase(object);
+    return std::forward<ScopedLine>(ScopedLine(&line, [this, object]{ mLines.erase(object); }));
 }
 
 QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
@@ -417,7 +413,7 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     return sceneRoot;
 }
 
-QSGNode* SpiralScene::createLineNode(const Circle::Line& line)
+QSGNode* SpiralScene::createLineNode(const Line& line)
 {
     auto* node = new QSGGeometryNode;
     auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), line.mLinePoints.size());

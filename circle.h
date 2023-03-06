@@ -1,9 +1,8 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #pragma once
+#include "scoped_line.h"
 #include <QQuickPaintedItem>
-
-class QSGFlatColorMaterial;
 
 namespace SpiralFun {
 
@@ -21,19 +20,9 @@ class Circle : public QQuickPaintedItem
 
 public:
     explicit Circle(SpiralScene* parent = nullptr);
-    ~Circle();
 
     enum Direction { CLOCKWISE = 0, COUNTER_CLOCKWISE = 1 };
     Q_ENUM(Direction)
-
-    struct Line
-    {
-          std::vector<QPointF> mLinePoints;
-          QColor mColor;
-          QSGNode* mRoot = nullptr;
-
-          void addPoint(const QPointF& p) { mLinePoints.push_back(p); }
-    };
 
     const QPointF& getCenter() const { return mCenter; }
     qreal getRadius() const { return mDiameter / 2.0; }
@@ -85,7 +74,7 @@ private:
     int mSpeed = 0;
     const qreal mMinDrawLength = 2.0;
     int mPenWidth;
-    Line* mSceneLine = nullptr;
+    ScopedLine mSceneLine;
 };
 
 using CircleList = std::vector<std::unique_ptr<SpiralFun::Circle>>;

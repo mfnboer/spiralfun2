@@ -26,6 +26,8 @@ set(PROJECT_SOURCES
         main.cpp
         player.h
         player.cpp
+        scoped_line.h
+        scoped_line.cpp
         spiral_config.h
         spiral_config.cpp
         spiral_scene.h
