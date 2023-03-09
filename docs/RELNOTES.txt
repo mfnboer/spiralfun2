@@ -1,3 +1,7 @@
+next
+----
+* Save image for sharing in config directory.
+
 2.0
 ---
 * Add armeabi-v7a support

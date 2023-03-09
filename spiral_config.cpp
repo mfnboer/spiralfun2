@@ -98,7 +98,7 @@ QJsonDocument SpiralConfig::createJsonDoc() const
 
 void SpiralConfig::save(const QImage& img) const
 {
-    const QString path = Utils::getSpiralCongifPath();
+    const QString path = Utils::getSpiralConfigPath();
     if (path.isNull())
         throw RuntimeException("Failed to access storage.");
 
@@ -132,7 +132,7 @@ void SpiralConfig::save(const QImage& img) const
 
 QObjectList SpiralConfig::getConfigFiles() const
 {
-    const QString path = Utils::getSpiralCongifPath();
+    const QString path = Utils::getSpiralConfigPath();
     QDir dir(path);
     const auto files = dir.entryList({"SPIRAL_*.json"}, QDir::Files, QDir::Time);
 

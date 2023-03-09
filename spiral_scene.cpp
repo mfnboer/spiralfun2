@@ -509,7 +509,7 @@ bool SpiralScene::saveImage(bool share)
 
     QString picPath;
     try {
-        picPath = Utils::getPicturesPath();
+        picPath = share ? Utils::getSpiralConfigPath() : Utils::getPicturesPath();
     } catch (RuntimeException& e) {
         emit message(e.msg());
         return false;

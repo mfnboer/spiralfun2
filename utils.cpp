@@ -64,7 +64,7 @@ QString getPicturesPath()
     return picPath;
 }
 
-QString getSpiralCongifPath()
+QString getSpiralConfigPath()
 {    if (!checkStoragePermission())
         throw RuntimeException("No permission to access storage.");
 
