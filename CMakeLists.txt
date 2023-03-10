@@ -11,7 +11,6 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core)
 
 add_compile_definitions(APP_VERSION="${PROJECT_VERSION}")
-add_compile_options(-Wall -Wextra -Werror)
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
     add_compile_definitions(QT_NO_DEBUG_OUTPUT)
@@ -34,6 +33,12 @@ set(PROJECT_SOURCES
         spiral_scene.cpp
         utils.h
         utils.cpp
+)
+
+set_source_files_properties(
+    ${PROJECT_SOURCES}
+    PROPERTIES
+    COMPILE_FLAGS "-Wall -Wextra -Werror"
 )
 
 qt_add_executable(spiralfun
@@ -101,11 +106,15 @@ set_target_properties(spiralfun PROPERTIES
 
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
+file(GLOB_RECURSE EGIF_SOURCES "egif/*.h" "egif/*.cpp")
+add_library(egif STATIC ${EGIF_SOURCES})
+
 target_link_libraries(spiralfun PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::Core
+    egif
 )
 
 set_target_properties(spiralfun PROPERTIES
