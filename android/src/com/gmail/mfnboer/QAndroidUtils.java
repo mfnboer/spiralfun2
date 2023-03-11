@@ -41,6 +41,10 @@ public class QAndroidUtils
         return getExternalPublicPath(Environment.DIRECTORY_PICTURES, subDir);
     }
 
+    public static String getPublicSpiralConfigPath(String subDir) {
+        return getExternalPublicPath(Environment.DIRECTORY_DOCUMENTS, subDir);
+    }
+
     public static String getSpiralConfigPath(String subDir) {
         Context context = QtNative.getContext();
         if (context == null)
@@ -60,16 +64,6 @@ public class QAndroidUtils
         }
 
         return configPath.getAbsolutePath();
-    }
-
-    public static void openDirectory(String path)
-    {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        File pathFile = new File(path);
-        intent.putExtra(Intent.EXTRA_TITLE, "Please select a folder to store config files:");
-        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, DocumentsContract.buildDocumentUri(
-                "com.android.externalstorage.documents", "primary:/Documents/SpiralFun"));
-        QtNative.activity().startActivity(intent);
     }
 
     // Make a media file show up in the gallery
