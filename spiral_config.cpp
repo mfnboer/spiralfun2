@@ -130,13 +130,8 @@ void SpiralConfig::save(const QImage& img) const
     }
 }
 
-QObjectList SpiralConfig::getConfigFiles() const
+static void addFiles(QObjectList& configFileList, const QStringList& files, const QDir& dir)
 {
-    const QString path = Utils::getSpiralConfigPath();
-    QDir dir(path);
-    const auto files = dir.entryList({"SPIRAL_*.json"}, QDir::Files, QDir::Time);
-
-    QObjectList configFileList;
     for (const auto& f : files)
     {
         auto* entry = new ConfigFileEntry;
@@ -147,6 +142,23 @@ QObjectList SpiralConfig::getConfigFiles() const
             entry->mImageFileName.clear();
 
         configFileList.push_back(entry);
+    }
+}
+
+QObjectList SpiralConfig::getConfigFiles() const
+{
+    const QString path = Utils::getSpiralConfigPath();
+    QDir dir(path);
+    const auto files = dir.entryList({"SPIRAL_*.json"}, QDir::Files, QDir::Time);
+    QObjectList configFileList;
+    addFiles(configFileList, files, dir);
+
+    const QString publicPath = Utils::getPublicSpiralConfigPath();
+    if (!publicPath.isNull())
+    {
+        QDir publicDir(publicPath);
+        const auto publicFiles = publicDir.entryList({"SPIRAL_*.json"}, QDir::Files, QDir::Time);
+        addFiles(configFileList, publicFiles, publicDir);
     }
 
     return configFileList;

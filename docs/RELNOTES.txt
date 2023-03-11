@@ -1,6 +1,6 @@
 next
 ----
-* Save image for sharing in config directory.
+* Save config files in private app storage.
 
 2.0
 ---

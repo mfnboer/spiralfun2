@@ -34,7 +34,6 @@ public:
     Q_ENUM(PlayState)
 
     explicit SpiralScene(QQuickItem *parent = nullptr);
-    ~SpiralScene();
 
     void setupCircles(const SpiralFun::CircleConfigList& config = DEFAULT_CONFIG);
     int getNumCircles() const { return mCircles.size(); }
@@ -87,7 +86,6 @@ private:
     void resetScene();
     void handleMediaScannerFinished(const QString& contentUri);
     void setSharingInProgress(bool inProgress);
-    void deleteShareImageFile();
     void handleReceivedAndroidIntent(const QString& uri);
     void setPlayState(PlayState state);
     QSGNode* createLineNode(const Line& line);

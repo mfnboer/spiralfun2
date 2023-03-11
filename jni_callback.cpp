@@ -22,7 +22,7 @@ void _handleViewUriReceived(JNIEnv* env, jobject, jstring jsUri)
 
 void _handleMediaScannerFinished(JNIEnv* env, jobject, jstring jsUri)
 {
-    QString uri(env->GetStringUTFChars(jsUri, nullptr));
+    QString uri = jsUri ? env->GetStringUTFChars(jsUri, nullptr) : QString();
     qDebug() << "Media scanner finished:" << uri;
     auto& instance = *gTheInstance;
     if (instance)
