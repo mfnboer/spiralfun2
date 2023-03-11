@@ -7,8 +7,10 @@ import org.qtproject.qt.android.QtNative;
 
 import java.io.File;
 import java.lang.String;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
+import android.provider.DocumentsContract;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -20,7 +22,7 @@ public class QAndroidUtils
 
     public static native void emitMediaScannerFinished(String uri);
 
-    private static String getPath(String type, String subDir)
+    private static String getExternalPublicPath(String type, String subDir)
     {
         File path = Environment.getExternalStoragePublicDirectory(type);
         File appPath = new File(path, subDir);
@@ -36,11 +38,32 @@ public class QAndroidUtils
     }
 
     public static String getPicturesPath(String subDir) {
-        return getPath(Environment.DIRECTORY_PICTURES, subDir);
+        return getExternalPublicPath(Environment.DIRECTORY_PICTURES, subDir);
+    }
+
+    public static String getPublicSpiralConfigPath(String subDir) {
+        return getExternalPublicPath(Environment.DIRECTORY_DOCUMENTS, subDir);
     }
 
     public static String getSpiralConfigPath(String subDir) {
-        return getPath(Environment.DIRECTORY_DOCUMENTS, subDir);
+        Context context = QtNative.getContext();
+        if (context == null)
+        {
+            Log.w(LOGTAG, "No context");
+            return null;
+        }
+
+        File path = context.getFilesDir();
+        File configPath = new File(path, subDir);
+
+        try {
+            configPath.mkdirs();
+        } catch (SecurityException e) {
+            Log.w(LOGTAG, "Could not create path: " + configPath + " details: " + e.getMessage());
+            return null;
+        }
+
+        return configPath.getAbsolutePath();
     }
 
     // Make a media file show up in the gallery

@@ -27,11 +27,6 @@ SpiralScene::SpiralScene(QQuickItem *parent) :
     setupCircles();
 }
 
-SpiralScene::~SpiralScene()
-{
-    deleteShareImageFile();
-}
-
 void SpiralScene::init()
 {
     calcDefaultRadiusSize();
@@ -336,17 +331,7 @@ void SpiralScene::resetScene()
     mScaleFactor = 1.0;
     setScale(mScaleFactor);
     update();
-    deleteShareImageFile();
     setSharingInProgress(false);
-}
-
-void SpiralScene::deleteShareImageFile()
-{
-    if (mShareImageFileNameSaved.isNull())
-        return;
-
-    QFile::remove(mShareImageFileNameSaved);
-    qDebug() << "Deteled share image file:" << mShareImageFileNameSaved;
     mShareImageFileNameSaved.clear();
 }
 
@@ -509,7 +494,7 @@ bool SpiralScene::saveImage(bool share)
 
     QString picPath;
     try {
-        picPath = share ? Utils::getSpiralConfigPath() : Utils::getPicturesPath();
+        picPath = Utils::getPicturesPath();
     } catch (RuntimeException& e) {
         emit message(e.msg());
         return false;
@@ -569,9 +554,17 @@ void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
     if (!mSharingInProgress)
         return;
 
-    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-    const QString configAppUri = cfg.getConfigAppUri();
-    Utils::sharePicture(contentUri, configAppUri);
+    if (!contentUri.isNull())
+    {
+        SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+        const QString configAppUri = cfg.getConfigAppUri();
+        Utils::sharePicture(contentUri, configAppUri);
+    }
+    else
+    {
+        qDebug() << "No content URI for sharing";
+    }
+
     setSharingInProgress(false);
 }
 

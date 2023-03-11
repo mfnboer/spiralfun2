@@ -2,7 +2,6 @@
 // License: GPLv3
 #include "utils.h"
 #include "exception.h"
-#include "jni_callback.h"
 #include <QDir>
 #include <QJniObject>
 #include <QStandardPaths>
@@ -64,10 +63,31 @@ QString getPicturesPath()
     return picPath;
 }
 
-QString getSpiralConfigPath()
-{    if (!checkStoragePermission())
+QString getPublicSpiralConfigPath()
+{
+    if (!checkStoragePermission())
         throw RuntimeException("No permission to access storage.");
 
+#if defined(Q_OS_ANDROID)
+    auto jsSubDir = QJniObject::fromString(SPIRAL_CONFIG_SUB_DIR);
+    auto pathObj = QJniObject::callStaticMethod<jstring>("com/gmail/mfnboer/QAndroidUtils",
+                                                         "getPublicSpiralConfigPath",
+                                                         "(Ljava/lang/String;)Ljava/lang/String;",
+                                                         jsSubDir.object<jstring>());
+    if (!pathObj.isValid())
+        throw RuntimeException("Cannot create public spiral config storage path.");
+
+    const QString cfgPath = pathObj.toString();
+    qDebug() << "Pictures path:" << cfgPath;
+#else
+    const QString cfgPath;
+#endif
+
+    return cfgPath;
+}
+
+QString getSpiralConfigPath()
+{
 #if defined(Q_OS_ANDROID)
     auto jsSubDir = QJniObject::fromString(SPIRAL_CONFIG_SUB_DIR);
     auto pathObj = QJniObject::callStaticMethod<jstring>("com/gmail/mfnboer/QAndroidUtils",
@@ -79,12 +99,6 @@ QString getSpiralConfigPath()
 
     const QString cfgPath = pathObj.toString();
     qDebug() << "Spiral config path:" << cfgPath;
-
-    // The .nomedia file indicates that the images in the directoy should not
-    // be picked up by the media scanner
-    QFile nomedia(cfgPath + "/.nomedia");
-    if (!nomedia.exists())
-        nomedia.open(QIODevice::WriteOnly);
 #else
     auto path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     const QString cfgPath = path + "/" + SPIRAL_CONFIG_SUB_DIR;
