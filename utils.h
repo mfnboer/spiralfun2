@@ -8,6 +8,7 @@ namespace SpiralFun::Utils {
 
 QString createDateTimeName();
 QString getPicturesPath();
+QString getPublicSpiralConfigPath();
 QString getSpiralConfigPath();
 QString createPictureFileName(bool forSharing);
 void scanMediaFile(const QString& fileName);
