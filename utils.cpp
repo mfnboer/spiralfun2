@@ -2,7 +2,6 @@
 // License: GPLv3
 #include "utils.h"
 #include "exception.h"
-#include "jni_callback.h"
 #include <QDir>
 #include <QJniObject>
 #include <QStandardPaths>
@@ -65,9 +64,7 @@ QString getPicturesPath()
 }
 
 QString getSpiralConfigPath()
-{    if (!checkStoragePermission())
-        throw RuntimeException("No permission to access storage.");
-
+{
 #if defined(Q_OS_ANDROID)
     auto jsSubDir = QJniObject::fromString(SPIRAL_CONFIG_SUB_DIR);
     auto pathObj = QJniObject::callStaticMethod<jstring>("com/gmail/mfnboer/QAndroidUtils",
