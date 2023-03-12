@@ -8,6 +8,8 @@
 
 #ifdef Q_OS_ANDROID
 #include <QtCore/private/qandroidextras_p.h>
+#else
+#include "jni_callback.h"
 #endif
 
 namespace {
