@@ -16,7 +16,8 @@
 namespace SpiralFun {
 
 SpiralScene::SpiralScene(QQuickItem *parent) :
-    QQuickItem(parent)
+    QQuickItem(parent),
+    mSceneGrabber(this, mSceneRect)
 {
     setFlags(ItemHasContents | ItemIsViewport);
     setAntialiasing(true);
@@ -483,15 +484,6 @@ void SpiralScene::touchEvent(QTouchEvent* event)
 
 bool SpiralScene::saveImage(bool share)
 {
-    const qreal dpr = window()->effectiveDevicePixelRatio();
-    const QSize imageSize = (size() * dpr).toSize();
-    auto grabResult = grabToImage(imageSize);
-    if (!grabResult)
-    {
-        emit message("Failed to grab image.");
-        return false;
-    }
-
     QString picPath;
     try {
         picPath = Utils::getPicturesPath();
@@ -513,9 +505,8 @@ bool SpiralScene::saveImage(bool share)
         return false;
     }
 
-    QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
-        [this, grabResult, fileName, dpr, share]{
-            const QImage img = Utils::extractSpiral(grabResult->image(), mSceneRect, 20, dpr);
+    const bool grabbed = mSceneGrabber.grabScene(
+        [this, fileName, share](const QImage& img){
             if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
@@ -531,7 +522,10 @@ bool SpiralScene::saveImage(bool share)
             }
         });
 
-    return true;
+    if (!grabbed)
+        emit message("Failed to grab image.");
+
+    return grabbed;
 }
 
 void SpiralScene::shareImage()

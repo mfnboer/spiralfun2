@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         main.cpp
         player.h
         player.cpp
+        scene_grabber.h
+        scene_grabber.cpp
         scoped_line.h
         scoped_line.cpp
         spiral_config.h

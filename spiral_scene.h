@@ -4,6 +4,7 @@
 
 #include "circle.h"
 #include "player.h"
+#include "scene_grabber.h"
 #include "scoped_line.h"
 #include "spiral_config.h"
 #include <QQuickItem>
@@ -104,6 +105,7 @@ private:
     QString mShareImageFileNameSaved;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
     bool mSharingInProgress = false;
+    SceneGrabber mSceneGrabber;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;
