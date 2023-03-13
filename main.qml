@@ -39,14 +39,28 @@ ApplicationWindow {
                     return playState === SpiralScene.DONE_PLAYING;
                 }
 
+                function isRecording() {
+                    return playState === SpiralScene.RECORDING;
+                }
+
                 function playStateIcon() {
                     switch (scene.playState) {
                     case SpiralScene.NOT_PLAYING:
                         return "play";
                     case SpiralScene.PLAYING:
+                    case SpiralScene.RECORDING:
                         return "stop";
                     case SpiralScene.DONE_PLAYING:
                         return "home";
+                    }
+                }
+
+                function shareButtonText() {
+                    switch (scene.shareMode) {
+                    case SpiralScene.SHARE_PIC:
+                        return "share picture";
+                    case SpiralScene.SHARE_VID:
+                        return "share video";
                     }
                 }
             }
@@ -63,12 +77,25 @@ ApplicationWindow {
             RoundButton {
                 id: sceneShareButton
                 icon.name: "share"
+                text: scene.shareButtonText()
                 Material.background: "transparent"
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 enabled: scene.donePlaying()
                 visible: scene.donePlaying()
-                onClicked: scene.shareImage()
+                onClicked: scene.share()
+            }
+
+            Label {
+                text: "RECORDING"
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: scene.isRecording()
+                SequentialAnimation on color {
+                    loops: Animation.Infinite
+                    ColorAnimation { from: "white"; to: "black"; duration: 1000 }
+                    ColorAnimation { from: "black"; to: "white"; duration: 1000 }
+                }
             }
 
             Menu {
@@ -94,6 +121,11 @@ ApplicationWindow {
                     text: "Save config"
                     enabled: scene.donePlaying()
                     onTriggered: scene.saveConfig()
+                }
+                MenuItem {
+                    text: "Record video"
+                    enabled: scene.donePlaying();
+                    onTriggered: scene.record();
                 }
                 MenuItem {
                     text: "Examples"

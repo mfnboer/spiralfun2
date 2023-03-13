@@ -261,6 +261,12 @@ void SpiralScene::setCurrentIndex(unsigned index)
 
 void SpiralScene::play()
 {
+    doPlay(nullptr);
+    setPlayState(PLAYING);
+}
+
+void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
+{
     mLineSegmentCount = 0;
     setCurrentCircleFocus(false);
     mPlayer = std::make_unique<Player>(mCircles);
@@ -276,8 +282,17 @@ void SpiralScene::play()
             }), Qt::SingleShotConnection);
             update();
     });
-    mPlayer->play();
-    setPlayState(PLAYING);
+    mPlayer->play(std::move(recorder));
+}
+
+void SpiralScene::record()
+{
+    auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
+    stop();
+    doPlay(std::move(recorder));
+    setPlayState(RECORDING);
+    setShareMode(SHARE_VID);
+    mShareVideoUri.clear();
 }
 
 void SpiralScene::stop()
@@ -286,6 +301,7 @@ void SpiralScene::stop()
     resetScene();
     setPlayState(NOT_PLAYING);
     setCurrentCircleFocus(true);
+    setShareMode(SHARE_PIC);
 }
 
 void SpiralScene::setPlayState(PlayState state)
@@ -293,6 +309,13 @@ void SpiralScene::setPlayState(PlayState state)
     mPlayState = state;
     emit playStateChanged();
 }
+
+void SpiralScene::setShareMode(ShareMode shareMode)
+{
+    mShareMode = shareMode;
+    emit shareModeChanged();
+}
+
 
 void SpiralScene::addCirclesToScene()
 {
@@ -505,6 +528,7 @@ bool SpiralScene::saveImage(bool share)
         return false;
     }
 
+    mSceneGrabber.setSceneRect(mSceneRect);
     const bool grabbed = mSceneGrabber.grabScene(
         [this, fileName, share](const QImage& img){
             if (img.save(fileName))
@@ -528,9 +552,23 @@ bool SpiralScene::saveImage(bool share)
     return grabbed;
 }
 
+void SpiralScene::share()
+{
+    switch (mShareMode)
+    {
+    case SHARE_PIC:
+        shareImage();
+        break;
+    case SHARE_VID:
+        shareVideo();
+        break;
+    }
+}
+
 void SpiralScene::shareImage()
 {
     setSharingInProgress(true);
+
     if (!mShareImageFileNameSaved.isNull() && QFile::exists(mShareImageFileNameSaved))
     {
         qDebug() << "Share file already saved:" << mShareImageFileNameSaved;
@@ -543,8 +581,29 @@ void SpiralScene::shareImage()
     }
 }
 
+void SpiralScene::shareVideo()
+{
+    if (mShareVideoUri.isNull())
+    {
+        qDebug() << "No video to share";
+        return;
+    }
+
+    setSharingInProgress(true);
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    const QString configAppUri = cfg.getConfigAppUri();
+    Utils::sharePicture(mShareVideoUri, configAppUri);
+    setSharingInProgress(false);
+}
+
 void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
 {
+    if (mShareMode == SHARE_VID && mShareVideoUri.isNull())
+    {
+        qDebug() << "Save video content URI for sharing:" << contentUri;
+        mShareVideoUri = contentUri;
+    }
+
     if (!mSharingInProgress)
         return;
 

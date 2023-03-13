@@ -16,6 +16,5 @@ void sharePicture(const QString& contentUri, const QString& configAppUri);
 void handlePendingIntent();
 
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize);
-QImage extractSpiral(const QImage& grabbedImg, const QRectF& sceneRect, int margin, qreal devicePixelRatio);
 
 }

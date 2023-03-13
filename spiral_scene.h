@@ -27,12 +27,16 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(SpiralFun::Circle* currentCircle READ getCurrentCircle NOTIFY currentCircleChanged)
     Q_PROPERTY(int currentCircleIndex READ getCurrentCircleIndex NOTIFY currentCircleIndexChanged)
     Q_PROPERTY(SpiralScene::PlayState playState READ getPlayState NOTIFY playStateChanged)
+    Q_PROPERTY(SpiralScene::ShareMode shareMode READ getShareMode NOTIFY shareModeChanged)
     Q_PROPERTY(bool sharingInProgress MEMBER mSharingInProgress NOTIFY sharingInProgressChanged)
     QML_ELEMENT
 
 public:
-    enum PlayState { NOT_PLAYING = 0, PLAYING = 1, DONE_PLAYING = 2 };
+    enum PlayState { NOT_PLAYING, PLAYING, RECORDING, DONE_PLAYING };
     Q_ENUM(PlayState)
+
+    enum ShareMode { SHARE_PIC, SHARE_VID };
+    Q_ENUM(ShareMode)
 
     explicit SpiralScene(QQuickItem *parent = nullptr);
 
@@ -41,6 +45,7 @@ public:
     SpiralFun::Circle* getCurrentCircle() const;
     int getCurrentCircleIndex() const { return mCurrentIndex; }
     PlayState getPlayState() const { return mPlayState; }
+    ShareMode getShareMode() const { return mShareMode; }
     void setNumCircles(int numCircles);
     void selectCircle(Circle* circle);
     ScopedLine addLine(QObject* object, const QColor& color, const QPointF& startPoint);
@@ -51,10 +56,11 @@ public slots:
     void circleUp();
     void circleDown();
     void play();
+    void record();
     void stop();
     bool saveImage(bool share = false);
     void shareImage();
-    void saveConfig();
+    void share();
     QObjectList getConfigFileList();
     void loadConfig(const QString& fileName);
     void deleteConfig(const QStringList& fileNameList);
@@ -65,6 +71,7 @@ signals:
     void currentCircleIndexChanged();
     void numCirclesChanged();
     void playStateChanged();
+    void shareModeChanged();
     void sharingInProgressChanged();
     void message(const QString message);
 
@@ -89,8 +96,12 @@ private:
     void setSharingInProgress(bool inProgress);
     void handleReceivedAndroidIntent(const QString& uri);
     void setPlayState(PlayState state);
+    void setShareMode(ShareMode shareMode);
     QSGNode* createLineNode(const Line& line);
     void updateSceneRect(const QPointF& p);
+    void doPlay(std::unique_ptr<SceneGrabber> recorder);
+    void shareVideo();
+    void saveConfig();
 
     std::unordered_map<QObject*, Line> mLines;
     bool mClearScene = false;
@@ -105,6 +116,8 @@ private:
     QString mShareImageFileNameSaved;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
     bool mSharingInProgress = false;
+    ShareMode mShareMode = SHARE_PIC;
+    QString mShareVideoUri;
     SceneGrabber mSceneGrabber;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;

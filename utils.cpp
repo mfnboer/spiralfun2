@@ -177,12 +177,4 @@ QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QR
     return thumbnail;
 }
 
-QImage extractSpiral(const QImage& grabbedImg, const QRectF& sceneRect, int margin, qreal devicePixelRatio)
-{
-    QRectF cutRect = sceneRect.adjusted(-margin, -margin, margin, margin);
-    cutRect = QRectF(cutRect.topLeft() * devicePixelRatio, cutRect.size() * devicePixelRatio);
-    const QImage spiral = grabbedImg.copy(cutRect.toRect());
-    return spiral;
-}
-
 }
