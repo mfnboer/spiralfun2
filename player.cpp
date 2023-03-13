@@ -4,6 +4,7 @@
 #include "exception.h"
 #include "utils.h"
 #include <QFile>
+#include <QThread>
 #include <chrono>
 
 using namespace std::chrono_literals;
@@ -12,7 +13,7 @@ namespace SpiralFun {
 
 namespace {
 constexpr int FRAME_DURATION = 4; // unit is 10ms
-constexpr int GIF_QUALITY = 10;
+constexpr int GIF_QUALITY = 15;
 }
 
 Player::Player(const CircleList &circles) :
@@ -100,17 +101,25 @@ void Player::finishPlaying()
     if (mRecording)
     {
         // Record last frame
-        const bool grabbed = mSceneGrabber->grabScene([this](const QImage& img){
-            recordFrame(img);
-            stopRecording();
-            Utils::scanMediaFile(mGifFileName);
-            emit done();
+        const bool grabbed = mSceneGrabber->grabScene([this](QImage&& img){
+                qDebug() << "START finalizing video";
+                mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
+                QThread* thread = QThread::create([this]{ recordFrame(); });
+                mRecordingThread.reset(thread);
+                QObject::connect(mRecordingThread.get(), &QThread::finished, this, [this]{
+                        stopRecording();
+                        qDebug() << "STOP finalizing video";
+                        Utils::scanMediaFile(mGifFileName);
+                        emit done();
+                    }, Qt::SingleShotConnection);
+                mRecordingThread->start();
         });
 
         if (!grabbed)
         {
             qWarning() << "Failed to grab last frame";
             stopRecording();
+            Utils::scanMediaFile(mGifFileName);
             emit done();
         }
     }
@@ -172,7 +181,8 @@ bool Player::setupRecording()
     const int height = frameSize.height();
     const int preAllocSize = width * height * 3;
 
-    qDebug() << "Recording frame size:" << frameSize;
+    qDebug() << "Start recording frame:" << frameSize << "alloc (MB):" << preAllocSize / (1024 * 1024.0);
+
     if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, false, 0, preAllocSize))
     {
         qWarning() << "Cannot open file:" << mGifFileName;
@@ -197,7 +207,17 @@ void Player::record()
         return;
 
     mRecordAngle = 0.0;
-    if (!mSceneGrabber->grabScene([this](const QImage& img){ recordFrame(img); mPlayTimer.start(); }))
+    const bool grabbed = mSceneGrabber->grabScene([this](QImage&& img){
+            mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
+            QThread* thread = QThread::create([this]{ recordFrame(); });
+            mRecordingThread.reset(thread);
+            QObject::connect(mRecordingThread.get(), &QThread::finished, this, [this]{
+                    mPlayTimer.start();
+                }, Qt::SingleShotConnection);
+            mRecordingThread->start();
+        });
+
+    if (!grabbed)
     {
         qDebug() << "Could not grab frame";
         return;
@@ -206,11 +226,13 @@ void Player::record()
     mPlayTimer.stop();
 }
 
-void Player::recordFrame(const QImage& img)
+void Player::recordFrame()
 {
     Q_ASSERT(mGifEncoder);
-    const uint8_t* frame = img.bits();
-    mGifEncoder->push(GifEncoder::PIXEL_FORMAT_RGBA, frame, img.width(), img.height(), FRAME_DURATION);
+    Q_ASSERT(mFrame);
+    const uint8_t* frame = mFrame->bits();
+    mGifEncoder->push(GifEncoder::PIXEL_FORMAT_RGBA, frame, mFrame->width(), mFrame->height(),
+                      FRAME_DURATION);
 }
 
 }

@@ -288,6 +288,7 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 void SpiralScene::record()
 {
     auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
+    recorder->setPixelRatio(1); // Lower resolution to keep GIF smallish
     stop();
     doPlay(std::move(recorder));
     setPlayState(RECORDING);
@@ -529,6 +530,8 @@ bool SpiralScene::saveImage(bool share)
     }
 
     mSceneGrabber.setSceneRect(mSceneRect);
+    mSceneGrabber.setPixelRatio(window()->effectiveDevicePixelRatio());
+
     const bool grabbed = mSceneGrabber.grabScene(
         [this, fileName, share](const QImage& img){
             if (img.save(fileName))

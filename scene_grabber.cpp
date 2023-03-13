@@ -19,8 +19,7 @@ SceneGrabber::SceneGrabber(QQuickItem* scene, const QRectF& sceneRect) :
 
 QSize SceneGrabber::getImageGrabSize() const
 {
-    const qreal dpr = mScene->window()->effectiveDevicePixelRatio();
-    const QSize imageSize = (mScene->size() * dpr).toSize();
+    const QSize imageSize = (mScene->size() * mPixelRatio).toSize();
     return imageSize;
 }
 
@@ -40,8 +39,8 @@ bool SceneGrabber::grabScene(const Callback& callback)
 
     QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
         [this, grabResult, callback]{
-            const QImage img = extractSpiral(grabResult->image());
-            callback(img);
+            QImage img = extractSpiral(grabResult->image());
+            callback(std::forward<QImage>(img));
         });
 
     return true;
@@ -49,9 +48,8 @@ bool SceneGrabber::grabScene(const Callback& callback)
 
 QRect SceneGrabber::getSpiralCutRect() const
 {
-    const qreal dpr = mScene->window()->effectiveDevicePixelRatio();
     QRectF cutRect = mSceneRect.adjusted(-IMG_MARGIN, -IMG_MARGIN, IMG_MARGIN, IMG_MARGIN);
-    cutRect = QRectF(cutRect.topLeft() * dpr, cutRect.size() * dpr);
+    cutRect = QRectF(cutRect.topLeft() * mPixelRatio, cutRect.size() * mPixelRatio);
     return cutRect.toRect();
 }
 

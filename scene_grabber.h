@@ -10,11 +10,12 @@ class SceneGrabber : public QObject
     Q_OBJECT
 
 public:
-    using Callback = std::function<void(const QImage&)>;
+    using Callback = std::function<void(QImage&&)>;
 
     SceneGrabber(QQuickItem* scene, const QRectF& sceneRect);
 
     void setSceneRect(const QRectF& sceneRect) { mSceneRect = sceneRect; }
+    void setPixelRatio(qreal pixelRatio) { mPixelRatio = pixelRatio; }
     QSize getImageGrabSize() const;
     QSize getSpiralImageSize() const;
     bool grabScene(const Callback& callback);
@@ -25,6 +26,7 @@ private:
 
     QQuickItem* mScene;
     QRectF mSceneRect;
+    qreal mPixelRatio = 1.0;
 };
 
 }

@@ -34,7 +34,7 @@ private:
     void finishPlaying();
     bool setupRecording();
     void record();
-    void recordFrame(const QImage& img);
+    void recordFrame();
     void stopRecording();
 
     const CircleList& mCircles;
@@ -51,6 +51,8 @@ private:
     std::unique_ptr<GifEncoder> mGifEncoder;
     QString mGifFileName;
     bool mRecording = false;
+    std::unique_ptr<QThread> mRecordingThread;
+    std::unique_ptr<QImage> mFrame;
 };
 
 }
