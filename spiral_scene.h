@@ -59,7 +59,7 @@ public slots:
     void record();
     void stop();
     bool saveImage(bool share = false);
-    void shareImage();
+    void saveConfig();
     void share();
     QObjectList getConfigFileList();
     void loadConfig(const QString& fileName);
@@ -100,8 +100,8 @@ private:
     QSGNode* createLineNode(const Line& line);
     void updateSceneRect(const QPointF& p);
     void doPlay(std::unique_ptr<SceneGrabber> recorder);
+    void shareImage();
     void shareVideo();
-    void saveConfig();
 
     std::unordered_map<QObject*, Line> mLines;
     bool mClearScene = false;
@@ -118,7 +118,7 @@ private:
     bool mSharingInProgress = false;
     ShareMode mShareMode = SHARE_PIC;
     QString mShareVideoUri;
-    SceneGrabber mSceneGrabber;
+    std::unique_ptr<SceneGrabber> mSceneGrabber;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;

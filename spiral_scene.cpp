@@ -16,8 +16,7 @@
 namespace SpiralFun {
 
 SpiralScene::SpiralScene(QQuickItem *parent) :
-    QQuickItem(parent),
-    mSceneGrabber(this, mSceneRect)
+    QQuickItem(parent)
 {
     setFlags(ItemHasContents | ItemIsViewport);
     setAntialiasing(true);
@@ -288,7 +287,6 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 void SpiralScene::record()
 {
     auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
-    recorder->setPixelRatio(1); // Lower resolution to keep GIF smallish
     stop();
     doPlay(std::move(recorder));
     setPlayState(RECORDING);
@@ -529,10 +527,8 @@ bool SpiralScene::saveImage(bool share)
         return false;
     }
 
-    mSceneGrabber.setSceneRect(mSceneRect);
-    mSceneGrabber.setPixelRatio(window()->effectiveDevicePixelRatio());
-
-    const bool grabbed = mSceneGrabber.grabScene(
+    mSceneGrabber = std::make_unique<SceneGrabber>(this, mSceneRect);
+    const bool grabbed = mSceneGrabber->grabScene(
         [this, fileName, share](const QImage& img){
             if (img.save(fileName))
             {

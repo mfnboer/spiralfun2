@@ -14,8 +14,6 @@ public:
 
     SceneGrabber(QQuickItem* scene, const QRectF& sceneRect);
 
-    void setSceneRect(const QRectF& sceneRect) { mSceneRect = sceneRect; }
-    void setPixelRatio(qreal pixelRatio) { mPixelRatio = pixelRatio; }
     QSize getImageGrabSize() const;
     QSize getSpiralImageSize() const;
     bool grabScene(const Callback& callback);

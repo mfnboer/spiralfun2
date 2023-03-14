@@ -15,6 +15,9 @@ SceneGrabber::SceneGrabber(QQuickItem* scene, const QRectF& sceneRect) :
     mSceneRect(sceneRect)
 {
     Q_ASSERT(scene);
+    auto* win = scene->window();
+    Q_ASSERT(win);
+    mPixelRatio = win->effectiveDevicePixelRatio();
 }
 
 QSize SceneGrabber::getImageGrabSize() const
