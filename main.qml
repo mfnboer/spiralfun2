@@ -55,12 +55,16 @@ ApplicationWindow {
                     }
                 }
 
+                function isInVideoShareMode() {
+                    return shareMode === SpiralScene.SHARE_VID;
+                }
+
                 function shareButtonText() {
                     switch (scene.shareMode) {
                     case SpiralScene.SHARE_PIC:
                         return "share picture";
                     case SpiralScene.SHARE_VID:
-                        return "share video";
+                        return "share gif";
                     }
                 }
             }
@@ -104,7 +108,7 @@ ApplicationWindow {
 
                 MenuItem {
                     text: "Save image"
-                    enabled: scene.donePlaying()
+                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
                     onTriggered: scene.saveImage()
                 }
                 MenuItem {
@@ -119,13 +123,13 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Save config"
-                    enabled: scene.donePlaying()
+                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
                     onTriggered: scene.saveConfig()
                 }
                 MenuItem {
-                    text: "Record video"
-                    enabled: scene.donePlaying();
-                    onTriggered: scene.record();
+                    text: "Record GIF (SLOW)"
+                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
+                    onTriggered: scene.record()
                 }
                 MenuItem {
                     text: "Examples"

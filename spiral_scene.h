@@ -102,6 +102,7 @@ private:
     void doPlay(std::unique_ptr<SceneGrabber> recorder);
     void shareImage();
     void shareVideo();
+    void scaleScene(qreal scaleFactor);
 
     std::unordered_map<QObject*, Line> mLines;
     bool mClearScene = false;
@@ -119,6 +120,7 @@ private:
     ShareMode mShareMode = SHARE_PIC;
     QString mShareVideoUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
+    qreal mRecordScaleFactor = 1.0;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;

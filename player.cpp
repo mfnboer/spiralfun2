@@ -13,7 +13,7 @@ namespace SpiralFun {
 
 namespace {
 constexpr int FRAME_DURATION = 4; // unit is 10ms
-constexpr int GIF_QUALITY = 15;
+constexpr int GIF_QUALITY = 10;
 }
 
 Player::Player(const CircleList &circles) :
