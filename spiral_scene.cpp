@@ -260,6 +260,15 @@ void SpiralScene::setCurrentIndex(unsigned index)
 
 void SpiralScene::play()
 {
+    const auto it = std::find_if(mCircles.begin(), mCircles.end(), [](const auto& c){
+            return c->getDraw(); });
+
+    if (it == mCircles.end())
+    {
+        emit message("Enable line drawing on at least 1 circle");
+        return;
+    }
+
     doPlay(nullptr);
     setPlayState(PLAYING);
 }
