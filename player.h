@@ -36,6 +36,7 @@ private:
     void record();
     void recordFrame();
     void stopRecording();
+    void runRecordFrameThread(const std::function<void()>& whenFinished);
 
     const CircleList& mCircles;
     QTimer mPlayTimer;

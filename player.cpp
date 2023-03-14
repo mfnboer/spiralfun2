@@ -27,6 +27,12 @@ Player::Player(const CircleList &circles) :
 
 Player::~Player()
 {
+    if (mRecordingThread)
+    {
+        qDebug() << "Wait for recording thread to finish";
+        mRecordingThread->wait();
+    }
+
     if (mRecording)
     {
         qDebug() << "Stop recording and remove file:" << mGifFileName;
@@ -104,15 +110,12 @@ void Player::finishPlaying()
         const bool grabbed = mSceneGrabber->grabScene([this](QImage&& img){
                 qDebug() << "START finalizing video";
                 mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
-                QThread* thread = QThread::create([this]{ recordFrame(); });
-                mRecordingThread.reset(thread);
-                QObject::connect(mRecordingThread.get(), &QThread::finished, this, [this]{
+                runRecordFrameThread([this]{
                         stopRecording();
                         qDebug() << "STOP finalizing video";
                         Utils::scanMediaFile(mGifFileName);
                         emit done();
-                    }, Qt::SingleShotConnection);
-                mRecordingThread->start();
+                    });
         });
 
         if (!grabbed)
@@ -209,12 +212,7 @@ void Player::record()
     mRecordAngle = 0.0;
     const bool grabbed = mSceneGrabber->grabScene([this](QImage&& img){
             mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
-            QThread* thread = QThread::create([this]{ recordFrame(); });
-            mRecordingThread.reset(thread);
-            QObject::connect(mRecordingThread.get(), &QThread::finished, this, [this]{
-                    mPlayTimer.start();
-                }, Qt::SingleShotConnection);
-            mRecordingThread->start();
+            runRecordFrameThread([this]{ mPlayTimer.start(); });
         });
 
     if (!grabbed)
@@ -233,6 +231,14 @@ void Player::recordFrame()
     const uint8_t* frame = mFrame->bits();
     mGifEncoder->push(GifEncoder::PIXEL_FORMAT_RGBA, frame, mFrame->width(), mFrame->height(),
                       FRAME_DURATION);
+}
+
+void Player::runRecordFrameThread(const std::function<void()>& whenFinished)
+{
+    QThread* thread = QThread::create([this]{ recordFrame(); });
+    mRecordingThread.reset(thread);
+    QObject::connect(thread, &QThread::finished, this, whenFinished, Qt::SingleShotConnection);
+    mRecordingThread->start();
 }
 
 }
