@@ -295,13 +295,16 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 
 void SpiralScene::record()
 {
+    // TODO: remove?
+#if 0
     const qreal dpr = window()->effectiveDevicePixelRatio();
     const qreal scaleFactor = 1.0 / dpr;
     scaleScene(scaleFactor);
     mRecordScaleFactor *= scaleFactor;
+#endif
     auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
     resetScene();
-    setScale(dpr);
+    //setScale(dpr);
     doPlay(std::move(recorder));
     setPlayState(RECORDING);
     setShareMode(SHARE_VID);

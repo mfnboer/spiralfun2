@@ -21,21 +21,24 @@
         data                                                                    \
     )
 
+// MICHEL: changed to 4 byte RGBA pixels
 static void getColorMap(uint8_t *colorMap, const uint8_t *pixels, int nPixels, int quality) {
-    initnet(pixels, nPixels * 3, quality);
+    initnet(pixels, nPixels * 4, quality);
     learn();
     unbiasnet();
     inxbuild();
     getcolourmap(colorMap);
 }
 
+// MICHEL: changed to 4 byte RGBA pixels
 static void getRasterBits(uint8_t *rasterBits, const uint8_t *pixels, int nPixels) {
+    int indexBlack = inxsearch(0, 0, 0);
+
     for (int i = 0; i < nPixels; ++i) {
-        rasterBits[i] = inxsearch(
-                pixels[i * 3],
-                pixels[i * 3 + 1],
-                pixels[i * 3 + 2]
-        );
+        const int r = pixels[i * 4];
+        const int g = pixels[i * 4 + 1];
+        const int b = pixels[i * 4 + 2];
+        rasterBits[i] = (b == 0 && g == 0 && r == 0) ? indexBlack : inxsearch(b, g, r);
     }
 }
 
@@ -156,6 +159,8 @@ bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int width, int h
         convertToBGR(format, pixels, frame, width, height);
         m_allFrameDelays.push_back(delay);
     } else {
+        // MICHEL: disabled as I pass 4 byte RGBA pixels to the neural net
+#if 0
         int needSize = width * height * 3;
         if (m_allocSize < needSize) {
             m_framePixels = (uint8_t *) realloc(m_framePixels, needSize);
@@ -165,12 +170,13 @@ bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int width, int h
 
         auto *pixels = m_framePixels;
         convertToBGR(format, pixels, frame, width, height);
+#endif
 
         auto *colorMap = GifMakeMapObject(256, nullptr);
-        getColorMap((uint8_t *) colorMap->Colors, pixels, width * height, m_quality);
+        getColorMap((uint8_t *) colorMap->Colors, frame, width * height, m_quality);
 
         auto *rasterBits = (GifByteType *) malloc(width * height);
-        getRasterBits((uint8_t *) rasterBits, pixels, width * height);
+        getRasterBits((uint8_t *) rasterBits, frame, width * height);
 
         encodeFrame(width, height, delay, colorMap, rasterBits);
     }

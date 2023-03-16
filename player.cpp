@@ -13,7 +13,7 @@ namespace SpiralFun {
 
 namespace {
 constexpr int FRAME_DURATION = 4; // unit is 10ms
-constexpr int GIF_QUALITY = 10;
+constexpr int GIF_QUALITY = 30;
 }
 
 Player::Player(const CircleList &circles) :
@@ -182,11 +182,10 @@ bool Player::setupRecording()
     const QSize& frameSize = mSceneGrabber->getSpiralImageSize();
     const int width = frameSize.width();
     const int height = frameSize.height();
-    const int preAllocSize = width * height * 3;
 
-    qDebug() << "Start recording frame:" << frameSize << "alloc (MB):" << preAllocSize / (1024 * 1024.0);
+    qDebug() << "Start recording frame:" << frameSize;
 
-    if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, false, 0, preAllocSize))
+    if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, false, 0))
     {
         qWarning() << "Cannot open file:" << mGifFileName;
         return false;

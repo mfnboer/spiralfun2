@@ -379,6 +379,7 @@ void alterneigh(int rad, int i, int b, int g, int r) {
 /* Main Learning Loop
    ------------------ */
 
+// MICHEL: changed to 4 bytes RGBA pixels
 void learn() {
     int i, j, b, g, r;
     int radius, rad, alpha, step, delta, samplepixels;
@@ -388,7 +389,7 @@ void learn() {
     alphadec = 30 + ((samplefac - 1) / 3);
     p = thepicture;
     lim = thepicture + lengthcount;
-    samplepixels = lengthcount / (3 * samplefac);
+    samplepixels = lengthcount / (4 * samplefac);
     delta = samplepixels / ncycles;
     alpha = initalpha;
     radius = initradius;
@@ -400,20 +401,20 @@ void learn() {
 
 //	fprintf(stderr,"beginning 1D learning: initial radius=%d\n", rad);
 
-    if ((lengthcount % prime1) != 0) step = 3 * prime1;
+    if ((lengthcount % prime1) != 0) step = 4 * prime1;
     else {
-        if ((lengthcount % prime2) != 0) step = 3 * prime2;
+        if ((lengthcount % prime2) != 0) step = 4 * prime2;
         else {
-            if ((lengthcount % prime3) != 0) step = 3 * prime3;
-            else step = 3 * prime4;
+            if ((lengthcount % prime3) != 0) step = 4 * prime3;
+            else step = 4 * prime4;
         }
     }
 
     i = 0;
     while (i < samplepixels) {
-        b = p[0] << netbiasshift;
+        b = p[2] << netbiasshift;
         g = p[1] << netbiasshift;
-        r = p[2] << netbiasshift;
+        r = p[0] << netbiasshift;
         j = contest(b, g, r);
 
         altersingle(alpha, j, b, g, r);
