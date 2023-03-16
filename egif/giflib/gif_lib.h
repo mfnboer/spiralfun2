@@ -132,7 +132,7 @@ GifFileType *EGifOpen(void *userPtr, OutputFunc writeFunc, int *Error);
 int EGifSpew(GifFileType * GifFile);
 int EGifWriteHeader(GifFileType *GifFileOut);
 int EGifWritePictures(GifFileType *GifFileOut);
-int EGifWriteTrailer(GifFileType *GifFileOut);
+int EGifWriteExtBlocks(GifFileType *GifFileOut);
 const char *EGifGetGifVersion(GifFileType *GifFile); /* new in 5.x */
 int EGifCloseFile(GifFileType *GifFile, int *ErrorCode);
 

@@ -32,7 +32,7 @@ static void getColorMap(uint8_t *colorMap, const uint8_t *pixels, int nPixels, i
 
 // MICHEL: changed to 4 byte RGBA pixels
 static void getRasterBits(uint8_t *rasterBits, const uint8_t *pixels, int nPixels) {
-    int indexBlack = inxsearch(0, 0, 0);
+    const int indexBlack = inxsearch(0, 0, 0);
 
     for (int i = 0; i < nPixels; ++i) {
         const int r = pixels[i * 4];
@@ -126,6 +126,12 @@ bool GifEncoder::open(const std::string &file, int width, int height, int qualit
         return false;
     }
 
+    if (EGifWriteExtBlocks(m_gifFile) == GIF_ERROR) {
+        EGifCloseFile(m_gifFile, nullptr);
+        m_gifFileHandler = nullptr;
+        return false;
+    }
+
     return true;
 }
 
@@ -155,15 +161,10 @@ bool GifEncoder::close() {
         return false;
     }
 
+    EGifCloseFile(m_gifFile, nullptr);
+
     int extCount = m_gifFile->ExtensionBlockCount;
     auto *extBlocks = m_gifFile->ExtensionBlocks;
-
-    if (EGifWriteTrailer(m_gifFile) == GIF_ERROR) {
-        EGifCloseFile(m_gifFile, nullptr);
-        m_gifFileHandler = nullptr;
-        return false;
-    }
-
     GifFreeExtensions(&extCount, &extBlocks);
     m_gifFileHandler = nullptr;
     reset();

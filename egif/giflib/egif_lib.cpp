@@ -332,7 +332,7 @@ EGifPutScreenDesc(GifFileType *GifFile,
         (ColorMap ? ColorMap->BitsPerPixel - 1 : 0x07 ); /* Actual size of the
                                                             color table. */
     if (ColorMap != NULL && ColorMap->SortFlag)
-	Buf[0] |= 0x08;
+        Buf[0] |= 0x08;
     Buf[1] = BackGround;    /* Index into the ColorTable for background color */
     Buf[2] = GifFile->AspectByte;     /* Pixel Aspect Ratio */
     InternalWrite(GifFile, Buf, 3);
@@ -1158,7 +1158,7 @@ int EGifWritePictures(GifFileType *GifFileOut)
     return (GIF_OK);
 }
 
-int EGifWriteTrailer(GifFileType *GifFileOut)
+int EGifWriteExtBlocks(GifFileType *GifFileOut)
 {
     if (EGifWriteExtensions(GifFileOut,
                             GifFileOut->ExtensionBlocks,
@@ -1179,7 +1179,7 @@ EGifSpew(GifFileType *GifFileOut)
     if (EGifWritePictures(GifFileOut) == GIF_ERROR)
         return (GIF_ERROR);
 
-    if (EGifWriteTrailer(GifFileOut) == GIF_ERROR)
+    if (EGifWriteExtBlocks(GifFileOut) == GIF_ERROR)
         return (GIF_ERROR);
 
     if (EGifCloseFile(GifFileOut, NULL) == GIF_ERROR)

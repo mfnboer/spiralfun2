@@ -127,7 +127,7 @@ ApplicationWindow {
                     onTriggered: scene.saveConfig()
                 }
                 MenuItem {
-                    text: "Record GIF (SLOW)"
+                    text: "Record GIF"
                     enabled: scene.donePlaying() && !scene.isInVideoShareMode()
                     onTriggered: scene.record()
                 }
