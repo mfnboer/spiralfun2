@@ -1,5 +1,6 @@
 //
 // Created by xiaozhuai on 2020/12/20.
+// Adapted for Spiral Fun by Michel de Boer in March 2023
 //
 
 #ifndef GIF_GIFENCODER_H
@@ -34,8 +35,7 @@ public:
      *        If use local color map, preAllocSize = MAX(width * height) * 3
      * @return
      */
-    bool open(const std::string &file, int width, int height,
-              int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize = 0);
+    bool open(const std::string &file, int width, int height, int quality, int16_t loop);
 
     /**
      * add frame
@@ -47,7 +47,7 @@ public:
      * @param delay delay time 0.01s
      * @return
      */
-    bool push(PixelFormat format, const uint8_t *frame, int x, int y, int width, int height, int delay);
+    bool push(const uint8_t *frame, int x, int y, int width, int height, int delay);
 
     /**
      * close gif file
@@ -57,17 +57,7 @@ public:
     bool close();
 
 private:
-    inline bool isFirstFrame() const {
-        return m_frameCount == 0;
-    }
-
     inline void reset() {
-        if (m_framePixels != nullptr) {
-            free(m_framePixels);
-            m_framePixels = nullptr;
-        }
-        m_allocSize = 0;
-        m_allFrameDelays.clear();
         m_frameCount = 0;
         m_frameWidth = -1;
         m_frameHeight = -1;
@@ -77,13 +67,7 @@ private:
 
 private:
     void *m_gifFileHandler = nullptr;
-
     int m_quality = 10;
-    bool m_useGlobalColorMap = false;
-
-    uint8_t *m_framePixels = nullptr;
-    int m_allocSize = 0;
-    std::vector<int> m_allFrameDelays{};
     int m_frameCount = 0;
     int m_frameWidth = -1;
     int m_frameHeight = -1;

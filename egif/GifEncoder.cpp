@@ -86,8 +86,7 @@ static bool convertToBGR(GifEncoder::PixelFormat format, uint8_t *dst, const uin
     return true;
 }
 
-bool GifEncoder::open(const std::string &file, int width, int height,
-                      int quality, bool useGlobalColorMap, int16_t loop, int preAllocSize) {
+bool GifEncoder::open(const std::string &file, int width, int height, int quality, int16_t loop) {
     if (m_gifFile != nullptr) {
         return false;
     }
@@ -99,14 +98,8 @@ bool GifEncoder::open(const std::string &file, int width, int height,
     }
 
     m_quality = quality;
-    m_useGlobalColorMap = useGlobalColorMap;
 
     reset();
-
-    if (preAllocSize > 0) {
-        m_framePixels = (uint8_t *) malloc(preAllocSize);
-        m_allocSize = preAllocSize;
-    }
 
     m_gifFile->SWidth = width;
     m_gifFile->SHeight = height;
@@ -130,7 +123,7 @@ bool GifEncoder::open(const std::string &file, int width, int height,
     return true;
 }
 
-bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int x, int y, int width, int height, int delay) {
+bool GifEncoder::push(const uint8_t *frame, int x, int y, int width, int height, int delay) {
     if (m_gifFile == nullptr) {
         return false;
     }
@@ -139,73 +132,21 @@ bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int x, int y, in
         return false;
     }
 
-    if (m_useGlobalColorMap) {
-        if (isFirstFrame()) {
-            m_frameWidth = width;
-            m_frameHeight = height;
-        } else {
-            if (m_frameWidth != width || m_frameHeight != height) {
-                throw std::runtime_error("Frame size must be same when use global color map!");
-            }
-        }
+    auto *colorMap = GifMakeMapObject(256, nullptr);
+    getColorMap((uint8_t *) colorMap->Colors, frame, width * height, m_quality);
 
-        int needSize = width * height * 3 * (m_frameCount + 1);
-        if (m_allocSize < needSize) {
-            m_framePixels = (uint8_t *) realloc(m_framePixels, needSize);
-            m_allocSize = needSize;
-//            printf("realloc 1\n");
-        }
-        auto *pixels = m_framePixels + width * height * 3 * m_frameCount;
-        convertToBGR(format, pixels, frame, width, height);
-        m_allFrameDelays.push_back(delay);
-    } else {
-        // MICHEL: disabled as I pass 4 byte RGBA pixels to the neural net
-#if 0
-        int needSize = width * height * 3;
-        if (m_allocSize < needSize) {
-            m_framePixels = (uint8_t *) realloc(m_framePixels, needSize);
-            m_allocSize = needSize;
-//            printf("realloc 2\n");
-        }
+    auto *rasterBits = (GifByteType *) malloc(width * height);
+    getRasterBits((uint8_t *) rasterBits, frame, width * height);
 
-        auto *pixels = m_framePixels;
-        convertToBGR(format, pixels, frame, width, height);
-#endif
-
-        auto *colorMap = GifMakeMapObject(256, nullptr);
-        getColorMap((uint8_t *) colorMap->Colors, frame, width * height, m_quality);
-
-        auto *rasterBits = (GifByteType *) malloc(width * height);
-        getRasterBits((uint8_t *) rasterBits, frame, width * height);
-
-        encodeFrame(x, y, width, height, delay, colorMap, rasterBits);
-    }
+    encodeFrame(x, y, width, height, delay, colorMap, rasterBits);
 
     m_frameCount++;
-
     return true;
 }
 
 bool GifEncoder::close() {
     if (m_gifFile == nullptr) {
         return false;
-    }
-
-    ColorMapObject *globalColorMap = nullptr;
-
-    if (m_useGlobalColorMap) {
-        globalColorMap = GifMakeMapObject(256, nullptr);
-        getColorMap((uint8_t *) globalColorMap->Colors, m_framePixels,
-                    m_frameWidth * m_frameHeight * m_frameCount, m_quality);
-        m_gifFile->SColorMap = globalColorMap;
-
-        for (int i = 0; i < m_frameCount; ++i) {
-            auto *pixels = m_framePixels + m_frameWidth * m_frameHeight * 3 * i;
-            auto *rasterBits = (GifByteType *) malloc(m_frameWidth * m_frameHeight);
-            getRasterBits((uint8_t *) rasterBits, pixels, m_frameWidth * m_frameHeight);
-
-            encodeFrame(0, 0, m_frameWidth, m_frameHeight, m_allFrameDelays[i], nullptr, rasterBits);
-        }
     }
 
     int extCount = m_gifFile->ExtensionBlockCount;
@@ -219,10 +160,6 @@ bool GifEncoder::close() {
         EGifCloseFile(m_gifFile, &error);
         m_gifFileHandler = nullptr;
         return false;
-    }
-
-    if (globalColorMap != nullptr) {
-        GifFreeMapObject(globalColorMap);
     }
 
     GifFreeExtensions(&extCount, &extBlocks);

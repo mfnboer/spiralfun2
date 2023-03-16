@@ -188,7 +188,7 @@ bool Player::setupRecording()
 
     qDebug() << "Start recording frame:" << mFullFrameRect.size();
 
-    if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, false, 0))
+    if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, 0))
     {
         qWarning() << "Cannot open file:" << mGifFileName;
         return false;
@@ -257,10 +257,8 @@ void Player::recordFrame()
     Q_ASSERT(mGifEncoder);
     Q_ASSERT(mFrame);
     const uint8_t* frame = mFrame->constBits();
-    mGifEncoder->push(GifEncoder::PIXEL_FORMAT_RGBA, frame,
-                      mFramePosition.x(), mFramePosition.y(),
-                      mFrame->width(), mFrame->height(),
-                      FRAME_DURATION);   
+    mGifEncoder->push(frame, mFramePosition.x(), mFramePosition.y(),
+                      mFrame->width(), mFrame->height(), FRAME_DURATION);
 }
 
 void Player::runRecordFrameThread(const std::function<void()>& whenFinished)
