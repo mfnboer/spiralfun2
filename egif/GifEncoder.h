@@ -58,17 +58,15 @@ public:
 
 private:
     inline void reset() {
-        m_frameCount = 0;
         m_frameWidth = -1;
         m_frameHeight = -1;
     }
 
-    void encodeFrame(int x, int y, int width, int height, int delay, void *colorMap, void *rasterBits);
+    bool encodeFrame(int x, int y, int width, int height, int delay, void *colorMap, void *rasterBits);
 
 private:
     void *m_gifFileHandler = nullptr;
     int m_quality = 10;
-    int m_frameCount = 0;
     int m_frameWidth = -1;
     int m_frameHeight = -1;
 };

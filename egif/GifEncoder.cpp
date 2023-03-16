@@ -120,6 +120,12 @@ bool GifEncoder::open(const std::string &file, int width, int height, int qualit
     GifAddExtensionBlockFor(m_gifFile, APPLICATION_EXT_FUNC_CODE, sizeof(appExt), appExt);
     GifAddExtensionBlockFor(m_gifFile, CONTINUE_EXT_FUNC_CODE, sizeof(appExtSubBlock), appExtSubBlock);
 
+    if (EGifWriteHeader(m_gifFile) == GIF_ERROR) {
+        EGifCloseFile(m_gifFile, &error);
+        m_gifFileHandler = nullptr;
+        return false;
+    }
+
     return true;
 }
 
@@ -138,9 +144,9 @@ bool GifEncoder::push(const uint8_t *frame, int x, int y, int width, int height,
     auto *rasterBits = (GifByteType *) malloc(width * height);
     getRasterBits((uint8_t *) rasterBits, frame, width * height);
 
-    encodeFrame(x, y, width, height, delay, colorMap, rasterBits);
+    if (!encodeFrame(x, y, width, height, delay, colorMap, rasterBits))
+        return false;
 
-    m_frameCount++;
     return true;
 }
 
@@ -152,40 +158,20 @@ bool GifEncoder::close() {
     int extCount = m_gifFile->ExtensionBlockCount;
     auto *extBlocks = m_gifFile->ExtensionBlocks;
 
-    int savedImageCount = m_gifFile->ImageCount;
-    auto *savedImages = m_gifFile->SavedImages;
-
-    int error;
-    if (EGifSpew(m_gifFile) == GIF_ERROR) {
-        EGifCloseFile(m_gifFile, &error);
+    if (EGifWriteTrailer(m_gifFile) == GIF_ERROR) {
+        EGifCloseFile(m_gifFile, nullptr);
         m_gifFileHandler = nullptr;
         return false;
     }
 
     GifFreeExtensions(&extCount, &extBlocks);
-    for (auto *sp = savedImages; sp < savedImages + savedImageCount; sp++) {
-        if (sp->ImageDesc.ColorMap != nullptr) {
-            GifFreeMapObject(sp->ImageDesc.ColorMap);
-            sp->ImageDesc.ColorMap = nullptr;
-        }
-
-        if (sp->RasterBits != nullptr) {
-            free((char *)sp->RasterBits);
-            sp->RasterBits = nullptr;
-        }
-
-        GifFreeExtensions(&sp->ExtensionBlockCount, &sp->ExtensionBlocks);
-    }
-    free(savedImages);
-
     m_gifFileHandler = nullptr;
-
     reset();
 
     return true;
 }
 
-void GifEncoder::encodeFrame(int x, int y, int width, int height, int delay, void *colorMap, void *rasterBits) {
+bool GifEncoder::encodeFrame(int x, int y, int width, int height, int delay, void *colorMap, void *rasterBits) {
     auto *gifImage = GifMakeSavedImage(m_gifFile, nullptr);
 
     gifImage->ImageDesc.Left = x;
@@ -206,4 +192,13 @@ void GifEncoder::encodeFrame(int x, int y, int width, int height, int delay, voi
     uint8_t gcbBytes[4];
     EGifGCBToExtension(&gcb, gcbBytes);
     GifAddExtensionBlockFor(gifImage, GRAPHICS_EXT_FUNC_CODE, sizeof(gcbBytes), gcbBytes);
+
+    if (EGifWritePictures(m_gifFile) == GIF_ERROR) {
+        EGifCloseFile(m_gifFile, nullptr);
+        m_gifFileHandler = nullptr;
+        return false;
+    }
+
+    GifFreeSavedImages(m_gifFile);
+    return true;
 }

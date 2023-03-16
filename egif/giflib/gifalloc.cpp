@@ -410,11 +410,12 @@ GifFreeSavedImages(GifFileType *GifFile)
 
         if (sp->RasterBits != NULL)
             free((char *)sp->RasterBits);
-	
-	GifFreeExtensions(&sp->ExtensionBlockCount, &sp->ExtensionBlocks);
+
+        GifFreeExtensions(&sp->ExtensionBlockCount, &sp->ExtensionBlocks);
     }
     free((char *)GifFile->SavedImages);
     GifFile->SavedImages = NULL;
+    GifFile->ImageCount = 0;
 }
 
 /* end */
