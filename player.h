@@ -33,6 +33,9 @@ private:
     void forceDraw();
     void finishPlaying();
     bool setupRecording();
+    void resetRecordingRect();
+    void updateRecordingRect();
+    void calcFramePosition();
     void record();
     void recordFrame();
     void stopRecording();
@@ -48,12 +51,15 @@ private:
     qreal mRecordAngle = 0.0;
     int mStartTime;
     int mCycles;
+    QRect mFullFrameRect;
+    QRectF mRecordingRect;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<GifEncoder> mGifEncoder;
     QString mGifFileName;
     bool mRecording = false;
     std::unique_ptr<QThread> mRecordingThread;
     std::unique_ptr<QImage> mFrame;
+    QPoint mFramePosition;
 };
 
 }

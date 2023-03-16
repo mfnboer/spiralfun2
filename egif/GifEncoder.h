@@ -47,7 +47,7 @@ public:
      * @param delay delay time 0.01s
      * @return
      */
-    bool push(PixelFormat format, const uint8_t *frame, int width, int height, int delay);
+    bool push(PixelFormat format, const uint8_t *frame, int x, int y, int width, int height, int delay);
 
     /**
      * close gif file
@@ -73,7 +73,7 @@ private:
         m_frameHeight = -1;
     }
 
-    void encodeFrame(int width, int height, int delay, void *colorMap, void *rasterBits);
+    void encodeFrame(int x, int y, int width, int height, int delay, void *colorMap, void *rasterBits);
 
 private:
     void *m_gifFileHandler = nullptr;

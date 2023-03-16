@@ -26,13 +26,7 @@ QSize SceneGrabber::getImageGrabSize() const
     return imageSize;
 }
 
-QSize SceneGrabber::getSpiralImageSize() const
-{
-    const auto rect = getSpiralCutRect();
-    return rect.size();
-}
-
-bool SceneGrabber::grabScene(const Callback& callback)
+bool SceneGrabber::grabScene(const QRect& cutRect, const Callback& callback)
 {
     Q_ASSERT(callback);
     auto grabResult = mScene->grabToImage(getImageGrabSize());
@@ -41,12 +35,30 @@ bool SceneGrabber::grabScene(const Callback& callback)
         return false;
 
     QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
-        [this, grabResult, callback]{
-            QImage img = extractSpiral(grabResult->image());
+        [this, grabResult, cutRect, callback]{
+            QImage img = extractRect(grabResult->image(), cutRect);
             callback(std::forward<QImage>(img));
         });
 
     return true;
+}
+
+QRectF SceneGrabber::calcBoundingRectangle(const CircleList& circles) const
+{
+    QRectF rect = circles[1]->boundingRect();
+    rect = QRectF(QPointF(0, 0), rect.size() * mPixelRatio);
+    rect.translate(circles[1]->x() * mPixelRatio, circles[1]->y() * mPixelRatio);
+
+    for (unsigned i = 2; i < circles.size(); ++i)
+    {
+        const auto& c = circles[i];
+        auto r = c->boundingRect();
+        r = QRectF(QPointF(0, 0), r.size() * mPixelRatio);
+        r.translate(c->x() * mPixelRatio, c->y() * mPixelRatio);
+        rect |= r;
+    }
+
+    return rect;
 }
 
 QRect SceneGrabber::getSpiralCutRect() const
@@ -56,10 +68,9 @@ QRect SceneGrabber::getSpiralCutRect() const
     return cutRect.toRect();
 }
 
-QImage SceneGrabber::extractSpiral(const QImage& grabbedImg)
+QImage SceneGrabber::extractRect(const QImage& grabbedImg, const QRect& cutRect)
 {
-    const QImage spiral = grabbedImg.copy(getSpiralCutRect());
-    return spiral;
+    return grabbedImg.copy(cutRect);
 }
 
 }

@@ -13,7 +13,7 @@ namespace SpiralFun {
 
 namespace {
 constexpr int FRAME_DURATION = 4; // unit is 10ms
-constexpr int GIF_QUALITY = 30;
+constexpr int GIF_QUALITY = 10;
 }
 
 Player::Player(const CircleList &circles) :
@@ -49,6 +49,7 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
     mCycles = 0;
     mSceneGrabber = std::move(sceneGrabber);
+    startTimers();
 
     if (mSceneGrabber)
     {
@@ -56,7 +57,6 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
             return false;
     }
 
-    startTimers();
     return true;
 }
 
@@ -107,7 +107,11 @@ void Player::finishPlaying()
     if (mRecording)
     {
         // Record last frame
-        const bool grabbed = mSceneGrabber->grabScene([this](QImage&& img){
+        updateRecordingRect();
+        calcFramePosition();
+
+        const bool grabbed = mSceneGrabber->grabScene(mRecordingRect.toRect(),
+            [this](QImage&& img){
                 qDebug() << "START finalizing video";
                 mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
                 runRecordFrameThread([this]{
@@ -116,7 +120,7 @@ void Player::finishPlaying()
                         Utils::scanMediaFile(mGifFileName);
                         emit done();
                     });
-        });
+            });
 
         if (!grabbed)
         {
@@ -167,7 +171,6 @@ void Player::forceDraw()
 bool Player::setupRecording()
 {
     Q_ASSERT(mSceneGrabber);
-    mRecordAngle = 0.0;
     QString path;
     try {
         path = Utils::getPicturesPath();
@@ -179,11 +182,11 @@ bool Player::setupRecording()
     const QString baseName = Utils::createDateTimeName();
     mGifFileName = path + QString("/VID_%1.gif").arg(baseName);
     mGifEncoder = std::make_unique<GifEncoder>();
-    const QSize& frameSize = mSceneGrabber->getSpiralImageSize();
-    const int width = frameSize.width();
-    const int height = frameSize.height();
+    mFullFrameRect = mSceneGrabber->getSpiralCutRect();
+    const int width = mFullFrameRect.width();
+    const int height = mFullFrameRect.height();
 
-    qDebug() << "Start recording frame:" << frameSize;
+    qDebug() << "Start recording frame:" << mFullFrameRect.size();
 
     if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, false, 0))
     {
@@ -191,7 +194,12 @@ bool Player::setupRecording()
         return false;
     }
 
+    // Capture one full frame, next frames will be subframes where changes happened.
+    mRecordingRect = mFullFrameRect;
+    mRecordAngle = mRecordAngleThreshold;
     mRecording = true;
+    record();
+
     return true;
 }
 
@@ -202,14 +210,34 @@ void Player::stopRecording()
     mRecording = false;
 }
 
+void Player::resetRecordingRect()
+{
+    mRecordingRect = mSceneGrabber->calcBoundingRectangle(mCircles);
+}
+
+void Player::updateRecordingRect()
+{
+    mRecordingRect |= mSceneGrabber->calcBoundingRectangle(mCircles);
+}
+
+void Player::calcFramePosition()
+{
+    mFramePosition = mRecordingRect.translated(-mFullFrameRect.topLeft()).toRect().topLeft();
+}
+
 void Player::record()
 {
+    updateRecordingRect();
     mRecordAngle += mStepAngle;
+
     if (mRecordAngle < mRecordAngleThreshold)
         return;
 
     mRecordAngle = 0.0;
-    const bool grabbed = mSceneGrabber->grabScene([this](QImage&& img){
+    calcFramePosition();
+
+    const bool grabbed = mSceneGrabber->grabScene(mRecordingRect.toRect(),
+        [this](QImage&& img){
             mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
             runRecordFrameThread([this]{ mPlayTimer.start(); });
         });
@@ -220,6 +248,7 @@ void Player::record()
         return;
     }
 
+    resetRecordingRect();
     mPlayTimer.stop();
 }
 
@@ -227,9 +256,11 @@ void Player::recordFrame()
 {
     Q_ASSERT(mGifEncoder);
     Q_ASSERT(mFrame);
-    const uint8_t* frame = mFrame->bits();
-    mGifEncoder->push(GifEncoder::PIXEL_FORMAT_RGBA, frame, mFrame->width(), mFrame->height(),
-                      FRAME_DURATION);
+    const uint8_t* frame = mFrame->constBits();
+    mGifEncoder->push(GifEncoder::PIXEL_FORMAT_RGBA, frame,
+                      mFramePosition.x(), mFramePosition.y(),
+                      mFrame->width(), mFrame->height(),
+                      FRAME_DURATION);   
 }
 
 void Player::runRecordFrameThread(const std::function<void()>& whenFinished)

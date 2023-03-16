@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #pragma once
+#include "circle.h"
 #include <QQuickItem>
 
 namespace SpiralFun {
@@ -14,13 +15,17 @@ public:
 
     SceneGrabber(QQuickItem* scene, const QRectF& sceneRect);
 
-    QSize getImageGrabSize() const;
-    QSize getSpiralImageSize() const;
-    bool grabScene(const Callback& callback);
+    QRect getSpiralCutRect() const;
+    bool grabScene(const QRect& cutRect, const Callback& callback);
+
+    // Calculate the bounding rectangle for circles 1..N-1
+    // Those are the circles that move/
+    // The rectangle position and size are relative to the full scene rect.
+    QRectF calcBoundingRectangle(const CircleList& circles) const;
 
 private:
-    QRect getSpiralCutRect() const;
-    QImage extractSpiral(const QImage& grabbedImg);
+    QSize getImageGrabSize() const;
+    QImage extractRect(const QImage& grabbedImg, const QRect& cutRect);
 
     QQuickItem* mScene;
     QRectF mSceneRect;

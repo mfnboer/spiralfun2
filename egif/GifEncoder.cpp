@@ -130,7 +130,7 @@ bool GifEncoder::open(const std::string &file, int width, int height,
     return true;
 }
 
-bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int width, int height, int delay) {
+bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int x, int y, int width, int height, int delay) {
     if (m_gifFile == nullptr) {
         return false;
     }
@@ -178,7 +178,7 @@ bool GifEncoder::push(PixelFormat format, const uint8_t *frame, int width, int h
         auto *rasterBits = (GifByteType *) malloc(width * height);
         getRasterBits((uint8_t *) rasterBits, frame, width * height);
 
-        encodeFrame(width, height, delay, colorMap, rasterBits);
+        encodeFrame(x, y, width, height, delay, colorMap, rasterBits);
     }
 
     m_frameCount++;
@@ -204,7 +204,7 @@ bool GifEncoder::close() {
             auto *rasterBits = (GifByteType *) malloc(m_frameWidth * m_frameHeight);
             getRasterBits((uint8_t *) rasterBits, pixels, m_frameWidth * m_frameHeight);
 
-            encodeFrame(m_frameWidth, m_frameHeight, m_allFrameDelays[i], nullptr, rasterBits);
+            encodeFrame(0, 0, m_frameWidth, m_frameHeight, m_allFrameDelays[i], nullptr, rasterBits);
         }
     }
 
@@ -248,11 +248,11 @@ bool GifEncoder::close() {
     return true;
 }
 
-void GifEncoder::encodeFrame(int width, int height, int delay, void *colorMap, void *rasterBits) {
+void GifEncoder::encodeFrame(int x, int y, int width, int height, int delay, void *colorMap, void *rasterBits) {
     auto *gifImage = GifMakeSavedImage(m_gifFile, nullptr);
 
-    gifImage->ImageDesc.Left = 0;
-    gifImage->ImageDesc.Top = 0;
+    gifImage->ImageDesc.Left = x;
+    gifImage->ImageDesc.Top = y;
     gifImage->ImageDesc.Width = width;
     gifImage->ImageDesc.Height = height;
     gifImage->ImageDesc.Interlace = false;
