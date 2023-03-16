@@ -295,49 +295,17 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 
 void SpiralScene::record()
 {
-    // TODO: remove?
-#if 0
-    const qreal dpr = window()->effectiveDevicePixelRatio();
-    const qreal scaleFactor = 1.0 / dpr;
-    scaleScene(scaleFactor);
-    mRecordScaleFactor *= scaleFactor;
-#endif
     auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
     resetScene();
-    //setScale(dpr);
     doPlay(std::move(recorder));
     setPlayState(RECORDING);
     setShareMode(SHARE_VID);
     mShareVideoUri.clear();
 }
 
-void SpiralScene::scaleScene(qreal scaleFactor)
-{
-    const QPointF center = mCircles[0]->getCenter();
-    const qreal xFactor = (center.x() - mSceneRect.x()) / mSceneRect.width();
-    const qreal yFactor = (center.y() - mSceneRect.y()) / mSceneRect.height();
-    const qreal x = center.x() - (mSceneRect.width() * scaleFactor) * xFactor;
-    const qreal y = center.y() - (mSceneRect.height() * scaleFactor) * yFactor;
-    const qreal w = mSceneRect.width() * scaleFactor;
-    const qreal h = mSceneRect.height() * scaleFactor;
-    const QRectF scaledSceneRect(x, y, w, h);
-    qDebug() << "Scale scene from:" << mSceneRect << "to:" << scaledSceneRect;
-    mSceneRect = scaledSceneRect;
-
-    for (auto& c : mCircles)
-        c->setRadius(c->getRadius() * scaleFactor);
-}
-
 void SpiralScene::stop()
 {
     mPlayer = nullptr;
-
-    if (mRecordScaleFactor != 1.0)
-    {
-        scaleScene(1.0 / mRecordScaleFactor);
-        mRecordScaleFactor = 1.0;
-    }
-
     resetScene();
     setPlayState(NOT_PLAYING);
     setCurrentCircleFocus(true);
