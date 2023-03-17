@@ -83,7 +83,7 @@ public class QAndroidUtils
             );
     }
 
-    public static void sharePicture(String uriString, String configAppUri) {
+    public static void sharePicture(String uriString, String configAppUri, String mimeType) {
         if (QtNative.activity() == null)
             return;
 
@@ -108,7 +108,8 @@ public class QAndroidUtils
             "Click to start or get the app from the play store (Android only):\n" +
             configAppUri);
         intent.putExtra(Intent.EXTRA_STREAM, uri);
-        intent.setType("image/jpg");
+        intent.setType(mimeType);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         QtNative.activity().startActivity(Intent.createChooser(intent, "Share spiral using"));
     }
 }

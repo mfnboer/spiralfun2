@@ -135,16 +135,18 @@ void scanMediaFile(const QString& fileName)
 #endif
 }
 
-void sharePicture(const QString& contentUri, const QString& configAppUri)
+void sharePicture(const QString& contentUri, const QString& configAppUri, const QString& mimeType)
 {
 #if defined(Q_OS_ANDROID)
     auto jsContentUri = QJniObject::fromString(contentUri);
     auto jsConfigAppUri = QJniObject::fromString(configAppUri);
+    auto jsMimeType = QJniObject::fromString(mimeType);
     QJniObject::callStaticMethod<void>("com/gmail/mfnboer/QAndroidUtils",
                                        "sharePicture",
-                                       "(Ljava/lang/String;Ljava/lang/String;)V",
+                                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
                                        jsContentUri.object<jstring>(),
-                                       jsConfigAppUri.object<jstring>());
+                                       jsConfigAppUri.object<jstring>(),
+                                       jsMimeType.object<jstring>());
 #else
     qDebug() << "Sharing not supported, content:" << contentUri;
     qDebug() << "config:" << configAppUri;

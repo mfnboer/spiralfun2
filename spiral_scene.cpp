@@ -577,15 +577,33 @@ void SpiralScene::shareImage()
     if (!mShareContentUri.isNull())
     {
         qDebug() << "Share content uri available:" << mShareContentUri;
-        SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-        const QString configAppUri = cfg.getConfigAppUri();
-        Utils::sharePicture(mShareContentUri, configAppUri);
+        shareContent();
     }
     else
     {
         if (!saveImage())
             setSharingInProgress(false);
     }
+}
+
+void SpiralScene::shareContent()
+{
+    Q_ASSERT(!mShareContentUri.isNull());
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    const QString configAppUri = cfg.getConfigAppUri();
+
+    QString mimeType;
+    switch (mShareMode)
+    {
+    case SHARE_PIC:
+        mimeType = "image/jpg";
+        break;
+    case SHARE_VID:
+        mimeType = "image/gif";
+        break;
+    }
+
+    Utils::sharePicture(mShareContentUri, configAppUri, mimeType);
 }
 
 void SpiralScene::shareVideo()
@@ -597,9 +615,7 @@ void SpiralScene::shareVideo()
     }
 
     setSharingInProgress(true);
-    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-    const QString configAppUri = cfg.getConfigAppUri();
-    Utils::sharePicture(mShareContentUri, configAppUri);
+    shareContent();
     setSharingInProgress(false);
 }
 
@@ -615,15 +631,9 @@ void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
         return;
 
     if (!contentUri.isNull())
-    {
-        SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-        const QString configAppUri = cfg.getConfigAppUri();
-        Utils::sharePicture(contentUri, configAppUri);
-    }
+        shareContent();
     else
-    {
         qDebug() << "No content URI for sharing";
-    }
 
     setSharingInProgress(false);
 }

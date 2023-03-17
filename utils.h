@@ -12,7 +12,7 @@ QString getPublicSpiralConfigPath();
 QString getSpiralConfigPath();
 QString createPictureFileName();
 void scanMediaFile(const QString& fileName);
-void sharePicture(const QString& contentUri, const QString& configAppUri);
+void sharePicture(const QString& contentUri, const QString& configAppUri, const QString& mimeType);
 void handlePendingIntent();
 
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize);

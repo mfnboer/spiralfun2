@@ -101,6 +101,7 @@ private:
     void updateSceneRect(const QPointF& p);
     void doPlay(std::unique_ptr<SceneGrabber> recorder);
     void shareImage();
+    void shareContent();
     void shareVideo();
 
     std::unordered_map<QObject*, Line> mLines;
