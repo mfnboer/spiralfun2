@@ -58,7 +58,7 @@ public slots:
     void play();
     void record();
     void stop();
-    bool saveImage(bool share = false);
+    bool saveImage();
     void saveConfig();
     void share();
     QObjectList getConfigFileList();
@@ -113,11 +113,10 @@ private:
     std::unique_ptr<Player> mPlayer;
     PlayState mPlayState = NOT_PLAYING;
     qreal mScaleFactor = 1.0;
-    QString mShareImageFileNameSaved;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
     bool mSharingInProgress = false;
     ShareMode mShareMode = SHARE_PIC;
-    QString mShareVideoUri;
+    QString mShareContentUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;

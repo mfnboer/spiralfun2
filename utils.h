@@ -10,7 +10,7 @@ QString createDateTimeName();
 QString getPicturesPath();
 QString getPublicSpiralConfigPath();
 QString getSpiralConfigPath();
-QString createPictureFileName(bool forSharing);
+QString createPictureFileName();
 void scanMediaFile(const QString& fileName);
 void sharePicture(const QString& contentUri, const QString& configAppUri);
 void handlePendingIntent();

@@ -300,7 +300,7 @@ void SpiralScene::record()
     doPlay(std::move(recorder));
     setPlayState(RECORDING);
     setShareMode(SHARE_VID);
-    mShareVideoUri.clear();
+    mShareContentUri.clear();
 }
 
 void SpiralScene::stop()
@@ -364,7 +364,7 @@ void SpiralScene::resetScene()
     setScale(mScaleFactor);
     update();
     setSharingInProgress(false);
-    mShareImageFileNameSaved.clear();
+    mShareContentUri.clear();
 }
 
 void SpiralScene::selectCircle(Circle* circle)
@@ -513,7 +513,7 @@ void SpiralScene::touchEvent(QTouchEvent* event)
     event->accept();
 }
 
-bool SpiralScene::saveImage(bool share)
+bool SpiralScene::saveImage()
 {
     QString picPath;
     try {
@@ -529,8 +529,8 @@ bool SpiralScene::saveImage(bool share)
         return false;
     }
 
-    const QString fileName = picPath + "/" + Utils::createPictureFileName(share);
-    if (!share && QFile::exists(fileName))
+    const QString fileName = picPath + "/" + Utils::createPictureFileName();
+    if (QFile::exists(fileName))
     {
         emit message(QString("Failed to create: %1").arg(fileName));
         return false;
@@ -538,14 +538,11 @@ bool SpiralScene::saveImage(bool share)
 
     mSceneGrabber = std::make_unique<SceneGrabber>(this, mSceneRect);
     const bool grabbed = mSceneGrabber->grabScene(
-        [this, fileName, share](const QImage& img){
+        [this, fileName](const QImage& img){
             if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
                 Utils::scanMediaFile(fileName);
-
-                if (share)
-                    mShareImageFileNameSaved = fileName;
             }
             else
             {
@@ -577,21 +574,23 @@ void SpiralScene::shareImage()
 {
     setSharingInProgress(true);
 
-    if (!mShareImageFileNameSaved.isNull() && QFile::exists(mShareImageFileNameSaved))
+    if (!mShareContentUri.isNull())
     {
-        qDebug() << "Share file already saved:" << mShareImageFileNameSaved;
-        Utils::scanMediaFile(mShareImageFileNameSaved);
+        qDebug() << "Share content uri available:" << mShareContentUri;
+        SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+        const QString configAppUri = cfg.getConfigAppUri();
+        Utils::sharePicture(mShareContentUri, configAppUri);
     }
     else
     {
-        if (!saveImage(true))
+        if (!saveImage())
             setSharingInProgress(false);
     }
 }
 
 void SpiralScene::shareVideo()
 {
-    if (mShareVideoUri.isNull())
+    if (mShareMode != SHARE_VID || mShareContentUri.isNull())
     {
         qDebug() << "No video to share";
         return;
@@ -600,16 +599,16 @@ void SpiralScene::shareVideo()
     setSharingInProgress(true);
     SpiralConfig cfg(mCircles, mDefaultCircleRadius);
     const QString configAppUri = cfg.getConfigAppUri();
-    Utils::sharePicture(mShareVideoUri, configAppUri);
+    Utils::sharePicture(mShareContentUri, configAppUri);
     setSharingInProgress(false);
 }
 
 void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
 {
-    if (mShareMode == SHARE_VID && mShareVideoUri.isNull())
+    if (mShareMode == SHARE_VID || mSharingInProgress)
     {
-        qDebug() << "Save video content URI for sharing:" << contentUri;
-        mShareVideoUri = contentUri;
+        mShareContentUri = contentUri;
+        qDebug() << "Content sharing URI:" << contentUri << "share mode:" << mShareMode;
     }
 
     if (!mSharingInProgress)
