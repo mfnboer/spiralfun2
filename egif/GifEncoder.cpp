@@ -161,11 +161,11 @@ bool GifEncoder::close() {
         return false;
     }
 
-    EGifCloseFile(m_gifFile, nullptr);
-
     int extCount = m_gifFile->ExtensionBlockCount;
     auto *extBlocks = m_gifFile->ExtensionBlocks;
     GifFreeExtensions(&extCount, &extBlocks);
+
+    EGifCloseFile(m_gifFile, nullptr);
     m_gifFileHandler = nullptr;
     reset();
 

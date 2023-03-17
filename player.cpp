@@ -257,6 +257,7 @@ void Player::recordFrame()
     Q_ASSERT(mGifEncoder);
     Q_ASSERT(mFrame);
     const uint8_t* frame = mFrame->constBits();
+
     mGifEncoder->push(frame, mFramePosition.x(), mFramePosition.y(),
                       mFrame->width(), mFrame->height(), FRAME_DURATION);
 }
