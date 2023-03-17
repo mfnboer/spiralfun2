@@ -537,7 +537,7 @@ bool SpiralScene::saveImage(bool share)
     }
 
     mSceneGrabber = std::make_unique<SceneGrabber>(this, mSceneRect);
-    const bool grabbed = mSceneGrabber->grabScene(mSceneGrabber->getSpiralCutRect(),
+    const bool grabbed = mSceneGrabber->grabScene(
         [this, fileName, share](const QImage& img){
             if (img.save(fileName))
             {

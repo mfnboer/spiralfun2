@@ -26,9 +26,18 @@ QSize SceneGrabber::getImageGrabSize() const
     return imageSize;
 }
 
+bool SceneGrabber::grabScene(const Callback& callback)
+{
+    return grabScene(getSpiralCutRect(), callback);
+}
+
 bool SceneGrabber::grabScene(const QRect& cutRect, const Callback& callback)
 {
     Q_ASSERT(callback);
+
+    // Make sure all rendering is done before grabbing
+    mScene->update();
+
     auto grabResult = mScene->grabToImage(getImageGrabSize());
 
     if (!grabResult)

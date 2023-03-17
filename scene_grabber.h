@@ -16,6 +16,7 @@ public:
     SceneGrabber(QQuickItem* scene, const QRectF& sceneRect);
 
     QRect getSpiralCutRect() const;
+    bool grabScene(const Callback& callback);
     bool grabScene(const QRect& cutRect, const Callback& callback);
 
     // Calculate the bounding rectangle for circles 1..N-1
