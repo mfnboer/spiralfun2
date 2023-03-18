@@ -77,6 +77,7 @@ signals:
     void shareModeChanged();
     void sharingInProgressChanged();
     void message(const QString message);
+    void statusUpdate(const QString message);
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) override;

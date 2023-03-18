@@ -282,6 +282,13 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
     QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });
     QObject::connect(mPlayer.get(), &Player::done, this, [this]{
             removeCirclesFromScene();
+
+            if (mPlayState == RECORDING)
+            {
+                const QString fileName = mPlayer->getGifFileName().split('/').last();
+                emit statusUpdate(QString("GIF saved: %1").arg(fileName));
+            }
+
             setPlayState(DONE_PLAYING);
 
             // Stats are only complete after rendering is done.
@@ -533,7 +540,8 @@ bool SpiralScene::saveImage()
         return false;
     }
 
-    const QString fileName = picPath + "/" + Utils::createPictureFileName();
+    const QString baseFileName = Utils::createPictureFileName();
+    const QString fileName = picPath + "/" + baseFileName;
     if (QFile::exists(fileName))
     {
         emit message(QString("Failed to create: %1").arg(fileName));
@@ -542,10 +550,11 @@ bool SpiralScene::saveImage()
 
     mSceneGrabber = std::make_unique<SceneGrabber>(this, mSceneRect);
     const bool grabbed = mSceneGrabber->grabScene(
-        [this, fileName](const QImage& img){
+        [this, fileName, baseFileName](const QImage& img){
             if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
+                emit statusUpdate(QString("Image saved: %1").arg(baseFileName));
                 Utils::scanMediaFile(fileName);
             }
             else
@@ -686,6 +695,7 @@ void SpiralScene::saveConfig()
 
             try {
                 cfg.save(thumbnail);
+                emit statusUpdate("Config saved");
             } catch (RuntimeException& e) {
                 emit message(e.msg());
             }

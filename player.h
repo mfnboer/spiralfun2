@@ -20,6 +20,7 @@ public:
 
     bool play(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
     qreal getAngle() const { return mAngle; }
+    const QString& getGifFileName() const { return mGifFileName; }
 
 signals:
     void done();

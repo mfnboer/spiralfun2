@@ -13,6 +13,29 @@ ApplicationWindow {
     visible: true
     title: "Spiral Fun"
 
+    Popup {
+        id: statusPopup
+        width: parent.width
+        closePolicy: Popup.CloseOnPressOutside
+
+        Label {
+            id: statusText
+            text: "Event"
+        }
+
+        Timer {
+            id: closeTimer
+            interval: 2000
+            onTriggered: statusPopup.close()
+        }
+
+        function show(msg) {
+            statusText.text = msg;
+            open()
+            closeTimer.restart()
+        }
+    }
+
     GridLayout {
         columns: 4
         anchors.fill: parent
@@ -30,6 +53,7 @@ ApplicationWindow {
                 width: parent.width
                 height: parent.height
                 onMessage: (msg) => showMessage(msg)
+                onStatusUpdate: (msg) => statusPopup.show(msg)
 
                 function notPlaying() {
                     return playState === SpiralScene.NOT_PLAYING;
