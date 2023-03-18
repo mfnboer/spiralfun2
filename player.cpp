@@ -212,12 +212,12 @@ void Player::stopRecording()
 
 void Player::resetRecordingRect()
 {
-    mRecordingRect = mSceneGrabber->calcBoundingRectangle(mCircles);
+    mRecordingRect = mSceneGrabber->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
 void Player::updateRecordingRect()
 {
-    mRecordingRect |= mSceneGrabber->calcBoundingRectangle(mCircles);
+    mRecordingRect |= mSceneGrabber->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
 void Player::calcFramePosition()

@@ -458,21 +458,24 @@ QSGNode* SpiralScene::createLineNode(const Line& line)
 
 void SpiralScene::updateSceneRect(const QPointF& p)
 {
+    const qreal x = std::clamp(p.x(), 0.0, size().width());
+    const qreal y = std::clamp(p.y(), 0.0, size().height());
+
     if (mSceneRect.isNull())
     {
-        mSceneRect = QRectF(p, QSizeF(1, 1));
+        mSceneRect = QRectF(QPointF(x, y), QSizeF(1, 1));
         return;
     }
 
-    if (p.x() < mSceneRect.left())
-        mSceneRect.setLeft(p.x());
-    else if (p.x() > mSceneRect.right())
-        mSceneRect.setRight(p.x());
+    if (x < mSceneRect.left())
+        mSceneRect.setLeft(x);
+    else if (x > mSceneRect.right())
+        mSceneRect.setRight(x);
 
-    if (p.y() < mSceneRect.top())
-        mSceneRect.setTop(p.y());
-    else if (p.y() > mSceneRect.bottom())
-        mSceneRect.setBottom(p.y());
+    if (y < mSceneRect.top())
+        mSceneRect.setTop(y);
+    else if (y > mSceneRect.bottom())
+        mSceneRect.setBottom(y);
 }
 
 void SpiralScene::touchEvent(QTouchEvent* event)

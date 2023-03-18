@@ -148,7 +148,7 @@ void sharePicture(const QString& contentUri, const QString& configAppUri, const 
                                        jsConfigAppUri.object<jstring>(),
                                        jsMimeType.object<jstring>());
 #else
-    qDebug() << "Sharing not supported, content:" << contentUri;
+    qDebug() << "Sharing not supported, content:" << contentUri << "mimetype:" << mimeType;
     qDebug() << "config:" << configAppUri;
 #endif
 }

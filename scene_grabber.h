@@ -20,7 +20,7 @@ public:
     bool grabScene(const QRect& cutRect, const Callback& callback);
 
     // Calculate the bounding rectangle for circles 1..N-1
-    // Those are the circles that move/
+    // Those are the circles that move.
     // The rectangle position and size are relative to the full scene rect.
     QRectF calcBoundingRectangle(const CircleList& circles) const;
 
