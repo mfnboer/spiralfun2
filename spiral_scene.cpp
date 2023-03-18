@@ -448,6 +448,7 @@ QSGNode* SpiralScene::createLineNode(const Line& line)
     node->setFlag(QSGNode::OwnsGeometry);
     auto* material = new QSGFlatColorMaterial;
     material->setColor(line.mColor);
+    material->setFlag(QSGMaterial::Blending);
     node->setMaterial(material);
     node->setFlag(QSGNode::OwnsMaterial);
 
