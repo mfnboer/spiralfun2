@@ -92,7 +92,7 @@ ApplicationWindow {
 
             Label {
                 text: "RECORDING"
-                anchors.bottom: parent.bottom
+                anchors.bottom: recordProgressBar.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: scene.isRecording()
                 SequentialAnimation on color {
@@ -100,6 +100,16 @@ ApplicationWindow {
                     ColorAnimation { from: "white"; to: "black"; duration: 1000 }
                     ColorAnimation { from: "black"; to: "white"; duration: 1000 }
                 }
+            }
+            ProgressBar {
+                id: recordProgressBar
+                value: scene.playAngle
+                from: 0
+                to: Math.PI * 2;
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                visible: scene.isRecording()
             }
 
             Menu {

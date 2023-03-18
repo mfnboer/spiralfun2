@@ -27,6 +27,7 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(SpiralFun::Circle* currentCircle READ getCurrentCircle NOTIFY currentCircleChanged)
     Q_PROPERTY(int currentCircleIndex READ getCurrentCircleIndex NOTIFY currentCircleIndexChanged)
     Q_PROPERTY(SpiralScene::PlayState playState READ getPlayState NOTIFY playStateChanged)
+    Q_PROPERTY(qreal playAngle READ getPlayAngle NOTIFY playAngleChanged);
     Q_PROPERTY(SpiralScene::ShareMode shareMode READ getShareMode NOTIFY shareModeChanged)
     Q_PROPERTY(bool sharingInProgress MEMBER mSharingInProgress NOTIFY sharingInProgressChanged)
     QML_ELEMENT
@@ -46,6 +47,7 @@ public:
     int getCurrentCircleIndex() const { return mCurrentIndex; }
     PlayState getPlayState() const { return mPlayState; }
     ShareMode getShareMode() const { return mShareMode; }
+    qreal getPlayAngle() const { return mPlayer ? mPlayer->getAngle() : 0.0; }
     void setNumCircles(int numCircles);
     void selectCircle(Circle* circle);
     ScopedLine addLine(QObject* object, const QColor& color, const QPointF& startPoint);
@@ -71,6 +73,7 @@ signals:
     void currentCircleIndexChanged();
     void numCirclesChanged();
     void playStateChanged();
+    void playAngleChanged();
     void shareModeChanged();
     void sharingInProgressChanged();
     void message(const QString message);

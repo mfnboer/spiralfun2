@@ -79,6 +79,7 @@ void Player::advance()
     {
         advanceCircles(mStepAngle);
         mAngle += mStepAngle;
+        emit angleChanged();
 
         if (mAngle >= M_PI * 2)
         {

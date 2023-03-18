@@ -19,10 +19,12 @@ public:
     ~Player();
 
     bool play(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
+    qreal getAngle() const { return mAngle; }
 
 signals:
     void done();
     void refreshScene();
+    void angleChanged();
 
 private:
     void startTimers();

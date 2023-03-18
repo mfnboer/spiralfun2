@@ -279,6 +279,7 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
     setCurrentCircleFocus(false);
     mPlayer = std::make_unique<Player>(mCircles);
     QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
+    QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });
     QObject::connect(mPlayer.get(), &Player::done, this, [this]{
             removeCirclesFromScene();
             setPlayState(DONE_PLAYING);
