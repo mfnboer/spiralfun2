@@ -8,6 +8,7 @@
 #include "scoped_line.h"
 #include "spiral_config.h"
 #include <QQuickItem>
+#include <QQuickWindow>
 #include <memory>
 #include <cstdint>
 #include <unordered_map>
@@ -22,6 +23,7 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(int MAX_CIRCLES MEMBER MAX_CIRCLES CONSTANT)
     Q_PROPERTY(int MAX_DIAMETER MEMBER MAX_DIAMETER NOTIFY maxDiameterChanged)
     Q_PROPERTY(int MAX_ROTATIONS MEMBER MAX_ROTATIONS CONSTANT)
+    Q_PROPERTY(int MAX_DRAW MEMBER MAX_DRAW CONSTANT)
     Q_PROPERTY(int CFG_IMAGE_SIZE MEMBER CFG_IMAGE_SIZE CONSTANT)
     Q_PROPERTY(int numCircles READ getNumCircles WRITE setNumCircles NOTIFY numCirclesChanged)
     Q_PROPERTY(SpiralFun::Circle* currentCircle READ getCurrentCircle NOTIFY currentCircleChanged)
@@ -50,22 +52,22 @@ public:
     qreal getPlayAngle() const { return mPlayer ? mPlayer->getAngle() : 0.0; }
     void setNumCircles(int numCircles);
     void selectCircle(Circle* circle);
-    ScopedLine addLine(QObject* object, const QColor& color, const QPointF& startPoint);
+    ScopedLine addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint);
 
-public slots:
-    void init();
-    void setupExample(const QString& example);
-    void circleUp();
-    void circleDown();
-    void play();
-    void record();
-    void stop();
-    bool saveImage();
-    void saveConfig();
-    void share();
-    QObjectList getConfigFileList();
-    void loadConfig(const QString& fileName);
-    void deleteConfig(const QStringList& fileNameList);
+    Q_INVOKABLE void init();
+    Q_INVOKABLE void setupExample(const QString& example);
+    Q_INVOKABLE void circleUp();
+    Q_INVOKABLE void circleDown();
+    Q_INVOKABLE void play();
+    Q_INVOKABLE void record();
+    Q_INVOKABLE void stop();
+    Q_INVOKABLE bool saveImage();
+    Q_INVOKABLE void saveConfig();
+    Q_INVOKABLE void share();
+    Q_INVOKABLE QObjectList getConfigFileList();
+    Q_INVOKABLE void loadConfig(const QString& fileName);
+    Q_INVOKABLE void deleteConfig(const QStringList& fileNameList);
+    Q_INVOKABLE qreal getDevicePixelRatio() const { return window()->devicePixelRatio(); }
 
 signals:
     void maxDiameterChanged();
@@ -128,6 +130,7 @@ private:
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;
     int MAX_DIAMETER = 300;
     static constexpr int MAX_ROTATIONS = SpiralConfig::MAX_SPEED;
+    static constexpr int MAX_DRAW = Circle::MAX_DRAW;
     static constexpr int CFG_IMAGE_SIZE = 150;
     static constexpr const char* VERSION = APP_VERSION;
 };

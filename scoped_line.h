@@ -13,8 +13,8 @@ struct Line
 {
       std::vector<QPointF> mLinePoints;
       QColor mColor;
+      int mLineWidth = 1;
       QSGNode* mRoot = nullptr;
-
       void addPoint(const QPointF& p) { mLinePoints.push_back(p); }
 };
 

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
 import QtQuick.Layouts
+import QtQuick.Shapes
 import SpiralFun
 
 ApplicationWindow {
@@ -253,14 +254,57 @@ ApplicationWindow {
                 cs.open();
             }
         }
-        CheckBox {
-            id: drawCheckBox
-            text: "draw line"
-            checked: scene.currentCircle.draw
+        ComboBox {
+            id: drawLineComboBox
+            model: { var l = []; for (let i = 0; i <= scene.MAX_DRAW; ++i) { l.push(i); }; return l;  }
+            currentIndex: scene.currentCircle.draw
             Layout.fillWidth: true
             Layout.rightMargin: 5
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
-            onCheckedChanged: scene.currentCircle.draw = checked
+            onCurrentIndexChanged: scene.currentCircle.draw = currentIndex
+
+            delegate: ItemDelegate {
+                width: drawLineComboBox.width
+                contentItem: Item {
+                    Shape {
+                        visible: modelData !== 0
+                        ShapePath {
+                            strokeWidth: modelData / scene.getDevicePixelRatio()
+                            strokeColor: "white"
+                            startX: 8; startY: height * 0.3
+                            PathLine { x: drawLineComboBox.contentWidth(); y: height * 0.3 }
+                        }
+                    }
+                    Label {
+                        y: height * 0.3
+                        x: 8
+                        text: "no line"
+                        visible: modelData === 0
+                    }
+                }
+                highlighted: drawLineComboBox.currentIndex === index
+            }
+
+            contentItem: Item {
+                Shape {
+                    visible: drawLineComboBox.currentIndex !== 0
+                    ShapePath {
+                        strokeWidth: drawLineComboBox.currentIndex / scene.getDevicePixelRatio()
+                        startX: 8; startY: drawLineComboBox.height / 2
+                        PathLine { x: drawLineComboBox.contentWidth(); y: drawLineComboBox.height / 2 }
+                    }
+                }
+                Label {
+                    y: drawLineComboBox.height * 0.3
+                    x: 8
+                    text: "no line"
+                    visible: drawLineComboBox.currentIndex === 0
+                }
+            }
+
+            function contentWidth() {
+                return drawLineComboBox.width - drawLineComboBox.indicator.width;
+            }
         }
 
         // Row 4

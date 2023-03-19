@@ -9,7 +9,6 @@
 #include <QFile>
 #include <QQmlEngine>
 #include <QQuickItemGrabResult>
-#include <QQuickWindow>
 #include <QSGFlatColorMaterial>
 #include <QSGNode>
 
@@ -393,11 +392,12 @@ void SpiralScene::selectCircle(Circle* circle)
     }
 }
 
-ScopedLine SpiralScene::addLine(QObject* object, const QColor& color, const QPointF& startPoint)
+ScopedLine SpiralScene::addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint)
 {
     Q_ASSERT(!mLines.count(object));
     Line& line = mLines[object];
     line.mColor = color;
+    line.mLineWidth = lineWidth;
     line.mLinePoints.reserve(256);
     line.mLinePoints.push_back(startPoint);
     return std::forward<ScopedLine>(ScopedLine(&line, [this, object]{ mLines.erase(object); }));
@@ -410,6 +410,10 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     if (mClearScene)
     {
         delete sceneRoot;
+
+        for (auto& [_, line] : mLines)
+            line.mRoot = nullptr;
+
         sceneRoot = new QSGNode;
         mSceneRect = {};
         mClearScene = false;
@@ -442,7 +446,7 @@ QSGNode* SpiralScene::createLineNode(const Line& line)
 {
     auto* node = new QSGGeometryNode;
     auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), line.mLinePoints.size());
-    geometry->setLineWidth(1);
+    geometry->setLineWidth(line.mLineWidth);
     geometry->setDrawingMode(QSGGeometry::DrawLineStrip);
     node->setGeometry(geometry);
     node->setFlag(QSGNode::OwnsGeometry);

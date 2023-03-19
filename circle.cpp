@@ -35,6 +35,7 @@ Circle* Circle::setCenter(const QPointF& center)
 
 Circle* Circle::setRadius(qreal radius)
 {
+    Q_ASSERT(radius > 0.0);
     return setDiameter(std::round(radius * 2));
 }
 
@@ -67,8 +68,11 @@ Circle* Circle::setColor(const QColor& color)
     return this;
 }
 
-Circle* Circle::setDraw(bool draw)
+Circle* Circle::setDraw(int draw)
 {
+    Q_ASSERT(draw >= 0);
+    Q_ASSERT(draw <= MAX_DRAW);
+
     if (draw != mDraw)
     {
         mDraw = draw;
@@ -188,7 +192,7 @@ void Circle::preparePlay()
 {
     mSceneLine = {};
     if (mDraw)
-        mSceneLine = mScene->addLine(this, mColor, mCenter);
+        mSceneLine = mScene->addLine(this, mColor, mDraw, mCenter);
 }
 
 void Circle::mousePressEvent(QMouseEvent *event)
