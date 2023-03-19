@@ -30,38 +30,38 @@ constexpr const char* KEY_COLOR = "C";
 }
 
 const std::initializer_list<CircleConfig> DEFAULT_CONFIG = {
-    { 4.0, 0, false, Qt::blue },
-    { 2.0, 1, false, Qt::green },
-    { 0.2, -5, true, Qt::white }
+    { 4.0, 0, 0, Qt::blue },
+    { 2.0, 1, 0, Qt::green },
+    { 0.2, -5, 1, Qt::white }
 };
 const std::initializer_list<CircleConfig> EXAMPLE1_CONFIG = {
-    { 6.0, 0, false, Qt::blue },
-    { 2.6, 1, false, Qt::green },
-    { 1.6, 5, false, Qt::yellow },
-    { 0.8, 40, true, Qt::red }
+    { 6.0, 0, 0, Qt::blue },
+    { 2.6, 1, 0, Qt::green },
+    { 1.6, 5, 0, Qt::yellow },
+    { 0.8, 40, 1, Qt::red }
 };
 const std::initializer_list<CircleConfig> EXAMPLE2_CONFIG = {
-    { 5.0, 0, false, Qt::blue },
-    { 3.0, 1, false, Qt::yellow },
-    { 1.6, 4, true, Qt::red },
-    { 0.2, 200, true, Qt::white }
+    { 5.0, 0, 0, Qt::blue },
+    { 3.0, 1, 0, Qt::yellow },
+    { 1.6, 4, 1, Qt::red },
+    { 0.2, 200, 1, Qt::white }
 };
 const std::initializer_list<CircleConfig> EXAMPLE3_CONFIG = {
-    { 6.0, 0, false, Qt::blue },
-    { 2.1, 1, false, Qt::green },
-    { 1.6, -5, false, Qt::yellow },
-    { 0.8, 25, true, Qt::red },
-    { 0.4, -125, false, Qt::cyan },
-    { 0.08, 625, true, Qt::white }
+    { 6.0, 0, 0, Qt::blue },
+    { 2.1, 1, 0, Qt::green },
+    { 1.6, -5, 0, Qt::yellow },
+    { 0.8, 25, 1, Qt::red },
+    { 0.4, -125, 0, Qt::cyan },
+    { 0.08, 625, 1, Qt::white }
 };
 const std::initializer_list<CircleConfig> EXAMPLE4_CONFIG = {
-    { 4.8, 0, false, Qt::cyan },
-    { 2.8, 1, false, Qt::yellow },
-    { 1.6, -3, true, Qt::green },
-    { 0.8, 9, false, Qt::magenta },
-    { 0.4, -27, true, Qt::blue },
-    { 0.2, 81, false, Qt::red },
-    { 0.04, -243, true, Qt::white }
+    { 4.8, 0, 0, Qt::cyan },
+    { 2.8, 1, 0, Qt::yellow },
+    { 1.6, -3, 1, Qt::green },
+    { 0.8, 9, 0, Qt::magenta },
+    { 0.4, -27, 1, Qt::blue },
+    { 0.2, 81, 0, Qt::red },
+    { 0.04, -243, 1, Qt::white }
 };
 
 SpiralConfig::SpiralConfig(const CircleList& circles, qreal defaultRadius) :
@@ -83,7 +83,7 @@ QJsonDocument SpiralConfig::createJsonDoc() const
         qreal relRadius = std::round((c->getRadius() / mDefaultRadius) * 100) / 100.0;
         circle.insert(KEY_RADIUS, relRadius);
         circle.insert(KEY_SPEED, c->getSpeed());
-        circle.insert(KEY_DRAW, c->getDraw() ? 1 : 0);
+        circle.insert(KEY_DRAW, c->getDraw());
         circle.insert(KEY_COLOR, c->getColor().name(QColor::HexRgb));
 
         circles.push_back(circle);
@@ -275,7 +275,7 @@ CircleConfigList SpiralConfig::createConfig(const QJsonDocument& doc) const
 
         CircleConfig circleCfg;
         circleCfg.mColor = QColor(circle[KEY_COLOR].toString());
-        circleCfg.mDraw = (circle[KEY_DRAW].toInt() != 0);
+        circleCfg.mDraw = circle[KEY_DRAW].toInt();
         circleCfg.mRelRadius = circle[KEY_RADIUS].toDouble();
         circleCfg.mSpeed = circle[KEY_SPEED].toInt();
         circleCfgList.push_back(circleCfg);
@@ -339,9 +339,24 @@ bool SpiralConfig::isValid(const CircleConfigList& cfgList, QString& error) cons
             error = QString("Circle[%1] radius(%2) > %3").arg(i).arg(cfg.mRelRadius).arg(MAX_REL_RADIUS);
             return false;
         }
+        if (cfg.mRelRadius <= 0)
+        {
+            error = QString("Circle[%1] radius(%2) <= 0").arg(i).arg(cfg.mRelRadius);
+            return false;
+        }
         if (std::abs(cfg.mSpeed) > MAX_SPEED)
         {
             error = QString("Circle[%1] speed(%2) > %3").arg(i).arg(cfg.mSpeed).arg(MAX_SPEED);
+            return false;
+        }
+        if (cfg.mDraw > Circle::MAX_DRAW)
+        {
+            error = QString("Circle[%1] draw(%2) > %3").arg(i).arg(cfg.mDraw).arg(Circle::MAX_DRAW);
+            return false;
+        }
+        if (cfg.mDraw < 0)
+        {
+            error = QString("Circle[%1] draw(%2) < 0").arg(i).arg(cfg.mDraw);
             return false;
         }
     }

@@ -1,6 +1,8 @@
-next
-----
-* Save config files in private app storage.
+2.1
+---
+* Record animation to GIF
+* Chose line thickness for drawing lines
+* Save config files private app storage as required for Android 11+
 
 2.0
 ---

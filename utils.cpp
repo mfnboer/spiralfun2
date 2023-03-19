@@ -116,9 +116,9 @@ QString createDateTimeName()
     return QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
 }
 
-QString createPictureFileName(bool forSharing)
+QString createPictureFileName()
 {
-    return forSharing ? "_TMP_SHARE.jpg" : QString("IMG_%1.jpg").arg(createDateTimeName());
+    return QString("IMG_%1.jpg").arg(createDateTimeName());
 }
 
 void scanMediaFile(const QString& fileName)
@@ -135,18 +135,20 @@ void scanMediaFile(const QString& fileName)
 #endif
 }
 
-void sharePicture(const QString& contentUri, const QString& configAppUri)
+void sharePicture(const QString& contentUri, const QString& configAppUri, const QString& mimeType)
 {
 #if defined(Q_OS_ANDROID)
     auto jsContentUri = QJniObject::fromString(contentUri);
     auto jsConfigAppUri = QJniObject::fromString(configAppUri);
+    auto jsMimeType = QJniObject::fromString(mimeType);
     QJniObject::callStaticMethod<void>("com/gmail/mfnboer/QAndroidUtils",
                                        "sharePicture",
-                                       "(Ljava/lang/String;Ljava/lang/String;)V",
+                                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
                                        jsContentUri.object<jstring>(),
-                                       jsConfigAppUri.object<jstring>());
+                                       jsConfigAppUri.object<jstring>(),
+                                       jsMimeType.object<jstring>());
 #else
-    qDebug() << "Sharing not supported, content:" << contentUri;
+    qDebug() << "Sharing not supported, content:" << contentUri << "mimetype:" << mimeType;
     qDebug() << "config:" << configAppUri;
 #endif
 }
@@ -175,14 +177,6 @@ QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QR
     const int y = std::max(center.y() - thumbnailSize / 2.0, 0.0);
     const QImage thumbnail = scaledImg.copy(x, y, thumbnailSize, thumbnailSize);
     return thumbnail;
-}
-
-QImage extractSpiral(const QImage& grabbedImg, const QRectF& sceneRect, int margin, qreal devicePixelRatio)
-{
-    QRectF cutRect = sceneRect.adjusted(-margin, -margin, margin, margin);
-    cutRect = QRectF(cutRect.topLeft() * devicePixelRatio, cutRect.size() * devicePixelRatio);
-    const QImage spiral = grabbedImg.copy(cutRect.toRect());
-    return spiral;
 }
 
 }

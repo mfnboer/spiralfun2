@@ -11,7 +11,7 @@ struct CircleConfig
 {
     qreal mRelRadius;
     int mSpeed;
-    bool mDraw;
+    int mDraw;
     QColor mColor;
 };
 

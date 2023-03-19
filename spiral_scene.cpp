@@ -9,7 +9,6 @@
 #include <QFile>
 #include <QQmlEngine>
 #include <QQuickItemGrabResult>
-#include <QQuickWindow>
 #include <QSGFlatColorMaterial>
 #include <QSGNode>
 
@@ -260,12 +259,35 @@ void SpiralScene::setCurrentIndex(unsigned index)
 
 void SpiralScene::play()
 {
+    const auto it = std::find_if(mCircles.begin(), mCircles.end(), [](const auto& c){
+            return c->getDraw(); });
+
+    if (it == mCircles.end())
+    {
+        emit message("Enable line drawing on at least 1 circle");
+        return;
+    }
+
+    doPlay(nullptr);
+    setPlayState(PLAYING);
+}
+
+void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
+{
     mLineSegmentCount = 0;
     setCurrentCircleFocus(false);
     mPlayer = std::make_unique<Player>(mCircles);
     QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
+    QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });
     QObject::connect(mPlayer.get(), &Player::done, this, [this]{
             removeCirclesFromScene();
+
+            if (mPlayState == RECORDING)
+            {
+                const QString fileName = mPlayer->getGifFileName().split('/').last();
+                emit statusUpdate(QString("GIF saved: %1").arg(fileName));
+            }
+
             setPlayState(DONE_PLAYING);
 
             // Stats are only complete after rendering is done.
@@ -275,8 +297,17 @@ void SpiralScene::play()
             }), Qt::SingleShotConnection);
             update();
     });
-    mPlayer->play();
-    setPlayState(PLAYING);
+    mPlayer->play(std::move(recorder));
+}
+
+void SpiralScene::record()
+{
+    auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
+    resetScene();
+    doPlay(std::move(recorder));
+    setPlayState(RECORDING);
+    setShareMode(SHARE_VID);
+    mShareContentUri.clear();
 }
 
 void SpiralScene::stop()
@@ -285,6 +316,7 @@ void SpiralScene::stop()
     resetScene();
     setPlayState(NOT_PLAYING);
     setCurrentCircleFocus(true);
+    setShareMode(SHARE_PIC);
 }
 
 void SpiralScene::setPlayState(PlayState state)
@@ -292,6 +324,13 @@ void SpiralScene::setPlayState(PlayState state)
     mPlayState = state;
     emit playStateChanged();
 }
+
+void SpiralScene::setShareMode(ShareMode shareMode)
+{
+    mShareMode = shareMode;
+    emit shareModeChanged();
+}
+
 
 void SpiralScene::addCirclesToScene()
 {
@@ -332,7 +371,7 @@ void SpiralScene::resetScene()
     setScale(mScaleFactor);
     update();
     setSharingInProgress(false);
-    mShareImageFileNameSaved.clear();
+    mShareContentUri.clear();
 }
 
 void SpiralScene::selectCircle(Circle* circle)
@@ -353,11 +392,12 @@ void SpiralScene::selectCircle(Circle* circle)
     }
 }
 
-ScopedLine SpiralScene::addLine(QObject* object, const QColor& color, const QPointF& startPoint)
+ScopedLine SpiralScene::addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint)
 {
     Q_ASSERT(!mLines.count(object));
     Line& line = mLines[object];
     line.mColor = color;
+    line.mLineWidth = lineWidth;
     line.mLinePoints.reserve(256);
     line.mLinePoints.push_back(startPoint);
     return std::forward<ScopedLine>(ScopedLine(&line, [this, object]{ mLines.erase(object); }));
@@ -370,6 +410,10 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     if (mClearScene)
     {
         delete sceneRoot;
+
+        for (auto& [_, line] : mLines)
+            line.mRoot = nullptr;
+
         sceneRoot = new QSGNode;
         mSceneRect = {};
         mClearScene = false;
@@ -402,12 +446,13 @@ QSGNode* SpiralScene::createLineNode(const Line& line)
 {
     auto* node = new QSGGeometryNode;
     auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), line.mLinePoints.size());
-    geometry->setLineWidth(1);
+    geometry->setLineWidth(line.mLineWidth);
     geometry->setDrawingMode(QSGGeometry::DrawLineStrip);
     node->setGeometry(geometry);
     node->setFlag(QSGNode::OwnsGeometry);
     auto* material = new QSGFlatColorMaterial;
     material->setColor(line.mColor);
+    material->setFlag(QSGMaterial::Blending);
     node->setMaterial(material);
     node->setFlag(QSGNode::OwnsMaterial);
 
@@ -426,21 +471,24 @@ QSGNode* SpiralScene::createLineNode(const Line& line)
 
 void SpiralScene::updateSceneRect(const QPointF& p)
 {
+    const qreal x = std::clamp(p.x(), 0.0, size().width());
+    const qreal y = std::clamp(p.y(), 0.0, size().height());
+
     if (mSceneRect.isNull())
     {
-        mSceneRect = QRectF(p, QSizeF(1, 1));
+        mSceneRect = QRectF(QPointF(x, y), QSizeF(1, 1));
         return;
     }
 
-    if (p.x() < mSceneRect.left())
-        mSceneRect.setLeft(p.x());
-    else if (p.x() > mSceneRect.right())
-        mSceneRect.setRight(p.x());
+    if (x < mSceneRect.left())
+        mSceneRect.setLeft(x);
+    else if (x > mSceneRect.right())
+        mSceneRect.setRight(x);
 
-    if (p.y() < mSceneRect.top())
-        mSceneRect.setTop(p.y());
-    else if (p.y() > mSceneRect.bottom())
-        mSceneRect.setBottom(p.y());
+    if (y < mSceneRect.top())
+        mSceneRect.setTop(y);
+    else if (y > mSceneRect.bottom())
+        mSceneRect.setBottom(y);
 }
 
 void SpiralScene::touchEvent(QTouchEvent* event)
@@ -481,17 +529,8 @@ void SpiralScene::touchEvent(QTouchEvent* event)
     event->accept();
 }
 
-bool SpiralScene::saveImage(bool share)
+bool SpiralScene::saveImage()
 {
-    const qreal dpr = window()->effectiveDevicePixelRatio();
-    const QSize imageSize = (size() * dpr).toSize();
-    auto grabResult = grabToImage(imageSize);
-    if (!grabResult)
-    {
-        emit message("Failed to grab image.");
-        return false;
-    }
-
     QString picPath;
     try {
         picPath = Utils::getPicturesPath();
@@ -506,23 +545,22 @@ bool SpiralScene::saveImage(bool share)
         return false;
     }
 
-    const QString fileName = picPath + "/" + Utils::createPictureFileName(share);
-    if (!share && QFile::exists(fileName))
+    const QString baseFileName = Utils::createPictureFileName();
+    const QString fileName = picPath + "/" + baseFileName;
+    if (QFile::exists(fileName))
     {
         emit message(QString("Failed to create: %1").arg(fileName));
         return false;
     }
 
-    QObject::connect(grabResult.get(), &QQuickItemGrabResult::ready, this,
-        [this, grabResult, fileName, dpr, share]{
-            const QImage img = Utils::extractSpiral(grabResult->image(), mSceneRect, 20, dpr);
+    mSceneGrabber = std::make_unique<SceneGrabber>(this, mSceneRect);
+    const bool grabbed = mSceneGrabber->grabScene(
+        [this, fileName, baseFileName](const QImage& img){
             if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
+                emit statusUpdate(QString("Image saved: %1").arg(baseFileName));
                 Utils::scanMediaFile(fileName);
-
-                if (share)
-                    mShareImageFileNameSaved = fileName;
             }
             else
             {
@@ -531,39 +569,89 @@ bool SpiralScene::saveImage(bool share)
             }
         });
 
-    return true;
+    if (!grabbed)
+        emit message("Failed to grab image.");
+
+    return grabbed;
+}
+
+void SpiralScene::share()
+{
+    switch (mShareMode)
+    {
+    case SHARE_PIC:
+        shareImage();
+        break;
+    case SHARE_VID:
+        shareVideo();
+        break;
+    }
 }
 
 void SpiralScene::shareImage()
 {
     setSharingInProgress(true);
-    if (!mShareImageFileNameSaved.isNull() && QFile::exists(mShareImageFileNameSaved))
+
+    if (!mShareContentUri.isNull())
     {
-        qDebug() << "Share file already saved:" << mShareImageFileNameSaved;
-        Utils::scanMediaFile(mShareImageFileNameSaved);
+        qDebug() << "Share content uri available:" << mShareContentUri;
+        shareContent();
     }
     else
     {
-        if (!saveImage(true))
+        if (!saveImage())
             setSharingInProgress(false);
     }
 }
 
+void SpiralScene::shareContent()
+{
+    Q_ASSERT(!mShareContentUri.isNull());
+    SpiralConfig cfg(mCircles, mDefaultCircleRadius);
+    const QString configAppUri = cfg.getConfigAppUri();
+
+    QString mimeType;
+    switch (mShareMode)
+    {
+    case SHARE_PIC:
+        mimeType = "image/jpg";
+        break;
+    case SHARE_VID:
+        mimeType = "image/gif";
+        break;
+    }
+
+    Utils::sharePicture(mShareContentUri, configAppUri, mimeType);
+}
+
+void SpiralScene::shareVideo()
+{
+    if (mShareMode != SHARE_VID || mShareContentUri.isNull())
+    {
+        qDebug() << "No video to share";
+        return;
+    }
+
+    setSharingInProgress(true);
+    shareContent();
+    setSharingInProgress(false);
+}
+
 void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
 {
+    if (mShareMode == SHARE_VID || mSharingInProgress)
+    {
+        mShareContentUri = contentUri;
+        qDebug() << "Content sharing URI:" << contentUri << "share mode:" << mShareMode;
+    }
+
     if (!mSharingInProgress)
         return;
 
     if (!contentUri.isNull())
-    {
-        SpiralConfig cfg(mCircles, mDefaultCircleRadius);
-        const QString configAppUri = cfg.getConfigAppUri();
-        Utils::sharePicture(contentUri, configAppUri);
-    }
+        shareContent();
     else
-    {
         qDebug() << "No content URI for sharing";
-    }
 
     setSharingInProgress(false);
 }
@@ -612,6 +700,7 @@ void SpiralScene::saveConfig()
 
             try {
                 cfg.save(thumbnail);
+                emit statusUpdate("Config saved");
             } catch (RuntimeException& e) {
                 emit message(e.msg());
             }

@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
 import QtQuick.Layouts
+import QtQuick.Shapes
 import SpiralFun
 
 ApplicationWindow {
@@ -12,6 +13,29 @@ ApplicationWindow {
     height: 960
     visible: true
     title: "Spiral Fun"
+
+    Popup {
+        id: statusPopup
+        width: parent.width
+        closePolicy: Popup.CloseOnPressOutside
+
+        Label {
+            id: statusText
+            text: "Event"
+        }
+
+        Timer {
+            id: closeTimer
+            interval: 2000
+            onTriggered: statusPopup.close()
+        }
+
+        function show(msg) {
+            statusText.text = msg;
+            open()
+            closeTimer.restart()
+        }
+    }
 
     GridLayout {
         columns: 4
@@ -30,6 +54,7 @@ ApplicationWindow {
                 width: parent.width
                 height: parent.height
                 onMessage: (msg) => showMessage(msg)
+                onStatusUpdate: (msg) => statusPopup.show(msg)
 
                 function notPlaying() {
                     return playState === SpiralScene.NOT_PLAYING;
@@ -39,14 +64,32 @@ ApplicationWindow {
                     return playState === SpiralScene.DONE_PLAYING;
                 }
 
+                function isRecording() {
+                    return playState === SpiralScene.RECORDING;
+                }
+
                 function playStateIcon() {
                     switch (scene.playState) {
                     case SpiralScene.NOT_PLAYING:
                         return "play";
                     case SpiralScene.PLAYING:
+                    case SpiralScene.RECORDING:
                         return "stop";
                     case SpiralScene.DONE_PLAYING:
                         return "home";
+                    }
+                }
+
+                function isInVideoShareMode() {
+                    return shareMode === SpiralScene.SHARE_VID;
+                }
+
+                function shareButtonText() {
+                    switch (scene.shareMode) {
+                    case SpiralScene.SHARE_PIC:
+                        return "share picture";
+                    case SpiralScene.SHARE_VID:
+                        return "share gif";
                     }
                 }
             }
@@ -63,12 +106,35 @@ ApplicationWindow {
             RoundButton {
                 id: sceneShareButton
                 icon.name: "share"
+                text: scene.shareButtonText()
                 Material.background: "transparent"
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 enabled: scene.donePlaying()
                 visible: scene.donePlaying()
-                onClicked: scene.shareImage()
+                onClicked: scene.share()
+            }
+
+            Label {
+                text: "RECORDING"
+                anchors.bottom: recordProgressBar.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: scene.isRecording()
+                SequentialAnimation on color {
+                    loops: Animation.Infinite
+                    ColorAnimation { from: "white"; to: "black"; duration: 1000 }
+                    ColorAnimation { from: "black"; to: "white"; duration: 1000 }
+                }
+            }
+            ProgressBar {
+                id: recordProgressBar
+                value: scene.playAngle
+                from: 0
+                to: Math.PI * 2;
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                visible: scene.isRecording()
             }
 
             Menu {
@@ -77,7 +143,7 @@ ApplicationWindow {
 
                 MenuItem {
                     text: "Save image"
-                    enabled: scene.donePlaying()
+                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
                     onTriggered: scene.saveImage()
                 }
                 MenuItem {
@@ -92,8 +158,13 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Save config"
-                    enabled: scene.donePlaying()
+                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
                     onTriggered: scene.saveConfig()
+                }
+                MenuItem {
+                    text: "Record GIF"
+                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
+                    onTriggered: scene.record()
                 }
                 MenuItem {
                     text: "Examples"
@@ -183,14 +254,57 @@ ApplicationWindow {
                 cs.open();
             }
         }
-        CheckBox {
-            id: drawCheckBox
-            text: "draw line"
-            checked: scene.currentCircle.draw
+        ComboBox {
+            id: drawLineComboBox
+            model: { var l = []; for (let i = 0; i <= scene.MAX_DRAW; ++i) { l.push(i); }; return l;  }
+            currentIndex: scene.currentCircle.draw
             Layout.fillWidth: true
             Layout.rightMargin: 5
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
-            onCheckedChanged: scene.currentCircle.draw = checked
+            onCurrentIndexChanged: scene.currentCircle.draw = currentIndex
+
+            delegate: ItemDelegate {
+                width: drawLineComboBox.width
+                contentItem: Item {
+                    Shape {
+                        visible: modelData !== 0
+                        ShapePath {
+                            strokeWidth: modelData / scene.getDevicePixelRatio()
+                            strokeColor: "white"
+                            startX: 8; startY: height * 0.3
+                            PathLine { x: drawLineComboBox.contentWidth(); y: height * 0.3 }
+                        }
+                    }
+                    Label {
+                        y: height * 0.3
+                        x: 8
+                        text: "no line"
+                        visible: modelData === 0
+                    }
+                }
+                highlighted: drawLineComboBox.currentIndex === index
+            }
+
+            contentItem: Item {
+                Shape {
+                    visible: drawLineComboBox.currentIndex !== 0
+                    ShapePath {
+                        strokeWidth: drawLineComboBox.currentIndex / scene.getDevicePixelRatio()
+                        startX: 8; startY: drawLineComboBox.height / 2
+                        PathLine { x: drawLineComboBox.contentWidth(); y: drawLineComboBox.height / 2 }
+                    }
+                }
+                Label {
+                    y: drawLineComboBox.height * 0.3
+                    x: 8
+                    text: "no line"
+                    visible: drawLineComboBox.currentIndex === 0
+                }
+            }
+
+            function contentWidth() {
+                return drawLineComboBox.width - drawLineComboBox.indicator.width;
+            }
         }
 
         // Row 4
