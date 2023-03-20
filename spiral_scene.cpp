@@ -12,6 +12,8 @@
 #include <QSGFlatColorMaterial>
 #include <QSGNode>
 
+using namespace std::chrono_literals;
+
 namespace SpiralFun {
 
 SpiralScene::SpiralScene(QQuickItem *parent) :
@@ -276,12 +278,13 @@ void SpiralScene::play()
 
 void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 {
-    mLineSegmentCount = 0;
+    mStats = {};
     setCurrentCircleFocus(false);
     mPlayer = std::make_unique<Player>(mCircles);
     QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
     QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });
-    QObject::connect(mPlayer.get(), &Player::done, this, [this]{
+    QObject::connect(mPlayer.get(), &Player::done, this, [this](const Player::Stats& stats){
+            mStats.mPlayerStats = stats;
             removeCirclesFromScene();
 
             if (mPlayState == RECORDING)
@@ -294,12 +297,31 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 
             // Stats are only complete after rendering is done.
             QObject::connect(window(), &QQuickWindow::afterRendering, this, ([this]{
-                qDebug() << "Line segments drawn:" << mLineSegmentCount;
+                const qreal avgPoints = mStats.mLinePointsSum / (qreal)mStats.mLineCount;
+                qDebug() << "Stats, #segments" << mStats.mLineSegmentCount <<
+                            "#avg_pts:" << avgPoints << "#lines:" << mStats.mLineCount;
                 qDebug() << "Scene rect:" << mSceneRect;
             }), Qt::SingleShotConnection);
             update();
     });
     mPlayer->play(std::move(recorder));
+}
+
+void SpiralScene::showSpiralStats()
+{
+    const QString statMsg = QString(
+        "| Statistic      | Value |\n"
+        "| :------------- | ----: |\n"
+        "| Creation steps | %1    |\n"
+        "| Creation time  | %2 s  |\n"
+        "| Step time      | %3 ms |\n"
+        "| Line segments  | %4    |")
+            .arg(mStats.mPlayerStats.mCycles)
+            .arg(qreal(mStats.mPlayerStats.mPlayTime / 1000.0ms))
+            .arg(qreal(mStats.mPlayerStats.mPlayTime / (qreal)mStats.mPlayerStats.mCycles / 1000.0us))
+            .arg(mStats.mLineSegmentCount);
+
+    emit message(statMsg);
 }
 
 void SpiralScene::record()
@@ -466,7 +488,9 @@ QSGNode* SpiralScene::createLineNode(const Line& line)
     }
 
     node->markDirty(QSGNode::DirtyGeometry);
-    mLineSegmentCount += line.mLinePoints.size() - 1;
+    mStats.mLineSegmentCount += line.mLinePoints.size() - 1;
+    mStats.mLinePointsSum += line.mLinePoints.size();
+    ++mStats.mLineCount;
     return node;
 }
 
@@ -640,7 +664,7 @@ void SpiralScene::shareVideo()
 
 void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
 {
-    if (mShareMode == SHARE_VID || mSharingInProgress)
+    if (mShareContentUri.isNull() && (mShareMode == SHARE_VID || mSharingInProgress))
     {
         mShareContentUri = contentUri;
         qDebug() << "Content sharing URI:" << contentUri << "share mode:" << mShareMode;

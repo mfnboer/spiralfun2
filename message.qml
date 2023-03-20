@@ -10,7 +10,7 @@ Dialog {
 
     Label {
         id: msgLabel
-        wrapMode: Text.WordWrap
+        textFormat: Text.MarkdownText
     }
 
     function show(msg) {

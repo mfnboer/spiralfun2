@@ -100,6 +100,10 @@ void Player::finishPlaying()
     qInfo() << "Play duration:" << t << "secs" << "cycles:" << mCycles <<
                 "avg-cycle-time:" << avgCycleT * 1000 << "ms";
 
+    Stats stats;
+    stats.mCycles = mCycles;
+    stats.mPlayTime = std::lround(t * 1000) * 1ms;
+
     // Draw the last line to close the curve. It may not have been drawn yet
     // due to the minimum draw length.
     forceDraw();
@@ -112,14 +116,14 @@ void Player::finishPlaying()
         calcFramePosition();
 
         const bool grabbed = mSceneGrabber->grabScene(mRecordingRect.toRect(),
-            [this](QImage&& img){
+            [this, stats](QImage&& img){
                 qDebug() << "START finalizing video";
                 mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
-                runRecordFrameThread([this]{
+                runRecordFrameThread([this, stats]{
                         stopRecording();
                         qDebug() << "STOP finalizing video";
                         Utils::scanMediaFile(mGifFileName);
-                        emit done();
+                        emit done(stats);
                     });
             });
 
@@ -128,12 +132,12 @@ void Player::finishPlaying()
             qWarning() << "Failed to grab last frame";
             stopRecording();
             Utils::scanMediaFile(mGifFileName);
-            emit done();
+            emit done(stats);
         }
     }
     else
     {
-        emit done();
+        emit done(stats);
     }
 }
 

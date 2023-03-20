@@ -41,6 +41,14 @@ public:
     enum ShareMode { SHARE_PIC, SHARE_VID };
     Q_ENUM(ShareMode)
 
+    struct Stats
+    {
+        Player::Stats mPlayerStats;
+        uint32_t mLineSegmentCount = 0;
+        uint32_t mLineCount = 0;
+        uint32_t mLinePointsSum = 0;
+    };
+
     explicit SpiralScene(QQuickItem *parent = nullptr);
 
     void setupCircles(const SpiralFun::CircleConfigList& config = DEFAULT_CONFIG);
@@ -59,6 +67,7 @@ public:
     Q_INVOKABLE void circleUp();
     Q_INVOKABLE void circleDown();
     Q_INVOKABLE void play();
+    Q_INVOKABLE void showSpiralStats();
     Q_INVOKABLE void record();
     Q_INVOKABLE void stop();
     Q_INVOKABLE bool saveImage();
@@ -113,7 +122,7 @@ private:
     std::unordered_map<QObject*, Line> mLines;
     bool mClearScene = false;
     QRectF mSceneRect;
-    uint64_t mLineSegmentCount = 0;
+    Stats mStats;
     CircleList mCircles;
     qreal mDefaultCircleRadius = 10.0;
     unsigned mCurrentIndex = 0;

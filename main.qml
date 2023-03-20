@@ -143,7 +143,7 @@ ApplicationWindow {
 
                 MenuItem {
                     text: "Save image"
-                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
+                    enabled: scene.donePlaying()
                     onTriggered: scene.saveImage()
                 }
                 MenuItem {
@@ -158,13 +158,18 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Save config"
-                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
+                    enabled: scene.donePlaying()
                     onTriggered: scene.saveConfig()
                 }
                 MenuItem {
                     text: "Record GIF"
                     enabled: scene.donePlaying() && !scene.isInVideoShareMode()
                     onTriggered: scene.record()
+                }
+                MenuItem {
+                    text: "Statistics"
+                    enabled: scene.donePlaying()
+                    onTriggered: scene.showSpiralStats();
                 }
                 MenuItem {
                     text: "Examples"

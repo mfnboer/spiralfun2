@@ -15,6 +15,12 @@ class Player : public QObject
     Q_OBJECT
 
 public:
+    struct Stats
+    {
+        int mCycles;
+        std::chrono::milliseconds mPlayTime;
+    };
+
     explicit Player(const CircleList &circles);
     ~Player();
 
@@ -23,7 +29,7 @@ public:
     const QString& getGifFileName() const { return mGifFileName; }
 
 signals:
-    void done();
+    void done(Stats stats);
     void refreshScene();
     void angleChanged();
 
