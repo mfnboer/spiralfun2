@@ -43,6 +43,8 @@ void SpiralScene::init()
 
     // Handle possibly pending intent from Android.
     Utils::handlePendingIntent();
+
+    qInfo() << "Surface format:" << window()->format();
 }
 
 void SpiralScene::calcDefaultRadiusSize()
@@ -409,14 +411,13 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 
     if (mClearScene)
     {
-        delete sceneRoot;
-
         for (auto& [_, line] : mLines)
             line.mRoot = nullptr;
 
-        sceneRoot = new QSGNode;
+        delete sceneRoot;
         mSceneRect = {};
         mClearScene = false;
+        return nullptr;
     }
 
     for (auto& [_, line] : mLines)
