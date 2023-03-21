@@ -92,6 +92,16 @@ ApplicationWindow {
                         return "share gif";
                     }
                 }
+
+                // Adding a black rectangle will ensure that the grabbed image has
+                // a black instead of a transparent background. The painter will
+                // blend this rectangle with the lines drawn over it.
+                Rectangle {
+                    z: -1
+                    color: "black"
+                    width: parent.width
+                    height: parent.height
+                }
             }
 
             RoundButton {
