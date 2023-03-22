@@ -55,7 +55,7 @@ private:
     QTimer mSceneRefreshTimer;
     qreal mAngle = 0.0;
     const qreal mStepAngle = qDegreesToRadians(0.05);
-    const unsigned mStepsPerInterval = 1;
+    const unsigned mStepsPerInterval = 100; // TODO
     const qreal mRecordAngleThreshold = qDegreesToRadians(1);
     qreal mRecordAngle = 0.0;
     int mStartTime;

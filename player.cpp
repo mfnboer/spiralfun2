@@ -63,7 +63,7 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
 void Player::startTimers()
 {
     mPlayTimer.start();
-    mSceneRefreshTimer.start();
+    // TODO mSceneRefreshTimer.start();
 }
 
 void Player::stopTimers()

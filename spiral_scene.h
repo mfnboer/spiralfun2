@@ -135,6 +135,9 @@ private:
     QString mShareContentUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
 
+    int mTotalMorphs = 360;
+    int mMorphCount = 0;
+
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;
     int MAX_DIAMETER = 300;

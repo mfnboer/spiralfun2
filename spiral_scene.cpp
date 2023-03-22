@@ -301,6 +301,8 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
                 qDebug() << "Stats, #segments" << mStats.mLineSegmentCount <<
                             "#avg_pts:" << avgPoints << "#lines:" << mStats.mLineCount;
                 qDebug() << "Scene rect:" << mSceneRect;
+
+                saveImage();
             }), Qt::SingleShotConnection);
             update();
     });
@@ -586,6 +588,16 @@ bool SpiralScene::saveImage()
                 qDebug() << "Saved file:" << fileName;
                 emit statusUpdate(QString("Image saved: %1").arg(baseFileName));
                 Utils::scanMediaFile(fileName);
+
+
+                if (++mMorphCount < mTotalMorphs)
+                {
+                    stop();
+                    const int rotations = mCircles.back()->getRotations() + 1;
+                    mCircles.back()->setRotations(rotations);
+                    qInfo() << "Morph:" << mMorphCount << "rotations:" << rotations;
+                    QTimer::singleShot(1, this, [this]{ play(); });
+                }
             }
             else
             {
