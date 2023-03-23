@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Michel de Boer
+﻿// Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "spiral_scene.h"
 #include "circle.h"
@@ -261,7 +261,7 @@ void SpiralScene::setCurrentIndex(unsigned index)
     emit currentCircleIndexChanged();
 }
 
-void SpiralScene::play()
+bool SpiralScene::checkPlayRequirement()
 {
     const auto it = std::find_if(mCircles.begin(), mCircles.end(), [](const auto& c){
             return c->getDraw(); });
@@ -269,21 +269,58 @@ void SpiralScene::play()
     if (it == mCircles.end())
     {
         emit message("Enable line drawing on at least 1 circle");
-        return;
+        return false;
     }
 
-    doPlay(nullptr);
-    setPlayState(PLAYING);
+    return true;
 }
 
-void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
+void SpiralScene::play()
+{
+    if (!checkPlayRequirement())
+        return;
+
+    setPlayState(PLAYING);
+    doPlay(nullptr);
+}
+
+void SpiralScene::playSequence()
+{
+    if (!checkPlayRequirement())
+        return;
+
+    mPlaySequenceStep = 0;
+    removeCirclesFromScene();
+    setPlayState(PLAYING_SEQUENCE);
+    doPlay(nullptr, [this]{ playNextSequenceStep(); });
+}
+
+void SpiralScene::playNextSequenceStep()
+{
+    if (++mPlaySequenceStep < mPlaySequenceLength)
+    {
+        const int rotations = mCircles.back()->getRotations() + 1;
+        mCircles.back()->setRotations(rotations);
+        qDebug() << "Play sequence step:" << mPlaySequenceStep << "rotations:" << rotations;
+
+        QTimer::singleShot(0, this, [this]{
+            doPlay(nullptr, [this]{ playNextSequenceStep(); });
+        });
+    }
+    else
+    {
+        setPlayState(DONE_PLAYING);
+    }
+}
+
+void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder, const std::function<void()>& afterPlayCb)
 {
     mStats = {};
     setCurrentCircleFocus(false);
     mPlayer = std::make_unique<Player>(mCircles);
     QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
     QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });
-    QObject::connect(mPlayer.get(), &Player::done, this, [this](const Player::Stats& stats){
+    QObject::connect(mPlayer.get(), &Player::done, this, [this, afterPlayCb](const Player::Stats& stats){
             mStats.mPlayerStats = stats;
             removeCirclesFromScene();
 
@@ -293,20 +330,37 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
                 emit statusUpdate(QString("GIF saved: %1").arg(fileName));
             }
 
-            setPlayState(DONE_PLAYING);
+            if (mPlayState == PLAYING_SEQUENCE)
+                mClearScene = true;
+            else
+                setPlayState(DONE_PLAYING);
 
             // Stats are only complete after rendering is done.
-            QObject::connect(window(), &QQuickWindow::afterRendering, this, ([this]{
+            QObject::connect(window(), &QQuickWindow::afterRendering, this, ([this, afterPlayCb]{
                 const qreal avgPoints = mStats.mLinePointsSum / (qreal)mStats.mLineCount;
                 qDebug() << "Stats, #segments" << mStats.mLineSegmentCount <<
                             "#avg_pts:" << avgPoints << "#lines:" << mStats.mLineCount;
                 qDebug() << "Scene rect:" << mSceneRect;
 
-                saveImage();
+                if (afterPlayCb)
+                    afterPlayCb();
+
             }), Qt::SingleShotConnection);
             update();
     });
-    mPlayer->play(std::move(recorder));
+
+    switch (mPlayState)
+    {
+    case PLAYING:
+    case RECORDING:
+        mPlayer->play(std::move(recorder));
+        break;
+    case PLAYING_SEQUENCE:
+        mPlayer->playAll();
+        break;
+    default:
+        Q_ASSERT(false);
+    }
 }
 
 void SpiralScene::showSpiralStats()
@@ -330,10 +384,10 @@ void SpiralScene::record()
 {
     auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
     resetScene();
-    doPlay(std::move(recorder));
     setPlayState(RECORDING);
     setShareMode(SHARE_VID);
     mShareContentUri.clear();
+    doPlay(std::move(recorder));
 }
 
 void SpiralScene::stop()
@@ -389,6 +443,9 @@ void SpiralScene::resetCircles()
 
 void SpiralScene::resetScene()
 {
+    for (auto& [_, line] : mLines)
+        line.mLinePoints.clear();
+
     removeCirclesFromScene();
     mClearScene = true;
     resetCircles();
@@ -439,9 +496,9 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             line.mRoot = nullptr;
 
         delete sceneRoot;
+        sceneRoot = new QSGNode;
         mSceneRect = {};
         mClearScene = false;
-        return nullptr;
     }
 
     for (auto& [_, line] : mLines)
@@ -588,16 +645,6 @@ bool SpiralScene::saveImage()
                 qDebug() << "Saved file:" << fileName;
                 emit statusUpdate(QString("Image saved: %1").arg(baseFileName));
                 Utils::scanMediaFile(fileName);
-
-
-                if (++mMorphCount < mTotalMorphs)
-                {
-                    stop();
-                    const int rotations = mCircles.back()->getRotations() + 1;
-                    mCircles.back()->setRotations(rotations);
-                    qInfo() << "Morph:" << mMorphCount << "rotations:" << rotations;
-                    QTimer::singleShot(1, this, [this]{ play(); });
-                }
             }
             else
             {

@@ -25,6 +25,7 @@ public:
     ~Player();
 
     bool play(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
+    void playAll();
     qreal getAngle() const { return mAngle; }
     const QString& getGifFileName() const { return mGifFileName; }
 
@@ -55,7 +56,7 @@ private:
     QTimer mSceneRefreshTimer;
     qreal mAngle = 0.0;
     const qreal mStepAngle = qDegreesToRadians(0.05);
-    const unsigned mStepsPerInterval = 100; // TODO
+    unsigned mStepsPerInterval = 1;
     const qreal mRecordAngleThreshold = qDegreesToRadians(1);
     qreal mRecordAngle = 0.0;
     int mStartTime;
@@ -69,6 +70,7 @@ private:
     std::unique_ptr<QThread> mRecordingThread;
     std::unique_ptr<QImage> mFrame;
     QPoint mFramePosition;
+    std::unique_ptr<QThread> mPlaySequenceThread;
 };
 
 }

@@ -35,7 +35,7 @@ class SpiralScene : public QQuickItem
     QML_ELEMENT
 
 public:
-    enum PlayState { NOT_PLAYING, PLAYING, RECORDING, DONE_PLAYING };
+    enum PlayState { NOT_PLAYING, PLAYING, PLAYING_SEQUENCE, RECORDING, DONE_PLAYING };
     Q_ENUM(PlayState)
 
     enum ShareMode { SHARE_PIC, SHARE_VID };
@@ -67,6 +67,7 @@ public:
     Q_INVOKABLE void circleUp();
     Q_INVOKABLE void circleDown();
     Q_INVOKABLE void play();
+    Q_INVOKABLE void playSequence();
     Q_INVOKABLE void showSpiralStats();
     Q_INVOKABLE void record();
     Q_INVOKABLE void stop();
@@ -114,7 +115,9 @@ private:
     void setShareMode(ShareMode shareMode);
     QSGNode* createLineNode(const Line& line);
     void updateSceneRect(const QPointF& p);
-    void doPlay(std::unique_ptr<SceneGrabber> recorder);
+    bool checkPlayRequirement();
+    void playNextSequenceStep();
+    void doPlay(std::unique_ptr<SceneGrabber> recorder, const std::function<void()>& afterPlayCb = nullptr);
     void shareImage();
     void shareContent();
     void shareVideo();
@@ -135,8 +138,8 @@ private:
     QString mShareContentUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
 
-    int mTotalMorphs = 360;
-    int mMorphCount = 0;
+    int mPlaySequenceLength = 360;
+    int mPlaySequenceStep = 0;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;

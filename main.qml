@@ -73,6 +73,7 @@ ApplicationWindow {
                     case SpiralScene.NOT_PLAYING:
                         return "play";
                     case SpiralScene.PLAYING:
+                    case SpiralScene.PLAYING_SEQUENCE:
                     case SpiralScene.RECORDING:
                         return "stop";
                     case SpiralScene.DONE_PLAYING:
@@ -175,6 +176,11 @@ ApplicationWindow {
                     text: "Record GIF"
                     enabled: scene.donePlaying() && !scene.isInVideoShareMode()
                     onTriggered: scene.record()
+                }
+                MenuItem {
+                    text: "Play sequence"
+                    enabled: scene.notPlaying()
+                    onTriggered: scene.playSequence();
                 }
                 MenuItem {
                     text: "Statistics"

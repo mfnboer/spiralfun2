@@ -46,6 +46,7 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     for (auto& circle : mCircles)
         circle->preparePlay();
 
+    mStepsPerInterval = 1;
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
     mCycles = 0;
     mSceneGrabber = std::move(sceneGrabber);
@@ -60,10 +61,21 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     return true;
 }
 
+void Player::playAll()
+{
+    for (auto& circle : mCircles)
+        circle->preparePlay();
+
+    mStepsPerInterval = 100;
+    mStartTime = QTime::currentTime().msecsSinceStartOfDay();
+    mCycles = 0;
+    mPlayTimer.start();
+}
+
 void Player::startTimers()
 {
     mPlayTimer.start();
-    // TODO mSceneRefreshTimer.start();
+    mSceneRefreshTimer.start();
 }
 
 void Player::stopTimers()
