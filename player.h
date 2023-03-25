@@ -30,7 +30,7 @@ public:
     const QString& getGifFileName() const { return mGifFileName; }
 
 signals:
-    void done(Stats stats);
+    void done(Player::Stats stats);
     void refreshScene();
     void angleChanged();
 

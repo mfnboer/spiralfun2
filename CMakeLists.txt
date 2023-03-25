@@ -23,6 +23,10 @@ set(PROJECT_SOURCES
         jni_callback.h
         jni_callback.cpp
         main.cpp
+        mutation.h
+        mutation.cpp
+        mutation_sequence.h
+        mutation_sequence.cpp
         player.h
         player.cpp
         scene_grabber.h
@@ -60,11 +64,13 @@ qt_add_qml_module(spiralfun
         help.qml
         main.qml
         message.qml
+	MutationSequenceDialog.qml
     RESOURCES
         "android/src/com/gmail/mfnboer/QAndroidUtils.java"
         "android/src/com/gmail/mfnboer/QSpiralFunActivity.java"
         "icons/spiralfun/20x20/arrow_downward.png"
         "icons/spiralfun/20x20/arrow_upward.png"
+        "icons/spiralfun/20x20/delete.png"
         "icons/spiralfun/20x20/home.png"
         "icons/spiralfun/20x20/more.png"
         "icons/spiralfun/20x20/play.png"
@@ -72,6 +78,7 @@ qt_add_qml_module(spiralfun
         "icons/spiralfun/20x20/stop.png"
         "icons/spiralfun/20x20@2/arrow_downward.png"
         "icons/spiralfun/20x20@2/arrow_upward.png"
+        "icons/spiralfun/20x20@2/delete.png"
         "icons/spiralfun/20x20@2/home.png"
         "icons/spiralfun/20x20@2/more.png"
         "icons/spiralfun/20x20@2/play.png"
@@ -79,6 +86,7 @@ qt_add_qml_module(spiralfun
         "icons/spiralfun/20x20@2/stop.png"
         "icons/spiralfun/20x20@3/arrow_downward.png"
         "icons/spiralfun/20x20@3/arrow_upward.png"
+        "icons/spiralfun/20x20@3/delete.png"
         "icons/spiralfun/20x20@3/home.png"
         "icons/spiralfun/20x20@3/more.png"
         "icons/spiralfun/20x20@3/play.png"
@@ -86,6 +94,7 @@ qt_add_qml_module(spiralfun
         "icons/spiralfun/20x20@3/stop.png"
         "icons/spiralfun/20x20@4/arrow_downward.png"
         "icons/spiralfun/20x20@4/arrow_upward.png"
+        "icons/spiralfun/20x20@4/delete.png"
         "icons/spiralfun/20x20@4/home.png"
         "icons/spiralfun/20x20@4/more.png"
         "icons/spiralfun/20x20@4/play.png"

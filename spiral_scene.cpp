@@ -284,43 +284,42 @@ void SpiralScene::play()
     doPlay(nullptr);
 }
 
-void SpiralScene::playSequence()
+void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength)
 {
+    Q_ASSERT(sequenceLength > 0);
     if (!checkPlayRequirement())
         return;
 
-    mPlaySequenceStep = 0;
+    mMutationSequence = std::make_unique<MutationSequence>(mCircles, *this);
+    mMutationSequence->setSequenceLength(sequenceLength);
+    mMutationSequence->setMutations(mutations);
+    emit sequenceLengthChanged();
+
     removeCirclesFromScene();
     setPlayState(PLAYING_SEQUENCE);
-    doPlay(nullptr, [this]{ playNextSequenceStep(); });
-}
 
-void SpiralScene::playNextSequenceStep()
-{
-    if (++mPlaySequenceStep < mPlaySequenceLength)
-    {
-        const int rotations = mCircles.back()->getRotations() + 1;
-        mCircles.back()->setRotations(rotations);
-        qDebug() << "Play sequence step:" << mPlaySequenceStep << "rotations:" << rotations;
-
-        QTimer::singleShot(0, this, [this]{
-            doPlay(nullptr, [this]{ playNextSequenceStep(); });
+    connect(mMutationSequence.get(), &MutationSequence::sequenceFramePlaying, this, [this]{ emit sequenceFrameChanged(); });
+    connect(mMutationSequence.get(), &MutationSequence::sequenceFinished, this, [this]{
+            setPlayState(DONE_PLAYING);
+            mMutationSequence = nullptr;
         });
-    }
-    else
-    {
-        setPlayState(DONE_PLAYING);
-    }
+
+    mMutationSequence->play();
 }
 
-void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder, const std::function<void()>& afterPlayCb)
+void SpiralScene::playSequence()
+{
+    doPlay(nullptr);
+}
+
+void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 {
     mStats = {};
     setCurrentCircleFocus(false);
     mPlayer = std::make_unique<Player>(mCircles);
     QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
     QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });
-    QObject::connect(mPlayer.get(), &Player::done, this, [this, afterPlayCb](const Player::Stats& stats){
+    QObject::connect(mPlayer.get(), &Player::done, this, [this](const Player::Stats& stats){
             mStats.mPlayerStats = stats;
             removeCirclesFromScene();
 
@@ -336,15 +335,14 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder, const std::func
                 setPlayState(DONE_PLAYING);
 
             // Stats are only complete after rendering is done.
-            QObject::connect(window(), &QQuickWindow::afterRendering, this, ([this, afterPlayCb]{
+            QObject::connect(window(), &QQuickWindow::afterRendering, this, ([this]{
                 const qreal avgPoints = mStats.mLinePointsSum / (qreal)mStats.mLineCount;
                 qDebug() << "Stats, #segments" << mStats.mLineSegmentCount <<
                             "#avg_pts:" << avgPoints << "#lines:" << mStats.mLineCount;
                 qDebug() << "Scene rect:" << mSceneRect;
 
-                if (afterPlayCb)
-                    afterPlayCb();
-
+                // TODO: there may still be line to be rendered in mLines
+                emit sequenceFramePlayed();
             }), Qt::SingleShotConnection);
             update();
     });
@@ -829,6 +827,18 @@ void SpiralScene::deleteConfig(const QStringList& fileNameList)
 {
     SpiralConfig cfg(mCircles, mDefaultCircleRadius);
     cfg.remove(fileNameList);
+}
+
+QStringList SpiralScene::getCircleColorList() const
+{
+    QStringList colorList;
+    for (const auto& c : mCircles)
+    {
+        const QString colorName = c->getColor().name();
+        colorList.push_back(colorName);
+    }
+
+    return colorList;
 }
 
 }

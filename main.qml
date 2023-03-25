@@ -56,17 +56,10 @@ ApplicationWindow {
                 onMessage: (msg) => showMessage(msg)
                 onStatusUpdate: (msg) => statusPopup.show(msg)
 
-                function notPlaying() {
-                    return playState === SpiralScene.NOT_PLAYING;
-                }
-
-                function donePlaying() {
-                    return playState === SpiralScene.DONE_PLAYING;
-                }
-
-                function isRecording() {
-                    return playState === SpiralScene.RECORDING;
-                }
+                function notPlaying() { return playState === SpiralScene.NOT_PLAYING }
+                function donePlaying() { return playState === SpiralScene.DONE_PLAYING }
+                function isPlayingSequence() { return playState === SpiralScene.PLAYING_SEQUENCE }
+                function isRecording() { return playState === SpiralScene.RECORDING }
 
                 function playStateIcon() {
                     switch (scene.playState) {
@@ -127,10 +120,10 @@ ApplicationWindow {
             }
 
             Label {
-                text: "RECORDING"
-                anchors.bottom: recordProgressBar.top
+                text: scene.isRecording() ? "RECORDING" : `PLAYING SEQUENCE (${scene.sequenceFrame}/${scene.sequenceLength})`
+                anchors.bottom: playProgressBar.top
                 anchors.horizontalCenter: parent.horizontalCenter
-                visible: scene.isRecording()
+                visible: scene.isRecording() || scene.isPlayingSequence()
                 SequentialAnimation on color {
                     loops: Animation.Infinite
                     ColorAnimation { from: "white"; to: "black"; duration: 1000 }
@@ -138,14 +131,14 @@ ApplicationWindow {
                 }
             }
             ProgressBar {
-                id: recordProgressBar
-                value: scene.playAngle
+                id: playProgressBar
+                value: scene.isRecording() ? scene.playAngle : scene.sequenceFrame
                 from: 0
-                to: Math.PI * 2;
+                to: scene.isRecording() ? Math.PI * 2 : scene.sequenceLength
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                visible: scene.isRecording()
+                visible: scene.isRecording() || scene.isPlayingSequence()
             }
 
             Menu {
@@ -178,9 +171,12 @@ ApplicationWindow {
                     onTriggered: scene.record()
                 }
                 MenuItem {
-                    text: "Play sequence"
+                    text: "Play mutation sequence"
                     enabled: scene.notPlaying()
-                    onTriggered: scene.playSequence();
+                    onTriggered: {
+                        if (scene.checkPlayRequirement())
+                            mutationSequenceDialog.show(scene.numCircles, scene.getCircleColorList())
+                    }
                 }
                 MenuItem {
                     text: "Statistics"
@@ -389,6 +385,13 @@ ApplicationWindow {
         var component = Qt.createComponent("message.qml");
         var obj = component.createObject(root);
         obj.show(message);
+    }
+
+    MutationSequenceDialog {
+        id: mutationSequenceDialog;
+        onAccepted: {
+            scene.playSequence(mutationList, sequenceLength)
+        }
     }
 
     Component.onCompleted: {
