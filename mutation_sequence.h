@@ -14,6 +14,7 @@ class ISequencePlayer
 public:
     virtual ~ISequencePlayer() = default;
     virtual void playSequence() = 0;
+    virtual int getMaxDiameter() const = 0;
 };
 
 class MutationSequence : public QObject
@@ -22,6 +23,7 @@ class MutationSequence : public QObject
 
 public:
     MutationSequence(const CircleList& circles, ISequencePlayer& sequencePlayer);
+    ~MutationSequence();
 
     void setSequenceLength(int sequenceLength) { mSequenceLength = sequenceLength; }
     void setMutations(const QVariant& mutationsQmlList);

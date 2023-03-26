@@ -32,7 +32,7 @@ public:
     void setChange(Change change) { mChange = change; emit changeChanged(); }
 
     void init(const CircleList& circleList);
-    void apply(const CircleList& circleList) const;
+    void apply(const CircleList& circleList, int maxDiameter) const;
 
 signals:
     void circleChanged();
@@ -44,6 +44,16 @@ private:
     Trait mTrait = TRAIT_ROTATIONS;
     Change mChange = CHANGE_INCREMENT;
     int mRotationDeltaFactor = 1;
+};
+
+class MutationFactory : public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
+
+public:
+    Q_INVOKABLE SpiralFun::Mutation* createMutation(int circle);
 };
 
 }

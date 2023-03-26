@@ -60,6 +60,7 @@ public:
     int getCurrentCircleIndex() const { return mCurrentIndex; }
     PlayState getPlayState() const { return mPlayState; }
     ShareMode getShareMode() const { return mShareMode; }
+    int getMaxDiameter() const override { return MAX_DIAMETER; }
     qreal getPlayAngle() const { return mPlayer ? mPlayer->getAngle() : 0.0; }
     int getSequenceFrame() const { return mMutationSequence ? mMutationSequence->getCurrentSequenceFrame() : 0; }
     int getSequenceLength() const { return mMutationSequence ? mMutationSequence->getSequenceLength() : 0; }

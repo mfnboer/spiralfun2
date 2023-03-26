@@ -26,24 +26,24 @@ Dialog {
 
         model: mutationList
 
-        delegate: RowLayout {
-            anchors.left: parent.left
-            anchors.right: parent.right
+        delegate: GridLayout {
+            columns: 4
+            width: parent.width
 
             ComboBox {
+                id: circleComboBox
                 model: { var l = []; for (let i = 0; i < numCircles; ++i) { l.push(`Circle ${i}`); }; return l; }
                 Material.foreground: circleColorList[currentIndex]
                 Material.background: "black"
                 currentIndex: modelData.circle
-                onActivated: modelData.circle = currentIndex
-                onCurrentIndexChanged: {
-                    if (currentIndex === 0) {
+                Layout.fillWidth: true
+                onActivated: {
+                    modelData.circle = currentIndex
+
+                    if (modelData.circle === 0) {
                         modelData.trait = Mutation.TRAIT_DIAMETER
-                        modelData.change = Mutation.CHANGE_INCREMENT
                     }
                 }
-
-                Layout.fillWidth: true
 
                 delegate: ItemDelegate {
                     contentItem: Label {
@@ -54,25 +54,36 @@ Dialog {
             }
 
             ComboBox {
+                id: traitsComboBox
                 model: modelData.circle > 0 ? ["diameter", "rotations", "direction"] : ["diameter"]
                 currentIndex: modelData.trait
-                onActivated: modelData.trait = currentIndex
                 Layout.fillWidth: true
+                onActivated: {
+                    modelData.trait = currentIndex
+
+                    if (modelData.trait === Mutation.TRAIT_DIRECTION) {
+                        modelData.change = Mutation.CHANGE_INCREMENT
+                    }
+                }
             }
 
             ComboBox {
-                model: modelData.trait === Mutation.TRAIT_DIRECTION ? ["invert"] : ["increment", "decrement"]
+                id: changeComboBox
+                model: modelData.trait === Mutation.TRAIT_DIRECTION ? ["flip"] : ["+1", "-1"]
                 currentIndex: modelData.change
+                Layout.preferredWidth: 70
                 onActivated: modelData.change = currentIndex
-                Layout.fillWidth: true
             }
 
-            Button {
+            RoundButton {
                 icon.name: "delete"
+                Material.background: "transparent"
                 onClicked: {
                     var l = []
                     for (let i = 0; i < mutationList.length; ++i) {
-                        if (i !== index) {
+                        if (i === index) {
+                            mutationList[i].destroy()
+                        } else {
                             l.push(mutationList[i])
                         }
                     }
@@ -105,10 +116,8 @@ Dialog {
     }
 
     function addMutation() {
-        mutationList.push(Qt.createQmlObject(`
-            import SpiralFun
-            Mutation { circle: ${(numCircles - 1)} }`,
-            mutationSequenceDialog));
+        var mutation = MutationFactory.createMutation(numCircles - 1)
+        mutationList.push(mutation)
     }
 
     function show(numCircles, colorList) {
@@ -117,8 +126,11 @@ Dialog {
         if (numCircles !== mutationSequenceDialog.numCircles) {
             // If the number of  circles have changed then the current mutations
             // may refer to non-exisiting circles. Cleanup current mutations.
-            mutationSequenceDialog.numCircles = numCircles
+            for (let i = 0; i < mutationList.length; ++i)
+                mutationList[i].destroy()
+
             mutationList = []
+            mutationSequenceDialog.numCircles = numCircles
             addMutation()
             sequenceLength = 10
             sequenceLengthSpinBox.value = sequenceLength

@@ -1,6 +1,8 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "mutation.h"
+#include "spiral_config.h"
+#include <QQmlEngine>
 
 namespace SpiralFun {
 
@@ -10,7 +12,7 @@ void Mutation::init(const CircleList& circleList)
     mRotationDeltaFactor = circle->getSpeed() < 0 ? -1 : 1;
 }
 
-void Mutation::apply(const CircleList& circleList) const
+void Mutation::apply(const CircleList& circleList, int maxDiameter) const
 {
     auto& circle = circleList[getCircle()];
 
@@ -18,13 +20,15 @@ void Mutation::apply(const CircleList& circleList) const
     {
     case Mutation::TRAIT_ROTATIONS: {
             const int delta = (getChange() == Mutation::CHANGE_INCREMENT ? 1 : -1) * mRotationDeltaFactor;
-            const int speed = circle->getSpeed() + delta;
+            const int newSpeed = circle->getSpeed() + delta;
+            const int speed = std::clamp(newSpeed, -SpiralConfig::MAX_SPEED, SpiralConfig::MAX_SPEED);
             circle->setSpeed(speed);
             break;
         }
     case Mutation::TRAIT_DIAMETER: {
             const int delta = getChange() == Mutation::CHANGE_INCREMENT ? 1 : -1;
-            const int diameter = std::max(circle->getDiameter() + delta, 1);
+            const int newDiameter = circle->getDiameter() + delta;
+            const int diameter = std::clamp(newDiameter, 1, maxDiameter);
             circle->setDiameter(diameter);
             break;
         }
@@ -35,6 +39,16 @@ void Mutation::apply(const CircleList& circleList) const
             break;
         }
     }
+}
+
+Mutation* MutationFactory::createMutation(int circle)
+{
+    auto* mutation = new Mutation;
+    mutation->setParent(this);
+    auto* engine = qmlEngine(this);
+    engine->setContextForObject(mutation, qmlContext(this));
+    mutation->setCircle(circle);
+    return mutation;
 }
 
 }

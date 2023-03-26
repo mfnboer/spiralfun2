@@ -201,7 +201,7 @@ void SpiralScene::handleDiameterChange(Circle* circle, int oldDiameter)
     }
 
     // Circle changed size, move circles on top of this circle.
-    moveCircles(mCurrentIndex + 1, yShift);
+    moveCircles(*index + 1, yShift);
 }
 
 void SpiralScene::moveCircles(unsigned index, qreal yShift)
@@ -391,6 +391,7 @@ void SpiralScene::record()
 void SpiralScene::stop()
 {
     mPlayer = nullptr;
+    mMutationSequence = nullptr;
     resetScene();
     setPlayState(NOT_PLAYING);
     setCurrentCircleFocus(true);
