@@ -116,9 +116,9 @@ QString createDateTimeName()
     return QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
 }
 
-QString createPictureFileName()
+QString createPictureFileName(const QString& baseNameSuffix)
 {
-    return QString("IMG_%1.jpg").arg(createDateTimeName());
+    return QString("IMG_%1%2.jpg").arg(createDateTimeName(), baseNameSuffix);
 }
 
 void scanMediaFile(const QString& fileName)

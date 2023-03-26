@@ -68,6 +68,7 @@ public:
     void selectCircle(Circle* circle);
     ScopedLine addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint);
     void playSequence() override;
+    QRectF getMaxSceneRect() const override;
 
     Q_INVOKABLE void init();
     Q_INVOKABLE void setupExample(const QString& example);
@@ -75,11 +76,12 @@ public:
     Q_INVOKABLE void circleDown();
     Q_INVOKABLE bool checkPlayRequirement();
     Q_INVOKABLE void play();
-    Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength);
+    Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength, MutationSequence::SaveAs saveAs);
     Q_INVOKABLE void showSpiralStats();
     Q_INVOKABLE void record();
     Q_INVOKABLE void stop();
-    Q_INVOKABLE bool saveImage();
+    Q_INVOKABLE bool saveImage(const QRectF cutRect = {}, const QString& baseNameSuffix = "",
+                               const ISequencePlayer::SavedCallback& savedCallback = nullptr) override;
     Q_INVOKABLE void saveConfig();
     Q_INVOKABLE void share();
     Q_INVOKABLE QObjectList getConfigFileList();

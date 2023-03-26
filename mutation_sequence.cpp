@@ -62,17 +62,18 @@ void MutationSequence::restoreCircleSettings()
     qDebug() << "Circle settings restored";
 }
 
-void MutationSequence::play()
+void MutationSequence::play(SaveAs saveAs)
 {
+    mSaveAs = saveAs;
     backupCircleSettings();
 
     // Unfortunately an interface cannot have signals
     auto* hack = dynamic_cast<SpiralScene*>(&mSequencePlayer);
     Q_ASSERT(hack);
-    connect(hack, &SpiralScene::sequenceFramePlayed, this, [this]{ playNextFrame(); });
+    connect(hack, &SpiralScene::sequenceFramePlayed, this, [this]{ postFrameProcessing(); });
     mCurrentSequenceFrame = 0;
-    mSequencePlayer.playSequence();
     emit sequenceFramePlaying(mCurrentSequenceFrame);
+    mSequencePlayer.playSequence();
 }
 
 void MutationSequence::playNextFrame()
@@ -83,14 +84,33 @@ void MutationSequence::playNextFrame()
         const auto* mutation = mMutations[index];
         qDebug() << mutation->getCircle() << mutation->getTrait() << mutation->getChange();
         mutation->apply(mCircles, mSequencePlayer.getMaxDiameter());
-        mSequencePlayer.playSequence();
         emit sequenceFramePlaying(mCurrentSequenceFrame);
+        mSequencePlayer.playSequence();
     }
     else
     {
         qDebug() << "Finished playing mutation sequence";
         restoreCircleSettings();
         emit sequenceFinished();
+    }
+}
+
+void MutationSequence::postFrameProcessing()
+{
+    switch (mSaveAs)
+    {
+    case SAVE_AS_NONE:
+        playNextFrame();
+        break;
+    case SAVE_AS_PICS: {
+        const QString suffix = QString("_MS%1").arg(mCurrentSequenceFrame + 1, 3, 10, QChar('0'));
+        const QRectF frameRect = mSequencePlayer.getMaxSceneRect();
+        mSequencePlayer.saveImage(frameRect, suffix, [this](bool){ playNextFrame(); });
+        break; }
+    case SAVE_AS_GIF:
+        qDebug() << "TODO";
+        playNextFrame();
+        break;
     }
 }
 

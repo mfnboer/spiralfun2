@@ -9,6 +9,7 @@ Dialog {
     property list<Mutation> mutationList
     property int sequenceLength
     property list<string> circleColorList
+    property int saveAs
 
     id: mutationSequenceDialog
     title: "Mutation sequence"
@@ -95,14 +96,16 @@ Dialog {
 
     Button {
         id: addButton
-        anchors.bottom: sequenceLengthRow.top
+        anchors.bottom: settingsGrid.top
         text: "Add mutation"
         onClicked: addMutation()
     }
 
-    RowLayout {
-        id: sequenceLengthRow
+    GridLayout {
+        id: settingsGrid
         anchors.bottom: parent.bottom
+        columns: 2
+
         Label {
             text: "Sequence length (frames):"
         }
@@ -112,6 +115,16 @@ Dialog {
             editable: true
             onValueChanged: sequenceLength = value
             Keys.onReturnPressed:  Qt.inputMethod.hide()
+        }
+
+        Label {
+            text: "Save sequence as:"
+        }
+        ComboBox {
+            id: saveAsComboBox
+            model: ["none (just play)", "Pictures", "GIF"]
+            implicitContentWidthPolicy: ComboBox.WidestText
+            onActivated: saveAs = currentIndex
         }
     }
 

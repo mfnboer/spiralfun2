@@ -284,7 +284,7 @@ void SpiralScene::play()
     doPlay(nullptr);
 }
 
-void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength)
+void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, MutationSequence::SaveAs saveAs)
 {
     Q_ASSERT(sequenceLength > 0);
     if (!checkPlayRequirement())
@@ -304,7 +304,7 @@ void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength)
             mMutationSequence = nullptr;
         });
 
-    mMutationSequence->play();
+    mMutationSequence->play(saveAs);
 }
 
 void SpiralScene::playSequence()
@@ -629,7 +629,8 @@ void SpiralScene::touchEvent(QTouchEvent* event)
     event->accept();
 }
 
-bool SpiralScene::saveImage()
+bool SpiralScene::saveImage(const QRectF cutRect, const QString& baseNameSuffix,
+                            const SavedCallback& savedCallback)
 {
     QString picPath;
     try {
@@ -645,7 +646,7 @@ bool SpiralScene::saveImage()
         return false;
     }
 
-    const QString baseFileName = Utils::createPictureFileName();
+    const QString baseFileName = Utils::createPictureFileName(baseNameSuffix);
     const QString fileName = picPath + "/" + baseFileName;
     if (QFile::exists(fileName))
     {
@@ -653,19 +654,26 @@ bool SpiralScene::saveImage()
         return false;
     }
 
-    mSceneGrabber = std::make_unique<SceneGrabber>(this, mSceneRect);
+    const QRectF grabRect = cutRect.isNull() ? mSceneRect : cutRect;
+    mSceneGrabber = std::make_unique<SceneGrabber>(this, grabRect);
     const bool grabbed = mSceneGrabber->grabScene(
-        [this, fileName, baseFileName](const QImage& img){
+        [this, fileName, baseFileName, savedCallback](const QImage& img){
             if (img.save(fileName))
             {
                 qDebug() << "Saved file:" << fileName;
                 emit statusUpdate(QString("Image saved: %1").arg(baseFileName));
                 Utils::scanMediaFile(fileName);
+
+                if (savedCallback)
+                    savedCallback(true);
             }
             else
             {
                 emit message(QString("Failed to save: %1").arg(fileName));
                 setSharingInProgress(false);
+
+                if (savedCallback)
+                    savedCallback(false);
             }
         });
 
@@ -857,6 +865,21 @@ QStringList SpiralScene::getCircleColorList() const
     }
 
     return colorList;
+}
+
+QRectF SpiralScene::getMaxSceneRect() const
+{
+    Q_ASSERT(!mCircles.empty());
+    qreal halfSize = mCircles[0]->getRadius();
+
+    for (unsigned i = 1; i < mCircles.size(); ++i)
+        halfSize += mCircles[i]->getDiameter();
+
+    const QPointF& center = mCircles[0]->getCenter();
+    const qreal x = center.x() - halfSize;
+    const qreal y = center.y() - halfSize;
+
+    return QRectF(x, y, halfSize * 2, halfSize * 2);
 }
 
 }
