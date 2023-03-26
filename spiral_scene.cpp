@@ -330,20 +330,15 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
             }
 
             if (mPlayState == PLAYING_SEQUENCE)
+            {
+                mDoRender = true;
                 mClearScene = true;
+            }
             else
+            {
                 setPlayState(DONE_PLAYING);
+            }
 
-            // Stats are only complete after rendering is done.
-            QObject::connect(window(), &QQuickWindow::afterRendering, this, ([this]{
-                const qreal avgPoints = mStats.mLinePointsSum / (qreal)mStats.mLineCount;
-                qDebug() << "Stats, #segments" << mStats.mLineSegmentCount <<
-                            "#avg_pts:" << avgPoints << "#lines:" << mStats.mLineCount;
-                qDebug() << "Scene rect:" << mSceneRect;
-
-                // TODO: there may still be line to be rendered in mLines
-                emit sequenceFramePlayed();
-            }), Qt::SingleShotConnection);
             update();
     });
 
@@ -400,7 +395,20 @@ void SpiralScene::stop()
 
 void SpiralScene::setPlayState(PlayState state)
 {
-    mPlayState = state;
+    switch (state)
+    {
+    case NOT_PLAYING:
+    case PLAYING:
+    case RECORDING:
+    case DONE_PLAYING:
+        mDoRender = true;
+        break;
+    case PLAYING_SEQUENCE:
+        mDoRender = false;
+        break;
+    }
+
+    mPlayState = state;  
     emit playStateChanged();
 }
 
@@ -487,6 +495,9 @@ ScopedLine SpiralScene::addLine(QObject* object, const QColor& color, int lineWi
 
 QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 {
+    if (!mDoRender)
+        return oldNode;
+
     QSGNode* sceneRoot = (oldNode ? oldNode : new QSGNode);
 
     if (mClearScene)
@@ -518,6 +529,12 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         QPointF p = line.mLinePoints.back();
         line.mLinePoints.clear();
         line.mLinePoints.push_back(p);
+    }
+
+    if (mPlayState == PLAYING_SEQUENCE)
+    {
+        mDoRender = false;
+        emit sequenceFramePlayed();
     }
 
     return sceneRoot;

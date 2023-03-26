@@ -133,6 +133,7 @@ private:
     void shareVideo();
 
     std::unordered_map<QObject*, Line> mLines;
+    bool mDoRender = true;
     bool mClearScene = false;
     QRectF mSceneRect;
     Stats mStats;
