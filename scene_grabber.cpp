@@ -70,6 +70,13 @@ QRectF SceneGrabber::calcBoundingRectangle(const CircleList& circles) const
     return rect;
 }
 
+QRectF SceneGrabber::getGrabRect(const QRectF& sceneRect)
+{
+    auto rect = QRectF(QPointF(0, 0), sceneRect.size() * mPixelRatio);
+    rect.translate(sceneRect.x() * mPixelRatio, sceneRect.y() * mPixelRatio);
+    return rect;
+}
+
 QRect SceneGrabber::getSpiralCutRect() const
 {
     QRectF cutRect = mSceneRect.adjusted(-IMG_MARGIN, -IMG_MARGIN, IMG_MARGIN, IMG_MARGIN);

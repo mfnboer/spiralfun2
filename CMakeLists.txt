@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
         circle.h
         circle.cpp
         exception.h
+        gif_recorder.h
+        gif_recorder.cpp
         jni_callback.h
         jni_callback.cpp
         main.cpp

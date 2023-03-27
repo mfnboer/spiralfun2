@@ -9,7 +9,9 @@ Dialog {
     property list<Mutation> mutationList
     property int sequenceLength
     property list<string> circleColorList
-    property int saveAs
+    property int saveAs: MutationSequence.SAVE_AS_NONE
+    property bool saveInNewAlbum: true
+    property int frameRate: GifRecorder.FPS_10
 
     id: mutationSequenceDialog
     title: "Mutation sequence"
@@ -129,7 +131,30 @@ Dialog {
             id: saveAsComboBox
             model: ["none (just play)", "Pictures", "GIF"]
             implicitContentWidthPolicy: ComboBox.WidestText
+            currentIndex: saveAs
             onActivated: saveAs = currentIndex
+        }
+
+        Label {
+            text: "GIF frames per second:"
+            enabled: saveAs === MutationSequence.SAVE_AS_GIF
+        }
+        ComboBox {
+            id: frameRateComboBox
+            model: ["25 (video)", "10 (slow video)", "2 (slide show)", "1 (slow slide show)"]
+            implicitContentWidthPolicy: ComboBox.WidestText
+            currentIndex: frameRate
+            enabled: saveAs === MutationSequence.SAVE_AS_GIF
+            onActivated: frameRate = currentIndex
+        }
+
+        CheckBox {
+            id: saveInNewAlbumCheckBox
+            text: "Save pictures in new album"
+            checked: saveInNewAlbum
+            enabled: saveAs === MutationSequence.SAVE_AS_PICS
+            onCheckedChanged: saveInNewAlbum = checked
+            Layout.columnSpan: 2
         }
     }
 
@@ -140,6 +165,7 @@ Dialog {
 
     function show(numCircles, colorList) {
         circleColorList = colorList
+        saveAs = MutationSequence.SAVE_AS_NONE
 
         if (numCircles !== mutationSequenceDialog.numCircles) {
             // If the number of  circles have changed then the current mutations

@@ -390,7 +390,7 @@ ApplicationWindow {
     MutationSequenceDialog {
         id: mutationSequenceDialog;
         onAccepted: {
-            scene.playSequence(mutationList, sequenceLength, saveAs)
+            scene.playSequence(mutationList, sequenceLength, saveAs, saveInNewAlbum, frameRate)
         }
     }
 

@@ -3,9 +3,7 @@
 #pragma once
 
 #include "circle.h"
-#include "scene_grabber.h"
-#include "egif/GifEncoder.h"
-#include <QTime>
+#include "gif_recorder.h"
 #include <QTimer>
 
 namespace SpiralFun {
@@ -22,12 +20,11 @@ public:
     };
 
     explicit Player(const CircleList &circles);
-    ~Player();
 
     bool play(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
     void playAll();
     qreal getAngle() const { return mAngle; }
-    const QString& getGifFileName() const { return mGifFileName; }
+    const QString& getGifFileName() const { return mGifRecorder->getFileName(); }
 
 signals:
     void done(Player::Stats stats);
@@ -45,11 +42,7 @@ private:
     bool setupRecording();
     void resetRecordingRect();
     void updateRecordingRect();
-    void calcFramePosition();
     void record();
-    void recordFrame();
-    void stopRecording();
-    void runRecordFrameThread(const std::function<void()>& whenFinished);
 
     const CircleList& mCircles;
     QTimer mPlayTimer;
@@ -64,13 +57,8 @@ private:
     QRect mFullFrameRect;
     QRectF mRecordingRect;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
-    std::unique_ptr<GifEncoder> mGifEncoder;
-    QString mGifFileName;
+    std::unique_ptr<GifRecorder> mGifRecorder;
     bool mRecording = false;
-    std::unique_ptr<QThread> mRecordingThread;
-    std::unique_ptr<QImage> mFrame;
-    QPoint mFramePosition;
-    std::unique_ptr<QThread> mPlaySequenceThread;
 };
 
 }

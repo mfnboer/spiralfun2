@@ -68,7 +68,9 @@ public:
     void selectCircle(Circle* circle);
     ScopedLine addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint);
     void playSequence() override;
+    const QRectF& getSceneRect() const override { return mSceneRect; }
     QRectF getMaxSceneRect() const override;
+    std::unique_ptr<SceneGrabber> createSceneGrabber(const QRectF& rect) override;
 
     Q_INVOKABLE void init();
     Q_INVOKABLE void setupExample(const QString& example);
@@ -76,11 +78,12 @@ public:
     Q_INVOKABLE void circleDown();
     Q_INVOKABLE bool checkPlayRequirement();
     Q_INVOKABLE void play();
-    Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength, MutationSequence::SaveAs saveAs);
+    Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength, MutationSequence::SaveAs saveAs,
+                                  bool createAlbum, GifRecorder::FrameRate frameRate);
     Q_INVOKABLE void showSpiralStats();
     Q_INVOKABLE void record();
     Q_INVOKABLE void stop();
-    Q_INVOKABLE bool saveImage(const QRectF cutRect = {}, const QString& baseNameSuffix = "",
+    Q_INVOKABLE bool saveImage(const QRectF cutRect = {}, const QString subDir = "", const QString& baseNameSuffix = "",
                                const ISequencePlayer::SavedCallback& savedCallback = nullptr) override;
     Q_INVOKABLE void saveConfig();
     Q_INVOKABLE void share();

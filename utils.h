@@ -7,7 +7,7 @@
 namespace SpiralFun::Utils {
 
 QString createDateTimeName();
-QString getPicturesPath();
+QString getPicturesPath(const QString& subDir = "");
 QString getPublicSpiralConfigPath();
 QString getSpiralConfigPath();
 QString createPictureFileName(const QString& baseNameSuffix = "");

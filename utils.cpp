@@ -38,13 +38,17 @@ bool checkStoragePermission()
 
 namespace SpiralFun::Utils {
 
-QString getPicturesPath()
+QString getPicturesPath(const QString& subDir)
 {
     if (!checkStoragePermission())
         throw RuntimeException("No permission to access storage.");
 
 #if defined(Q_OS_ANDROID)
-    auto jsSubDir = QJniObject::fromString(PICTURES_SUB_DIR);
+    QString picSubPath = PICTURES_SUB_DIR;
+    if (!subDir.isEmpty())
+        picSubPath += "/" + subDir;
+
+    auto jsSubDir = QJniObject::fromString(picSubPath);
     auto pathObj = QJniObject::callStaticMethod<jstring>("com/gmail/mfnboer/QAndroidUtils",
                                                          "getPicturesPath",
                                                          "(Ljava/lang/String;)Ljava/lang/String;",
@@ -56,7 +60,9 @@ QString getPicturesPath()
     qDebug() << "Pictures path:" << picPath;
 #else
     auto path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-    const QString picPath = path + "/" + PICTURES_SUB_DIR;
+    QString picPath = path + "/" + PICTURES_SUB_DIR;
+    if (!subDir.isEmpty())
+        picPath += "/" + subDir;
 
     if (!QDir().mkpath(picPath))
         throw RuntimeException(QString("Failed to create path: %1").arg(picPath));

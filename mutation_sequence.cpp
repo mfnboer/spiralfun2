@@ -2,6 +2,7 @@
 // License: GPLv3
 #include "mutation_sequence.h"
 #include "spiral_scene.h"
+#include "utils.h"
 
 namespace SpiralFun {
 
@@ -65,7 +66,12 @@ void MutationSequence::restoreCircleSettings()
 void MutationSequence::play(SaveAs saveAs)
 {
     mSaveAs = saveAs;
-    backupCircleSettings();
+
+    if (!preparePlay())
+    {
+        emit sequenceFinished();
+        return;
+    }
 
     // Unfortunately an interface cannot have signals
     auto* hack = dynamic_cast<SpiralScene*>(&mSequencePlayer);
@@ -90,6 +96,10 @@ void MutationSequence::playNextFrame()
     else
     {
         qDebug() << "Finished playing mutation sequence";
+
+        if (mSaveAs == SAVE_AS_GIF)
+            mGifRecorder->stopRecording(true);
+
         restoreCircleSettings();
         emit sequenceFinished();
     }
@@ -105,13 +115,44 @@ void MutationSequence::postFrameProcessing()
     case SAVE_AS_PICS: {
         const QString suffix = QString("_MS%1").arg(mCurrentSequenceFrame + 1, 3, 10, QChar('0'));
         const QRectF frameRect = mSequencePlayer.getMaxSceneRect();
-        mSequencePlayer.saveImage(frameRect, suffix, [this](bool){ playNextFrame(); });
+        mSequencePlayer.saveImage(frameRect, mPicturesSubDir, suffix, [this](bool){ playNextFrame(); });
         break; }
-    case SAVE_AS_GIF:
-        qDebug() << "TODO";
-        playNextFrame();
-        break;
+    case SAVE_AS_GIF: {
+        mGifRecorder->addFrame([this]{ playNextFrame(); });
+        break; }
     }
+}
+
+bool MutationSequence::preparePlay()
+{
+    backupCircleSettings();
+
+    if (mSaveAs == SAVE_AS_GIF && !setupGifRecording())
+    {
+        qDebug() << "Failed to setup GIF recording";
+        return false;
+    }
+
+    if (mCreateNewPictureFolder)
+    {
+        const QString dateTimeName = Utils::createDateTimeName();
+        mPicturesSubDir = QString("SpiralFun_%1").arg(dateTimeName);
+    }
+    else
+    {
+        mPicturesSubDir.clear();
+    }
+
+    return true;
+}
+
+bool MutationSequence::setupGifRecording()
+{
+    const auto rect = mSequencePlayer.getMaxSceneRect();
+    mSceneGrabber = mSequencePlayer.createSceneGrabber(rect);
+    mGifRecorder = std::make_unique<GifRecorder>(*mSceneGrabber);
+
+    return mGifRecorder->startRecording(mFrameRate, "_MS");
 }
 
 }

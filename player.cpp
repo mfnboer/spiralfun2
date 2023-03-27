@@ -1,20 +1,12 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "player.h"
-#include "exception.h"
-#include "utils.h"
-#include <QFile>
-#include <QThread>
+#include <QTime>
 #include <chrono>
 
 using namespace std::chrono_literals;
 
 namespace SpiralFun {
-
-namespace {
-constexpr int FRAME_DURATION = 4; // unit is 10ms
-constexpr int GIF_QUALITY = 10;
-}
 
 Player::Player(const CircleList &circles) :
     mCircles(circles)
@@ -23,22 +15,6 @@ Player::Player(const CircleList &circles) :
     QObject::connect(&mPlayTimer, &QTimer::timeout, this, &Player::advance);
     mSceneRefreshTimer.setInterval(40ms);
     QObject::connect(&mSceneRefreshTimer, &QTimer::timeout, this, [this]{ emit refreshScene(); });
-}
-
-Player::~Player()
-{
-    if (mRecordingThread)
-    {
-        qDebug() << "Wait for recording thread to finish";
-        mRecordingThread->wait();
-    }
-
-    if (mRecording)
-    {
-        qDebug() << "Stop recording and remove file:" << mGifFileName;
-        stopRecording();
-        QFile::remove(mGifFileName);
-    }
 }
 
 bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
@@ -50,9 +26,13 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
     mCycles = 0;
     mSceneGrabber = std::move(sceneGrabber);
-    startTimers();
 
     if (mSceneGrabber)
+        mGifRecorder = std::make_unique<GifRecorder>(*mSceneGrabber);
+
+    startTimers();
+
+    if (mGifRecorder)
     {
         if (!setupRecording())
             return false;
@@ -125,25 +105,16 @@ void Player::finishPlaying()
     {
         // Record last frame
         updateRecordingRect();
-        calcFramePosition();
 
-        const bool grabbed = mSceneGrabber->grabScene(mRecordingRect.toRect(),
-            [this, stats](QImage&& img){
-                qDebug() << "START finalizing video";
-                mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
-                runRecordFrameThread([this, stats]{
-                        stopRecording();
-                        qDebug() << "STOP finalizing video";
-                        Utils::scanMediaFile(mGifFileName);
-                        emit done(stats);
-                    });
+        const bool frameAdded = mGifRecorder->addFrame(mRecordingRect, [this, stats]{
+                mGifRecorder->stopRecording(true);
+                emit done(stats);
             });
 
-        if (!grabbed)
+        if (!frameAdded)
         {
-            qWarning() << "Failed to grab last frame";
-            stopRecording();
-            Utils::scanMediaFile(mGifFileName);
+            qWarning() << "Failed to add last frame";
+            mGifRecorder->stopRecording(true);
             emit done(stats);
         }
     }
@@ -187,29 +158,11 @@ void Player::forceDraw()
 
 bool Player::setupRecording()
 {
-    Q_ASSERT(mSceneGrabber);
-    QString path;
-    try {
-        path = Utils::getPicturesPath();
-    } catch (RuntimeException& e) {
-        qWarning() << "Cannot record:" << e.msg();
+    Q_ASSERT(mGifRecorder);
+    if (!mGifRecorder->startRecording(GifRecorder::FPS_25))
         return false;
-    }
 
-    const QString baseName = Utils::createDateTimeName();
-    mGifFileName = path + QString("/VID_%1.gif").arg(baseName);
-    mGifEncoder = std::make_unique<GifEncoder>();
-    mFullFrameRect = mSceneGrabber->getSpiralCutRect();
-    const int width = mFullFrameRect.width();
-    const int height = mFullFrameRect.height();
-
-    qDebug() << "Start recording frame:" << mFullFrameRect.size();
-
-    if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, 0))
-    {
-        qWarning() << "Cannot open file:" << mGifFileName;
-        return false;
-    }
+    mFullFrameRect = mGifRecorder->getFullFrameRect();
 
     // Capture one full frame, next frames will be subframes where changes happened.
     mRecordingRect = mFullFrameRect;
@@ -218,13 +171,6 @@ bool Player::setupRecording()
     record();
 
     return true;
-}
-
-void Player::stopRecording()
-{
-    Q_ASSERT(mGifEncoder);
-    mGifEncoder->close();
-    mRecording = false;
 }
 
 void Player::resetRecordingRect()
@@ -237,11 +183,6 @@ void Player::updateRecordingRect()
     mRecordingRect |= mSceneGrabber->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
-void Player::calcFramePosition()
-{
-    mFramePosition = mRecordingRect.translated(-mFullFrameRect.topLeft()).toRect().topLeft();
-}
-
 void Player::record()
 {
     updateRecordingRect();
@@ -251,40 +192,16 @@ void Player::record()
         return;
 
     mRecordAngle = 0.0;
-    calcFramePosition();
+    const bool frameAdded = mGifRecorder->addFrame(mRecordingRect, [this]{ mPlayTimer.start(); });
 
-    const bool grabbed = mSceneGrabber->grabScene(mRecordingRect.toRect(),
-        [this](QImage&& img){
-            mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
-            runRecordFrameThread([this]{ mPlayTimer.start(); });
-        });
-
-    if (!grabbed)
+    if (!frameAdded)
     {
-        qDebug() << "Could not grab frame";
+        qDebug() << "Could not add frame";
         return;
     }
 
     resetRecordingRect();
     mPlayTimer.stop();
-}
-
-void Player::recordFrame()
-{
-    Q_ASSERT(mGifEncoder);
-    Q_ASSERT(mFrame);
-    const uint8_t* frame = mFrame->constBits();
-
-    mGifEncoder->push(frame, mFramePosition.x(), mFramePosition.y(),
-                      mFrame->width(), mFrame->height(), FRAME_DURATION);
-}
-
-void Player::runRecordFrameThread(const std::function<void()>& whenFinished)
-{
-    QThread* thread = QThread::create([this]{ recordFrame(); });
-    mRecordingThread.reset(thread);
-    QObject::connect(thread, &QThread::finished, this, whenFinished, Qt::SingleShotConnection);
-    mRecordingThread->start();
 }
 
 }
