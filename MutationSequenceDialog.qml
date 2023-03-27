@@ -33,13 +33,13 @@ Dialog {
 
             ComboBox {
                 id: circleComboBox
-                model: { var l = []; for (let i = 0; i < numCircles; ++i) { l.push(`Circle ${i}`); }; return l; }
-                Material.foreground: circleColorList[currentIndex]
+                model: { var l = []; for (let i = numCircles; i > 0; --i) { l.push(`Circle ${i}`); }; return l; }
+                Material.foreground: circleColorList[indexToCircle(currentIndex)]
                 Material.background: "black"
-                currentIndex: modelData.circle
+                currentIndex: numCircles - modelData.circle - 1
                 Layout.fillWidth: true
                 onActivated: {
-                    modelData.circle = currentIndex
+                    modelData.circle = indexToCircle(currentIndex)
 
                     if (modelData.circle === 0) {
                         modelData.trait = Mutation.TRAIT_DIAMETER
@@ -49,8 +49,13 @@ Dialog {
                 delegate: ItemDelegate {
                     contentItem: Label {
                         text: modelData
-                        color: circleColorList[index]
+                        color: circleColorList[circleComboBox.indexToCircle(index)]
                     }
+                }
+
+                function indexToCircle(idx)
+                {
+                    return numCircles - idx - 1
                 }
             }
 
