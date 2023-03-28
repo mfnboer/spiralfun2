@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 
 public class QSpiralFunActivity extends QtActivity {
 
@@ -80,5 +82,23 @@ public class QSpiralFunActivity extends QtActivity {
         Uri uri = intent.getData();
         Log.d(LOGTAG, "VIEW uri: " + uri);
         emitViewUriReceived(uri.toString());
+    }
+
+    public void setKeepScreenOn(boolean keepOn) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Window window = getWindow();
+                if (window == null) {
+                    Log.w(LOGTAG, "Cannot get window");
+                    return;
+                }
+
+                if (keepOn)
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                else
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        });
     }
 }

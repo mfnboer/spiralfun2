@@ -407,13 +407,24 @@ void SpiralScene::setPlayState(PlayState state)
     switch (state)
     {
     case NOT_PLAYING:
+        mDoRender = true;
+        Utils::setKeepScreenOn(false);
+        break;
     case PLAYING:
+        mDoRender = true;
+        Utils::setKeepScreenOn(true);
+        break;
     case RECORDING:
+        mDoRender = true;
+        Utils::setKeepScreenOn(true);
+        break;
     case DONE_PLAYING:
         mDoRender = true;
+        Utils::setKeepScreenOn(false);
         break;
     case PLAYING_SEQUENCE:
         mDoRender = false;
+        Utils::setKeepScreenOn(true);
         break;
     }
 

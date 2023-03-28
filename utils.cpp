@@ -173,6 +173,22 @@ void handlePendingIntent()
 #endif
 }
 
+void setKeepScreenOn(bool keepOn)
+{
+#if defined(Q_OS_ANDROID)
+    if (!QNativeInterface::QAndroidApplication::isActivityContext())
+    {
+        qWarning() << "Cannot find Android activity";
+        return;
+    }
+
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    activity.callMethod<void>("setKeepScreenOn", "(Z)V", (jboolean)keepOn);
+#else
+    Q_UNUSED(keepOn);
+#endif
+}
+
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize)
 {
     const QSize sz = scaledImg.size();

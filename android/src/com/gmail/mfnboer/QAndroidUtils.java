@@ -10,7 +10,6 @@ import java.lang.String;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
-import android.provider.DocumentsContract;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
