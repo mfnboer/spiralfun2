@@ -41,7 +41,7 @@ public:
     enum PlayState { NOT_PLAYING, PLAYING, PLAYING_SEQUENCE, RECORDING, DONE_PLAYING };
     Q_ENUM(PlayState)
 
-    enum ShareMode { SHARE_PIC, SHARE_VID };
+    enum ShareMode { SHARE_NONE, SHARE_PIC, SHARE_VID };
     Q_ENUM(ShareMode)
 
     struct Stats
@@ -151,7 +151,7 @@ private:
     qreal mScaleFactor = 1.0;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
     bool mSharingInProgress = false;
-    ShareMode mShareMode = SHARE_PIC;
+    ShareMode mShareMode = SHARE_NONE;
     QString mShareContentUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<MutationSequence> mMutationSequence;

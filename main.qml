@@ -74,16 +74,14 @@ ApplicationWindow {
                     }
                 }
 
-                function isInVideoShareMode() {
-                    return shareMode === SpiralScene.SHARE_VID;
-                }
-
                 function shareButtonText() {
                     switch (scene.shareMode) {
                     case SpiralScene.SHARE_PIC:
                         return "share picture";
                     case SpiralScene.SHARE_VID:
                         return "share gif";
+                    case SpiralScene.SHARE_NONE:
+                        return "";
                     }
                 }
 
@@ -114,8 +112,8 @@ ApplicationWindow {
                 Material.background: "transparent"
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                enabled: scene.donePlaying()
-                visible: scene.donePlaying()
+                enabled: scene.donePlaying() && scene.shareMode !== SpiralScene.SHARE_NONE
+                visible: scene.donePlaying() && scene.shareMode !== SpiralScene.SHARE_NONE
                 onClicked: scene.share()
             }
 
@@ -167,7 +165,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Record GIF"
-                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
+                    enabled: scene.donePlaying() && scene.shareMode === SpiralScene.SHARE_PIC
                     onTriggered: scene.record()
                 }
                 MenuItem {

@@ -281,6 +281,7 @@ void SpiralScene::play()
         return;
 
     setPlayState(PLAYING);
+    setShareMode(SHARE_PIC);
     doPlay(nullptr);
 }
 
@@ -398,7 +399,7 @@ void SpiralScene::stop()
     resetScene();
     setPlayState(NOT_PLAYING);
     setCurrentCircleFocus(true);
-    setShareMode(SHARE_PIC);
+    setShareMode(SHARE_NONE);
 }
 
 void SpiralScene::setPlayState(PlayState state)
@@ -701,6 +702,9 @@ void SpiralScene::share()
     case SHARE_VID:
         shareVideo();
         break;
+    case SHARE_NONE:
+        qDebug() << "Nothing to share";
+        break;
     }
 }
 
@@ -735,6 +739,9 @@ void SpiralScene::shareContent()
     case SHARE_VID:
         mimeType = "image/gif";
         break;
+    case SHARE_NONE:
+        qWarning() << "Nothing to share";
+        return;
     }
 
     Utils::sharePicture(mShareContentUri, configAppUri, mimeType);
