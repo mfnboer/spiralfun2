@@ -76,6 +76,8 @@ private:
     ISequencePlayer& mSequencePlayer;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<GifRecorder> mGifRecorder;
+    const QRectF mMaxSceneRect;
+    QRectF mPreviousFrameRect;
 };
 
 }

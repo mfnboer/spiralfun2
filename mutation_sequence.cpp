@@ -8,7 +8,8 @@ namespace SpiralFun {
 
 MutationSequence::MutationSequence(const CircleList& circles, ISequencePlayer& sequencePlayer) :
     mCircles(circles),
-    mSequencePlayer(sequencePlayer)
+    mSequencePlayer(sequencePlayer),
+    mMaxSceneRect(mSequencePlayer.getMaxSceneRect())
 {
 }
 
@@ -114,11 +115,14 @@ void MutationSequence::postFrameProcessing()
         break;
     case SAVE_AS_PICS: {
         const QString suffix = QString("_MS%1").arg(mCurrentSequenceFrame + 1, 3, 10, QChar('0'));
-        const QRectF frameRect = mSequencePlayer.getMaxSceneRect();
-        mSequencePlayer.saveImage(frameRect, mPicturesSubDir, suffix, [this](bool){ playNextFrame(); });
+        mSequencePlayer.saveImage(mMaxSceneRect, mPicturesSubDir, suffix, [this](bool){ playNextFrame(); });
         break; }
     case SAVE_AS_GIF: {
-        mGifRecorder->addFrame([this]{ playNextFrame(); });
+        // Enlarge the rect by 2 pixels on each side to avoid rounding error artifacts
+        const auto currentRect = mSequencePlayer.getSceneRect().adjusted(-2, -2, 2, 2);
+        const auto rect = mSceneGrabber->getGrabRect(mPreviousFrameRect | currentRect);
+        mPreviousFrameRect = currentRect;
+        mGifRecorder->addFrame(rect, [this]{ playNextFrame(); });
         break; }
     }
 }
@@ -148,9 +152,9 @@ bool MutationSequence::preparePlay()
 
 bool MutationSequence::setupGifRecording()
 {
-    const auto rect = mSequencePlayer.getMaxSceneRect();
-    mSceneGrabber = mSequencePlayer.createSceneGrabber(rect);
+    mSceneGrabber = mSequencePlayer.createSceneGrabber(mMaxSceneRect);
     mGifRecorder = std::make_unique<GifRecorder>(*mSceneGrabber);
+    mPreviousFrameRect = mMaxSceneRect;
 
     return mGifRecorder->startRecording(mFrameRate, "_MS");
 }
