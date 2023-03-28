@@ -39,11 +39,12 @@ public:
     ~MutationSequence();
 
     void setSequenceLength(int sequenceLength) { mSequenceLength = sequenceLength; }
+    void setAddReverseSequence(int addReverse) { mAddReverseSequence = addReverse; }
     void setMutations(const QVariant& mutationsQmlList);
     void setCreateNewPicturesFolder(bool create) { mCreateNewPictureFolder = create; }
     void setFrameRate(GifRecorder::FrameRate frameRate) { mFrameRate = frameRate; }
     int getCurrentSequenceFrame() const { return mCurrentSequenceFrame; }
-    int getSequenceLength() const { return mSequenceLength; }
+    int getTotalSequenceLength() const { return mAddReverseSequence ? mSequenceLength * 2 - 1 : mSequenceLength; }
     void play(SaveAs saveAs);
 
 signals:
@@ -60,6 +61,7 @@ private:
     void backupCircleSettings();
     void restoreCircleSettings();
     void playNextFrame();
+    void playMutation(unsigned index, bool reverse = false);
     void postFrameProcessing();
     bool preparePlay();
     bool setupGifRecording();
@@ -71,6 +73,7 @@ private:
     SaveAs mSaveAs = SAVE_AS_NONE;
     bool mCreateNewPictureFolder = true;
     GifRecorder::FrameRate mFrameRate = GifRecorder::FPS_10;
+    bool mAddReverseSequence = false;
     QString mPicturesSubDir;
     const CircleList& mCircles;
     ISequencePlayer& mSequencePlayer;

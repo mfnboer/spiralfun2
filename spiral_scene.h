@@ -63,7 +63,7 @@ public:
     int getMaxDiameter() const override { return MAX_DIAMETER; }
     qreal getPlayAngle() const { return mPlayer ? mPlayer->getAngle() : 0.0; }
     int getSequenceFrame() const { return mMutationSequence ? mMutationSequence->getCurrentSequenceFrame() : 0; }
-    int getSequenceLength() const { return mMutationSequence ? mMutationSequence->getSequenceLength() : 0; }
+    int getSequenceLength() const { return mMutationSequence ? mMutationSequence->getTotalSequenceLength() : 0; }
     void setNumCircles(int numCircles);
     void selectCircle(Circle* circle);
     ScopedLine addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint);
@@ -78,8 +78,9 @@ public:
     Q_INVOKABLE void circleDown();
     Q_INVOKABLE bool checkPlayRequirement();
     Q_INVOKABLE void play();
-    Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength, MutationSequence::SaveAs saveAs,
-                                  bool createAlbum, GifRecorder::FrameRate frameRate);
+    Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength, bool addReverse,
+                                  MutationSequence::SaveAs saveAs, bool createAlbum,
+                                  GifRecorder::FrameRate frameRate);
     Q_INVOKABLE void showSpiralStats();
     Q_INVOKABLE void record();
     Q_INVOKABLE void stop();

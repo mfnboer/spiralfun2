@@ -15,7 +15,7 @@ class GifRecorder : public QObject
     QML_ELEMENT
 
 public:
-    enum FrameRate { FPS_25, FPS_10, FPS_2, FPS_1 };
+    enum FrameRate { FPS_25, FPS_10, FPS_4, FPS_2, FPS_1 };
     Q_ENUM(FrameRate);
 
     explicit GifRecorder(SceneGrabber& sceneGrabber);

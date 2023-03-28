@@ -85,14 +85,18 @@ void MutationSequence::play(SaveAs saveAs)
 
 void MutationSequence::playNextFrame()
 {
-    if (++mCurrentSequenceFrame < mSequenceLength && !mMutations.empty())
+    Q_ASSERT(!mMutations.empty());
+    ++mCurrentSequenceFrame;
+
+    if (mCurrentSequenceFrame < mSequenceLength)
     {
         const unsigned index = (mCurrentSequenceFrame - 1) % mMutations.size();
-        const auto* mutation = mMutations[index];
-        qDebug() << mutation->getCircle() << mutation->getTrait() << mutation->getChange();
-        mutation->apply(mCircles, mSequencePlayer.getMaxDiameter());
-        emit sequenceFramePlaying(mCurrentSequenceFrame);
-        mSequencePlayer.playSequence();
+        playMutation(index, false);
+    }
+    else if (mAddReverseSequence && mCurrentSequenceFrame < mSequenceLength * 2 - 1)
+    {
+        const unsigned index = (mSequenceLength * 2 - mCurrentSequenceFrame - 1) % mMutations.size();
+        playMutation(index, true);
     }
     else
     {
@@ -104,6 +108,16 @@ void MutationSequence::playNextFrame()
         restoreCircleSettings();
         emit sequenceFinished();
     }
+}
+
+void MutationSequence::playMutation(unsigned index, bool reverse)
+{
+    Q_ASSERT(index < mMutations.size());
+    const auto* mutation = mMutations[index];
+    qDebug() << mutation->getCircle() << mutation->getTrait() << mutation->getChange();
+    mutation->apply(mCircles, mSequencePlayer.getMaxDiameter(), reverse);
+    emit sequenceFramePlaying(mCurrentSequenceFrame);
+    mSequencePlayer.playSequence();
 }
 
 void MutationSequence::postFrameProcessing()
@@ -130,6 +144,12 @@ void MutationSequence::postFrameProcessing()
 bool MutationSequence::preparePlay()
 {
     backupCircleSettings();
+
+    if (mMutations.empty())
+    {
+        qDebug() << "No mutations";
+        return false;
+    }
 
     if (mSaveAs == SAVE_AS_GIF && !setupGifRecording())
     {

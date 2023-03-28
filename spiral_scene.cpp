@@ -284,8 +284,9 @@ void SpiralScene::play()
     doPlay(nullptr);
 }
 
-void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, MutationSequence::SaveAs saveAs,
-                               bool createAlbum, GifRecorder::FrameRate frameRate)
+void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, bool addReverse,
+                               MutationSequence::SaveAs saveAs, bool createAlbum,
+                               GifRecorder::FrameRate frameRate)
 {
     Q_ASSERT(sequenceLength > 0);
     if (!checkPlayRequirement())
@@ -293,10 +294,11 @@ void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, Mu
 
     mMutationSequence = std::make_unique<MutationSequence>(mCircles, *this);
     mMutationSequence->setSequenceLength(sequenceLength);
-    emit sequenceLengthChanged();
+    mMutationSequence->setAddReverseSequence(addReverse);
     mMutationSequence->setMutations(mutations);
     mMutationSequence->setCreateNewPicturesFolder(createAlbum);
     mMutationSequence->setFrameRate(frameRate);
+    emit sequenceLengthChanged();
 
     removeCirclesFromScene();
     setPlayState(PLAYING_SEQUENCE);

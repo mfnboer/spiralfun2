@@ -32,7 +32,7 @@ public:
     void setChange(Change change) { mChange = change; emit changeChanged(); }
 
     void init(const CircleList& circleList);
-    void apply(const CircleList& circleList, int maxDiameter) const;
+    void apply(const CircleList& circleList, int maxDiameter, bool reverse = false) const;
 
 signals:
     void circleChanged();

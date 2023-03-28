@@ -8,6 +8,7 @@ Dialog {
     property int numCircles
     property list<Mutation> mutationList
     property int sequenceLength
+    property bool addReverseSequence
     property list<string> circleColorList
     property int saveAs: MutationSequence.SAVE_AS_NONE
     property bool saveInNewAlbum: true
@@ -124,6 +125,14 @@ Dialog {
             Keys.onReturnPressed:  Qt.inputMethod.hide()
         }
 
+        CheckBox {
+            id: addReverseSequenceCheckBox
+            text: "Add reverse sequence"
+            checked: addReverseSequence
+            onCheckedChanged: addReverseSequence = checked
+            Layout.columnSpan: 2
+        }
+
         Label {
             text: "Save sequence as:"
         }
@@ -141,7 +150,7 @@ Dialog {
         }
         ComboBox {
             id: frameRateComboBox
-            model: ["25 (video)", "10 (slow video)", "2 (slide show)", "1 (slow slide show)"]
+            model: ["25 (video)", "10 (slow video)", "4 (fast slide show)", "2 (slide show)", "1 (slow slide show)"]
             implicitContentWidthPolicy: ComboBox.WidestText
             currentIndex: frameRate
             enabled: saveAs === MutationSequence.SAVE_AS_GIF
@@ -178,6 +187,7 @@ Dialog {
             addMutation()
             sequenceLength = 10
             sequenceLengthSpinBox.value = sequenceLength
+            addReverseSequence = false
         }
 
         open()

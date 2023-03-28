@@ -119,6 +119,9 @@ void GifRecorder::setFrameDuration(FrameRate frameRate)
     case FPS_10:
         mFrameDuration = 10;
         break;
+    case FPS_4:
+        mFrameDuration = 25;
+        break;
     case FPS_2:
         mFrameDuration = 50;
         break;

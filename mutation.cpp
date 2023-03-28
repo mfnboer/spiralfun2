@@ -12,21 +12,22 @@ void Mutation::init(const CircleList& circleList)
     mRotationDeltaFactor = circle->getSpeed() < 0 ? -1 : 1;
 }
 
-void Mutation::apply(const CircleList& circleList, int maxDiameter) const
+void Mutation::apply(const CircleList& circleList, int maxDiameter, bool reverse) const
 {
     auto& circle = circleList[getCircle()];
+    const int changeFactor = reverse ? -1 : 1;
 
     switch (getTrait())
     {
     case Mutation::TRAIT_ROTATIONS: {
-            const int delta = (getChange() == Mutation::CHANGE_INCREMENT ? 1 : -1) * mRotationDeltaFactor;
+            const int delta = (getChange() == Mutation::CHANGE_INCREMENT ? 1 : -1) * mRotationDeltaFactor * changeFactor;
             const int newSpeed = circle->getSpeed() + delta;
             const int speed = std::clamp(newSpeed, -SpiralConfig::MAX_SPEED, SpiralConfig::MAX_SPEED);
             circle->setSpeed(speed);
             break;
         }
     case Mutation::TRAIT_DIAMETER: {
-            const int delta = getChange() == Mutation::CHANGE_INCREMENT ? 1 : -1;
+            const int delta = (getChange() == Mutation::CHANGE_INCREMENT ? 1 : -1) * changeFactor;
             const int newDiameter = circle->getDiameter() + delta;
             const int diameter = std::clamp(newDiameter, 1, maxDiameter);
             circle->setDiameter(diameter);
