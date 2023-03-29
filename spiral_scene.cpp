@@ -316,8 +316,9 @@ void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, bo
     mMutationSequence->play(saveAs);
 }
 
-void SpiralScene::playSequence()
+void SpiralScene::playSequenceFrame()
 {
+    resetCircles();
     doPlay(nullptr);
 }
 

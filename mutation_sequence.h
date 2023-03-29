@@ -19,7 +19,7 @@ public:
     virtual const QRectF& getSceneRect() const = 0;
     virtual QRectF getMaxSceneRect() const = 0;
     virtual std::unique_ptr<SceneGrabber> createSceneGrabber(const QRectF& rect) = 0;
-    virtual void playSequence() = 0;
+    virtual void playSequenceFrame() = 0;
 
     using SavedCallback = std::function<void(bool success)>;
     virtual bool saveImage(const QRectF cutRect, const QString subDir, const QString& baseNameSuffix,

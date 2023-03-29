@@ -80,7 +80,7 @@ void MutationSequence::play(SaveAs saveAs)
     connect(hack, &SpiralScene::sequenceFramePlayed, this, [this]{ postFrameProcessing(); });
     mCurrentSequenceFrame = 0;
     emit sequenceFramePlaying(mCurrentSequenceFrame);
-    mSequencePlayer.playSequence();
+    mSequencePlayer.playSequenceFrame();
 }
 
 void MutationSequence::playNextFrame()
@@ -117,7 +117,7 @@ void MutationSequence::playMutation(unsigned index, bool reverse)
     qDebug() << mutation->getCircle() << mutation->getTrait() << mutation->getChange();
     mutation->apply(mCircles, mSequencePlayer.getMaxDiameter(), reverse);
     emit sequenceFramePlaying(mCurrentSequenceFrame);
-    mSequencePlayer.playSequence();
+    mSequencePlayer.playSequenceFrame();
 }
 
 void MutationSequence::postFrameProcessing()

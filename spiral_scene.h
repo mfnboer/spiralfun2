@@ -67,7 +67,7 @@ public:
     void setNumCircles(int numCircles);
     void selectCircle(Circle* circle);
     ScopedLine addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint);
-    void playSequence() override;
+    void playSequenceFrame() override;
     const QRectF& getSceneRect() const override { return mSceneRect; }
     QRectF getMaxSceneRect() const override;
     std::unique_ptr<SceneGrabber> createSceneGrabber(const QRectF& rect) override;
