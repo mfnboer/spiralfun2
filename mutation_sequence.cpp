@@ -134,7 +134,7 @@ void MutationSequence::postFrameProcessing()
     case SAVE_AS_GIF: {
         // Enlarge the rect by 2 pixels on each side to avoid rounding error artifacts
         const auto currentRect = mSequencePlayer.getSceneRect().adjusted(-2, -2, 2, 2);
-        const auto rect = mSceneGrabber->getGrabRect(mPreviousFrameRect | currentRect);
+        const auto rect = mSceneGrabber->getGrabRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
         mPreviousFrameRect = currentRect;
         mGifRecorder->addFrame(rect, [this]{ playNextFrame(); });
         break; }

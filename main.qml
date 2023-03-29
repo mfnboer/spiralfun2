@@ -118,7 +118,7 @@ ApplicationWindow {
             }
 
             Label {
-                text: scene.isRecording() ? "RECORDING" : `PLAYING SEQUENCE (${scene.sequenceFrame}/${scene.sequenceLength})`
+                text: scene.isRecording() ? "RECORDING" : `MUTATION SEQUENCE (${scene.sequenceFrame}/${scene.sequenceLength})`
                 anchors.bottom: playProgressBar.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: scene.isRecording() || scene.isPlayingSequence()

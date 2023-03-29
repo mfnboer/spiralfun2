@@ -138,7 +138,7 @@ Dialog {
         }
         ComboBox {
             id: saveAsComboBox
-            model: ["none (just play)", "Pictures", "GIF"]
+            model: ["none (just play)", "Picture per frame", "GIF"]
             implicitContentWidthPolicy: ComboBox.WidestText
             currentIndex: saveAs
             onActivated: saveAs = currentIndex

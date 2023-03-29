@@ -906,7 +906,7 @@ QRectF SpiralScene::getMaxSceneRect() const
     const qreal x = center.x() - halfSize;
     const qreal y = center.y() - halfSize;
 
-    return QRectF(x, y, halfSize * 2, halfSize * 2);
+    return QRectF(x, y, halfSize * 2, halfSize * 2) & boundingRect();
 }
 
 std::unique_ptr<SceneGrabber> SpiralScene::createSceneGrabber(const QRectF& rect)
