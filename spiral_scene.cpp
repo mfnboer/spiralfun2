@@ -385,7 +385,9 @@ void SpiralScene::showSpiralStats()
 
 void SpiralScene::record()
 {
-    auto recorder = std::make_unique<SceneGrabber>(this, mSceneRect);
+    const qreal r = mCircles.back()->getRadius();
+    QRectF recordRect = mSceneRect.adjusted(-r, -r, r, r);
+    auto recorder = createSceneGrabber(recordRect);
     resetScene();
     setPlayState(RECORDING);
     setShareMode(SHARE_VID);
@@ -676,7 +678,7 @@ bool SpiralScene::saveImage(const QRectF cutRect, const QString subDir, const QS
     }
 
     const QRectF grabRect = cutRect.isNull() ? mSceneRect : cutRect;
-    mSceneGrabber = std::make_unique<SceneGrabber>(this, grabRect);
+    mSceneGrabber = createSceneGrabber(grabRect);
     const bool grabbed = mSceneGrabber->grabScene(
         [this, fileName, baseFileName, savedCallback](const QImage& img){
             if (img.save(fileName))
