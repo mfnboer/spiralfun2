@@ -8,9 +8,11 @@ import org.qtproject.qt.android.bindings.QtActivity;
 
 import java.lang.String;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
@@ -20,6 +22,7 @@ public class QSpiralFunActivity extends QtActivity {
     private static final String LOGTAG = "spiralfun.QSpiralFunActivity";
     private boolean mIsIntentPending = false;
     private boolean mIsReady = false;
+    private PowerManager.WakeLock mWakeLock = null;
 
     public static native void emitViewUriReceived(String uri);
 
@@ -94,10 +97,27 @@ public class QSpiralFunActivity extends QtActivity {
                     return;
                 }
 
-                if (keepOn)
+                Context context = QtNative.getContext();
+                if (context == null) {
+                    Log.w(LOGTAG, "No context");
+                    return;
+                }
+
+                PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+
+                if (keepOn) {
                     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                else
+                    if (mWakeLock == null) {
+                        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SpiralFunTag");
+                        mWakeLock.acquire();
+                    }
+                } else {
                     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    if (mWakeLock != null) {
+                        mWakeLock.release();
+                        mWakeLock = null;
+                    }
+                }
             }
         });
     }
