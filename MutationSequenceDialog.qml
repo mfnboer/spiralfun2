@@ -67,6 +67,7 @@ Dialog {
                 model: { var l = []; for (let i = numCircles; i > 0; --i) { l.push(`Circle ${i}`); }; return l; }
                 Material.foreground: circleColorList[indexToCircle(currentIndex)]
                 Material.background: "black"
+                popup.background: Rectangle { color: "black" }
                 currentIndex: numCircles - modelData.circle - 1
                 Layout.fillWidth: true
                 onActivated: {
