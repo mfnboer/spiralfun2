@@ -8,8 +8,7 @@ namespace SpiralFun {
 
 MutationSequence::MutationSequence(const CircleList& circles, ISequencePlayer& sequencePlayer) :
     mCircles(circles),
-    mSequencePlayer(sequencePlayer),
-    mMaxSceneRect(mSequencePlayer.getMaxSceneRect())
+    mSequencePlayer(sequencePlayer)
 {
 }
 
@@ -30,6 +29,36 @@ void MutationSequence::setMutations(const QVariant& mutationsQmlList)
         Mutation* mutation = dynamic_cast<Mutation*>(mutationList.at(i));
         mutation->init(mCircles);
         mMutations.push_back(mutation);
+    }
+}
+
+// Diameter mutations may make the scene bigger. Calculate this effect.
+void MutationSequence::calcMaxSceneRect()
+{
+    int maxExtraSize = 0;
+    int extraSize = 0;
+
+    for (int i = 0; i < mSequenceLength; ++i)
+    {
+        const auto& mutation = mMutations[i % mMutations.size()];
+        if (mutation->getTrait() == Mutation::TRAIT_DIAMETER)
+        {
+            int sizeChange = mutation->getChange() == Mutation::CHANGE_INCREMENT ? 1 : -1;
+            if (mutation->getCircle() > 0)
+                sizeChange *= 2;
+
+            extraSize += sizeChange;
+            maxExtraSize = std::max(maxExtraSize, extraSize);
+        }
+    }
+
+    mMaxSceneRect = mSequencePlayer.getMaxSceneRect();
+
+    if (maxExtraSize > 0)
+    {
+        qDebug() << "Extra size due to diameter mutations:" << maxExtraSize;
+        mMaxSceneRect.adjust(-maxExtraSize, -maxExtraSize, maxExtraSize, maxExtraSize);
+        mMaxSceneRect = mMaxSceneRect & mSequencePlayer.getBoundingRect();
     }
 }
 
@@ -150,6 +179,8 @@ bool MutationSequence::preparePlay()
         qDebug() << "No mutations";
         return false;
     }
+
+    calcMaxSceneRect();
 
     if (mSaveAs == SAVE_AS_GIF && !setupGifRecording())
     {

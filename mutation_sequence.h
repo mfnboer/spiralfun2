@@ -18,6 +18,7 @@ public:
     virtual int getMaxDiameter() const = 0;
     virtual const QRectF& getSceneRect() const = 0;
     virtual QRectF getMaxSceneRect() const = 0;
+    virtual QRectF getBoundingRect() const = 0;
     virtual std::unique_ptr<SceneGrabber> createSceneGrabber(const QRectF& rect) = 0;
     virtual void playSequenceFrame() = 0;
 
@@ -58,6 +59,7 @@ private:
         int mSpeed;
     };
 
+    void calcMaxSceneRect();
     void backupCircleSettings();
     void restoreCircleSettings();
     void playNextFrame();
@@ -79,7 +81,7 @@ private:
     ISequencePlayer& mSequencePlayer;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<GifRecorder> mGifRecorder;
-    const QRectF mMaxSceneRect;
+    QRectF mMaxSceneRect;
     QRectF mPreviousFrameRect;
 };
 

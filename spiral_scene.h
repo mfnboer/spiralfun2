@@ -70,6 +70,7 @@ public:
     void playSequenceFrame() override;
     const QRectF& getSceneRect() const override { return mSceneRect; }
     QRectF getMaxSceneRect() const override;
+    QRectF getBoundingRect() const override { return boundingRect(); }
     std::unique_ptr<SceneGrabber> createSceneGrabber(const QRectF& rect) override;
 
     Q_INVOKABLE void init();

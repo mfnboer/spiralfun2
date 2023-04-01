@@ -191,7 +191,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Help"
-                    onTriggered: sceneMoreMenu.showWindow("help.qml")
+                    onTriggered: sceneMoreMenu.showWindow("Help.qml")
                 }
                 MenuItem {
                     text: "About"

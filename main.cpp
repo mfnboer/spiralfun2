@@ -4,6 +4,7 @@
 #include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QSurfaceFormat>
+#include <QtWebView>
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
     QSurfaceFormat::setDefaultFormat(format);
     qDebug() << format;
 
+    QtWebView::initialize();
     qputenv("QT_SCALE_FACTOR", "0.9");
     QApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");

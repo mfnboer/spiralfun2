@@ -15,11 +15,39 @@ Dialog {
     property int frameRate: GifRecorder.FPS_10
 
     id: mutationSequenceDialog
-    title: "Mutation sequence"
     standardButtons: Dialog.Cancel | Dialog.Ok
     height: parent.height
     width: parent.width
     anchors.centerIn: parent
+
+    header: RowLayout {
+        Label {
+            text: "Mutation sequence"
+            font.bold: true
+            font.pointSize: 20
+            Layout.fillWidth: true
+            leftPadding: 25
+        }
+        RoundButton {
+            icon.name: "more"
+            Material.background: "transparent"
+            onClicked: moreMenu.open()
+        }
+
+        Menu {
+            id: moreMenu
+            x: parent.width - width
+
+            MenuItem {
+                text: "Help"
+                onTriggered: {
+                    var component = Qt.createComponent("Help.qml");
+                    var obj = component.createObject(root);
+                    obj.openMutationSequenceHelp();
+                }
+            }
+        }
+    }
 
     ListView {
         id: sequenceListView
