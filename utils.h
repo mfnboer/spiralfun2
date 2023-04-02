@@ -7,13 +7,14 @@
 namespace SpiralFun::Utils {
 
 QString createDateTimeName();
-QString getPicturesPath();
+QString getPicturesPath(const QString& subDir = "");
 QString getPublicSpiralConfigPath();
 QString getSpiralConfigPath();
-QString createPictureFileName();
+QString createPictureFileName(const QString& baseNameSuffix = "");
 void scanMediaFile(const QString& fileName);
 void sharePicture(const QString& contentUri, const QString& configAppUri, const QString& mimeType);
 void handlePendingIntent();
+void setKeepScreenOn(bool keepOn);
 
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize);
 

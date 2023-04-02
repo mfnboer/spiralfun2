@@ -38,13 +38,17 @@ bool checkStoragePermission()
 
 namespace SpiralFun::Utils {
 
-QString getPicturesPath()
+QString getPicturesPath(const QString& subDir)
 {
     if (!checkStoragePermission())
         throw RuntimeException("No permission to access storage.");
 
 #if defined(Q_OS_ANDROID)
-    auto jsSubDir = QJniObject::fromString(PICTURES_SUB_DIR);
+    QString picSubPath = PICTURES_SUB_DIR;
+    if (!subDir.isEmpty())
+        picSubPath += "/" + subDir;
+
+    auto jsSubDir = QJniObject::fromString(picSubPath);
     auto pathObj = QJniObject::callStaticMethod<jstring>("com/gmail/mfnboer/QAndroidUtils",
                                                          "getPicturesPath",
                                                          "(Ljava/lang/String;)Ljava/lang/String;",
@@ -56,7 +60,9 @@ QString getPicturesPath()
     qDebug() << "Pictures path:" << picPath;
 #else
     auto path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-    const QString picPath = path + "/" + PICTURES_SUB_DIR;
+    QString picPath = path + "/" + PICTURES_SUB_DIR;
+    if (!subDir.isEmpty())
+        picPath += "/" + subDir;
 
     if (!QDir().mkpath(picPath))
         throw RuntimeException(QString("Failed to create path: %1").arg(picPath));
@@ -116,9 +122,9 @@ QString createDateTimeName()
     return QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
 }
 
-QString createPictureFileName()
+QString createPictureFileName(const QString& baseNameSuffix)
 {
-    return QString("IMG_%1.jpg").arg(createDateTimeName());
+    return QString("IMG_%1%2.jpg").arg(createDateTimeName(), baseNameSuffix);
 }
 
 void scanMediaFile(const QString& fileName)
@@ -164,6 +170,22 @@ void handlePendingIntent()
 
     QJniObject activity = QNativeInterface::QAndroidApplication::context();
     activity.callMethod<void>("handlePendingIntent");
+#endif
+}
+
+void setKeepScreenOn(bool keepOn)
+{
+#if defined(Q_OS_ANDROID)
+    if (!QNativeInterface::QAndroidApplication::isActivityContext())
+    {
+        qWarning() << "Cannot find Android activity";
+        return;
+    }
+
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    activity.callMethod<void>("setKeepScreenOn", "(Z)V", (jboolean)keepOn);
+#else
+    Q_UNUSED(keepOn);
 #endif
 }
 

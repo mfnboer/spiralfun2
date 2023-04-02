@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html style="background-color:  #121212; color: #ffffff; font-size: 12pt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<title>Spiral Fun</title>
+
+<script>
+function init() {
+	const params = new URLSearchParams(document.location.search);
+	const app = params.get("app");
+	const show = app === "1" ? "none" : "block";
+	const appElems = document.getElementsByClassName("app");
+	
+	for (let i = 0; i < appElems.length; ++i) {
+		appElems[i].style.display = show;	
+	}
+}
+</script>
+
+<style>
+img.round { border-radius: 5%; border-color: lightgrey; border-width: medium; border-style: solid; }
+a { color: #bb86fc; font-weight: bold; }
+</style>
+
+</head>
+<body onload="init()">
+
+<h1>Spiral Fun</h1>
+
+<div style="position: absolute; top: 20pt; right: 10pt;">
+<form action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="business" value="AWDNLHYFF4HWC" />
+<input type="hidden" name="no_recurring" value="0" />
+<input type="hidden" name="item_name" value="Spiral Fun" />
+<input type="hidden" name="currency_code" value="EUR" />
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_NL/i/scr/pixel.gif" width="1" height="1" />
+</form>
+</div>
+
+<p>Create spirograph like graphics.</p>
+<p>Morph your spirals by applying mutations.</p>
+<p>Share your creations with friends on social media.</p>
+
+<div class="app">
+<a href="https://play.google.com/store/apps/details?id=com.gmail.mfnboer.spiralfun">
+<img src="android_market.png" width="195" height="60"/>
+</a>
+</div>
+
+<h2>How to create a spiral</h2>
+
+<p>
+The dynamics by which a spiral are created are simple: a circle orbiting around a circle orbiting around a circle...
+</p>
+<p>
+Think of Earth orbiting around the sun.
+The central circle (the sun) is always stationary. So with two circles things become boring very quickly as
+the only shape that you get is a circle. You can change the diameter of the circles which will change the size
+of the shape, but it will still be a circle. You can change the rotation direction or the number of the rotations
+of the second circle, but again it will still draw a circle.
+</p>
+<img src="two_circles_1.gif" class="round" alt="" style="max-width: 30%; max-height: 220px; object-fit: contain;">
+<img src="two_circles_2.gif" class="round" alt="" style="max-width: 30%; max-height: 220px; object-fit: contain;">
+<img src="two_circles_3.gif" class="round" alt="" style="max-width: 30%; max-height: 220px; object-fit: contain;">
+<p>
+With three circles it begins to get interesting. When you start the Spiral Fun app, it shows three
+circles. When you play this configuration, you will see this. To play the configuration press the
+play button.
+</p>
+<img src="three_circles_1.gif" class="round" width="220" height="212" alt="">
+<p>
+To see or change the settings for each circle you can use the arrow buttons to navigate up and down
+the circle. The active circle will show a thick edge. The settings below are the settings for the
+active circle. There you can see and change the following:
+</p>
+<ul>
+<li>Diameter</li>
+<li>The number of rotations</li>
+<li>The rotation direction (clockwise / anti-clockwise)</li>
+<li>Color</li>
+<li>The thickness of the line to draw, or not draw a line at all.</li>
+</ul>
+<p>
+To change the number of circles, you change the number in the "Circles:" box. To select a circle
+you can also tap the circle on the screen instead of using the arrows to navigate. This works fine
+for large circles, but very small circles may be hard to tap.
+</p>
+<p>
+Let's make a small change. Navigate to the second circle (the middle one). The number of rotations
+is set at 5 at startup. Change it to 6. If you just played the previous configuration and you do not
+see the circles, but the drawn shape, then first press the "home" button to reset the scene.
+</p>
+<p>
+When you play the changed configuration you will get this:
+</p>
+<img src="three_circles_2.gif" class="round" width="206" height="230" alt="">
+<p>
+This is all there is to it! At first it may seem that the spirals you can create will be very limited
+in shape, but that is not true. Here is an example with seven circles:
+</p>
+<img src="seven_circles_1.gif" class="round" alt="" style="max-width: 100%; object-fit: contain;">
+<p>
+You may think that you need many circles to create interesting spirals, but that is not true either.
+Here is an interesting spiral that was create with only three circles:
+</p>
+<img src="three_circles_blue.jpg" alt="" style="max-width: 100%; object-fit: contain; ">
+<p>
+You can find more creations in the "Examples" menu.
+<div class="app">
+Or take al look on <a href="https://www.instagram.com/spiralfun/">
+Instagram</a>
+</div>
+</p>
+After playing a configuration, several items in the menu get enabled for saving and sharing.
+
+<h2>Save image</h2>
+
+When you click "Save image" the image will be save as JPG in your gallery in an album called
+"Spiral Fun". All your Spiral Fun images will be save into this album.
+
+<h2>Share picture</h2>
+
+After playing a configuration, the share button appears in the lower right corner. With
+this you can share your creation on social media, WhatsApp, mail, etc. With the image
+a URL will be shared. Clicking this link will open the Spiral Fun app with the configuration
+that created the picture. If someone does not have the Spiral Fun app, then clicking the
+link will bring you to Spiral Fun in Google Play.
+
+<h2>Save configuration</h2>
+
+With this option you will save your configuration, i.e. the number of circles and all the
+settings of the individual circles, such that you can play it again at a later time.
+
+<h2>Record GIF</h2>
+
+This option will restart the playing, but this time a GIF will be created. Note that playing will be slower
+due to the GIF creation process. When the playing is finished, you can find the GIF in the "Spiral
+Fun" album.
+<p>
+Note that a GIF file can become large, i.e. more than 100MB. This depends on the complexity of
+your spiral image.
+</p>
+
+<h2>Share GIF</h2>
+
+After recording a GIF, the share button appears in the lower right corner. With this you can
+share the GIF. If the GIF is large then it may be refused by some applications.
+
+<h2>Load configuration</h2>
+
+With this menu option you can load a previously saved configuration. You can delete a saved configuration
+by pressing and holding it for a few seconds.
+
+<div id="play_mutation_sequence">
+<h2>Play mutation sequence</h2>
+</div>
+
+With a mutation sequence you can create morph-like animations. You create a sequence of spiral images.
+Each image is created by changing one setting of one circle in the configuration. The following changes
+are possible:
+
+<ul>
+<li>Increase rotations by 1</li>
+<li>Decrease rotations by 1</li>
+<li>Increase diameter by 1</li>
+<li>Decrease diameter by 1</li>
+<li>Flip rotation direction</li>
+</ul> 
+
+<p>
+You define 1 or more mutations and set the length of the sequence, i.e. the number of images to
+create. For each mutation you set the following:
+</p>
+<ul>
+<li>Circle</li>
+<li>What trait to mutate, i.e. rotations, diameter or direction.</li>
+<li>The change to make</li>
+</ul>
+<p>
+The circles are numbered starting at the center circle as 1. The next circle is 2, and so on.
+</p>
+<img src="circle_numbers.jpg" class="round" width="157" height="227" alt="">
+<p>
+Every next image is created by applying the next mutation from your list. If the list of mutations
+is exhausted then the first mutation is picked again.
+</p>
+<p>
+If decrease of rotations result in 0 rotations for a circle then the next decrement will flip
+the rotation direction and the number of rotations will increase in the flipped direction.
+If decrease of a diameter result in a diameter of 1, then the diameter will not be decreased
+any further.
+</p>
+<p>
+If you enable "Add reverse sequence" then the total sequence becomes twice as large. After the first
+sequence has been played, the mutations are applied in reverse such that the last image is your
+starting image.
+</p>
+<p>
+You can just play the sequence on your screen or you can save it. In the latter case it will also
+be played on your screen, but at the same time it will be saved, just like recording a GIF of a single
+spiral.
+</p>
+
+<h3>Save sequence as picture per frame</h3>
+
+Every created image is saved a JPG. If you set the sequence length to 100, then you get 100 JPGs!
+<p>
+It is recommended to save the pictures in a new album. This makes it easy to later delete the pictures
+as you can simply delete the whole album. The album will be named "SpiralFun" followed by a date/timestamp.
+</p>
+<p>
+Below you can see a sequence of length 3. It starts with the default configuration. The rotations
+of the third circle are increased by 1 each time. This is the default mutation.
+</p>
+<img src="MS001.jpg" class="round" alt="" style="max-width: 30%; max-height: 230px; object-fit: contain;">
+<img src="MS002.jpg" class="round" alt="" style="max-width: 30%; max-height: 230px; object-fit: contain;">
+<img src="MS003.jpg" class="round" alt="" style="max-width: 30%; max-height: 230px; object-fit: contain;">
+
+<h3>Save sequence as GIF</h3>
+
+You can set the number of frames that should be played when you later view the GIF. The GIF
+will be created in the "Spiral Fun" album.
+<p>
+Note that for large sequences the GIF can become very large, i.e. more than 100MB. The size
+depends on the complexity of the spiral images.
+</p>
+<p>
+Here is a sequence of 50 spirals, playing at a rate of 10 frames/sec.
+</p>
+<img src="morph.gif" class="round" alt="" style="max-width: 100%; object-fit: contain;">
+
+</body>
+</html>

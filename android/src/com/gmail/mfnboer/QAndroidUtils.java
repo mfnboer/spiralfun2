@@ -10,7 +10,6 @@ import java.lang.String;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
-import android.provider.DocumentsContract;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -105,7 +104,6 @@ public class QAndroidUtils
         intent.putExtra(Intent.EXTRA_SUBJECT, APP_NAME);
         intent.putExtra(Intent.EXTRA_TEXT,
             "Created with Spiral Fun\n" +
-            "Click to start or get the app from the play store (Android only):\n" +
             configAppUri);
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.setType(mimeType);

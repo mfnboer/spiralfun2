@@ -30,24 +30,24 @@ constexpr const char* KEY_COLOR = "C";
 }
 
 const std::initializer_list<CircleConfig> DEFAULT_CONFIG = {
-    { 4.0, 0, 0, Qt::blue },
+    { 4.0, 0, 0, "skyblue" },
     { 2.0, 1, 0, Qt::green },
     { 0.2, -5, 1, Qt::white }
 };
 const std::initializer_list<CircleConfig> EXAMPLE1_CONFIG = {
-    { 6.0, 0, 0, Qt::blue },
+    { 6.0, 0, 0, "skyblue" },
     { 2.6, 1, 0, Qt::green },
     { 1.6, 5, 0, Qt::yellow },
     { 0.8, 40, 1, Qt::red }
 };
 const std::initializer_list<CircleConfig> EXAMPLE2_CONFIG = {
-    { 5.0, 0, 0, Qt::blue },
+    { 5.0, 0, 0, "skyblue" },
     { 3.0, 1, 0, Qt::yellow },
     { 1.6, 4, 1, Qt::red },
     { 0.2, 200, 1, Qt::white }
 };
 const std::initializer_list<CircleConfig> EXAMPLE3_CONFIG = {
-    { 6.0, 0, 0, Qt::blue },
+    { 6.0, 0, 0, "skyblue" },
     { 2.1, 1, 0, Qt::green },
     { 1.6, -5, 0, Qt::yellow },
     { 0.8, 25, 1, Qt::red },
@@ -99,7 +99,7 @@ QJsonDocument SpiralConfig::createJsonDoc() const
 void SpiralConfig::save(const QImage& img) const
 {
     const QString path = Utils::getSpiralConfigPath();
-    if (path.isNull())
+    if (path.isEmpty())
         throw RuntimeException("Failed to access storage.");
 
     const QString baseName = Utils::createDateTimeName();
@@ -154,7 +154,7 @@ QObjectList SpiralConfig::getConfigFiles() const
     addFiles(configFileList, files, dir);
 
     const QString publicPath = Utils::getPublicSpiralConfigPath();
-    if (!publicPath.isNull())
+    if (!publicPath.isEmpty())
     {
         QDir publicDir(publicPath);
         const auto publicFiles = publicDir.entryList({"SPIRAL_*.json"}, QDir::Files, QDir::Time);

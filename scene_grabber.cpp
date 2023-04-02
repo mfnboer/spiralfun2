@@ -70,11 +70,26 @@ QRectF SceneGrabber::calcBoundingRectangle(const CircleList& circles) const
     return rect;
 }
 
+QRectF SceneGrabber::getGrabRect(const QRectF& sceneRect)
+{
+    auto rect = QRectF(QPointF(0, 0), sceneRect.size() * mPixelRatio);
+    rect.translate(sceneRect.x() * mPixelRatio, sceneRect.y() * mPixelRatio);
+    return rect;
+}
+
 QRect SceneGrabber::getSpiralCutRect() const
 {
     QRectF cutRect = mSceneRect.adjusted(-IMG_MARGIN, -IMG_MARGIN, IMG_MARGIN, IMG_MARGIN);
     cutRect = QRectF(cutRect.topLeft() * mPixelRatio, cutRect.size() * mPixelRatio);
-    return cutRect.toRect();
+
+    // Make dimensions even numbers, so they can be used as video frames for ffmpeg
+    QRect intCutRect = cutRect.toRect();
+    if (intCutRect.width() & 1)
+        intCutRect.setWidth(intCutRect.width() + 1);
+    if (intCutRect.height() & 1)
+        intCutRect.setHeight(intCutRect.height() + 1);
+
+    return intCutRect;
 }
 
 QImage SceneGrabber::extractRect(const QImage& grabbedImg, const QRect& cutRect)

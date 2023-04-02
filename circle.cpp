@@ -146,9 +146,12 @@ void Circle::rotate(const QPointF& rotationCenter, qreal angle, bool clockwise)
 void Circle::moveTo(const QPointF& center)
 {
     mCenter = center;
-    setX(mCenter.x() - getRadius() - SELECT_PEN_WIDTH / 2.0);
-    setY(mCenter.y() - getRadius() - SELECT_PEN_WIDTH / 2.0);
-    update();
+
+    if (isVisible())
+    {
+        setX(mCenter.x() - getRadius() - SELECT_PEN_WIDTH / 2.0);
+        setY(mCenter.y() - getRadius() - SELECT_PEN_WIDTH / 2.0);
+    }
 }
 
 void Circle::drawTo(const QPointF& center, bool force)
@@ -170,13 +173,12 @@ void Circle::forceDrawToCenter()
 void Circle::removeFromScene()
 {
     setVisible(false);
-    update();
 }
 
 void Circle::addToScene()
 {
     setVisible(true);
-    update();
+    moveTo(mCenter);
 }
 
 void Circle::paint(QPainter* painter)

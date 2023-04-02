@@ -3,6 +3,7 @@
 #pragma once
 
 #include "circle.h"
+#include "mutation_sequence.h"
 #include "player.h"
 #include "scene_grabber.h"
 #include "scoped_line.h"
@@ -15,7 +16,7 @@
 
 namespace SpiralFun {
 
-class SpiralScene : public QQuickItem
+class SpiralScene : public QQuickItem, public ISequencePlayer
 {
     Q_OBJECT
     Q_PROPERTY(QString VERSION MEMBER VERSION CONSTANT)
@@ -30,15 +31,17 @@ class SpiralScene : public QQuickItem
     Q_PROPERTY(int currentCircleIndex READ getCurrentCircleIndex NOTIFY currentCircleIndexChanged)
     Q_PROPERTY(SpiralScene::PlayState playState READ getPlayState NOTIFY playStateChanged)
     Q_PROPERTY(qreal playAngle READ getPlayAngle NOTIFY playAngleChanged);
+    Q_PROPERTY(int sequenceFrame READ getSequenceFrame NOTIFY sequenceFrameChanged)
+    Q_PROPERTY(int sequenceLength READ getSequenceLength NOTIFY sequenceLengthChanged)
     Q_PROPERTY(SpiralScene::ShareMode shareMode READ getShareMode NOTIFY shareModeChanged)
     Q_PROPERTY(bool sharingInProgress MEMBER mSharingInProgress NOTIFY sharingInProgressChanged)
     QML_ELEMENT
 
 public:
-    enum PlayState { NOT_PLAYING, PLAYING, RECORDING, DONE_PLAYING };
+    enum PlayState { NOT_PLAYING, PLAYING, PLAYING_SEQUENCE, RECORDING, DONE_PLAYING };
     Q_ENUM(PlayState)
 
-    enum ShareMode { SHARE_PIC, SHARE_VID };
+    enum ShareMode { SHARE_NONE, SHARE_PIC, SHARE_VID };
     Q_ENUM(ShareMode)
 
     struct Stats
@@ -57,26 +60,40 @@ public:
     int getCurrentCircleIndex() const { return mCurrentIndex; }
     PlayState getPlayState() const { return mPlayState; }
     ShareMode getShareMode() const { return mShareMode; }
+    int getMaxDiameter() const override { return MAX_DIAMETER; }
     qreal getPlayAngle() const { return mPlayer ? mPlayer->getAngle() : 0.0; }
+    int getSequenceFrame() const { return mMutationSequence ? mMutationSequence->getCurrentSequenceFrame() : 0; }
+    int getSequenceLength() const { return mMutationSequence ? mMutationSequence->getTotalSequenceLength() : 0; }
     void setNumCircles(int numCircles);
     void selectCircle(Circle* circle);
     ScopedLine addLine(QObject* object, const QColor& color, int lineWidth, const QPointF& startPoint);
+    void playSequenceFrame() override;
+    const QRectF& getSceneRect() const override { return mSceneRect; }
+    QRectF getMaxSceneRect() const override;
+    QRectF getBoundingRect() const override { return boundingRect(); }
+    std::unique_ptr<SceneGrabber> createSceneGrabber(const QRectF& rect) override;
 
     Q_INVOKABLE void init();
     Q_INVOKABLE void setupExample(const QString& example);
     Q_INVOKABLE void circleUp();
     Q_INVOKABLE void circleDown();
+    Q_INVOKABLE bool checkPlayRequirement();
     Q_INVOKABLE void play();
+    Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength, bool addReverse,
+                                  MutationSequence::SaveAs saveAs, bool createAlbum,
+                                  GifRecorder::FrameRate frameRate);
     Q_INVOKABLE void showSpiralStats();
     Q_INVOKABLE void record();
     Q_INVOKABLE void stop();
-    Q_INVOKABLE bool saveImage();
+    Q_INVOKABLE bool saveImage(const QRectF cutRect = {}, const QString subDir = "", const QString& baseNameSuffix = "",
+                               const ISequencePlayer::SavedCallback& savedCallback = nullptr) override;
     Q_INVOKABLE void saveConfig();
     Q_INVOKABLE void share();
     Q_INVOKABLE QObjectList getConfigFileList();
     Q_INVOKABLE void loadConfig(const QString& fileName);
     Q_INVOKABLE void deleteConfig(const QStringList& fileNameList);
     Q_INVOKABLE qreal getDevicePixelRatio() const { return window()->devicePixelRatio(); }
+    Q_INVOKABLE QStringList getCircleColorList() const;
 
 signals:
     void maxDiameterChanged();
@@ -85,10 +102,13 @@ signals:
     void numCirclesChanged();
     void playStateChanged();
     void playAngleChanged();
+    void sequenceFrameChanged();
+    void sequenceLengthChanged();
     void shareModeChanged();
     void sharingInProgressChanged();
     void message(const QString message);
     void statusUpdate(const QString message);
+    void sequenceFramePlayed();
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) override;
@@ -120,6 +140,7 @@ private:
     void shareVideo();
 
     std::unordered_map<QObject*, Line> mLines;
+    bool mDoRender = true;
     bool mClearScene = false;
     QRectF mSceneRect;
     Stats mStats;
@@ -131,9 +152,10 @@ private:
     qreal mScaleFactor = 1.0;
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
     bool mSharingInProgress = false;
-    ShareMode mShareMode = SHARE_PIC;
+    ShareMode mShareMode = SHARE_NONE;
     QString mShareContentUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
+    std::unique_ptr<MutationSequence> mMutationSequence;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;

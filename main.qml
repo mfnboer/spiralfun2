@@ -56,32 +56,22 @@ ApplicationWindow {
                 onMessage: (msg) => showMessage(msg)
                 onStatusUpdate: (msg) => statusPopup.show(msg)
 
-                function notPlaying() {
-                    return playState === SpiralScene.NOT_PLAYING;
-                }
-
-                function donePlaying() {
-                    return playState === SpiralScene.DONE_PLAYING;
-                }
-
-                function isRecording() {
-                    return playState === SpiralScene.RECORDING;
-                }
+                function notPlaying() { return playState === SpiralScene.NOT_PLAYING }
+                function donePlaying() { return playState === SpiralScene.DONE_PLAYING }
+                function isPlayingSequence() { return playState === SpiralScene.PLAYING_SEQUENCE }
+                function isRecording() { return playState === SpiralScene.RECORDING }
 
                 function playStateIcon() {
                     switch (scene.playState) {
                     case SpiralScene.NOT_PLAYING:
                         return "play";
                     case SpiralScene.PLAYING:
+                    case SpiralScene.PLAYING_SEQUENCE:
                     case SpiralScene.RECORDING:
                         return "stop";
                     case SpiralScene.DONE_PLAYING:
                         return "home";
                     }
-                }
-
-                function isInVideoShareMode() {
-                    return shareMode === SpiralScene.SHARE_VID;
                 }
 
                 function shareButtonText() {
@@ -90,6 +80,8 @@ ApplicationWindow {
                         return "share picture";
                     case SpiralScene.SHARE_VID:
                         return "share gif";
+                    case SpiralScene.SHARE_NONE:
+                        return "";
                     }
                 }
 
@@ -120,16 +112,16 @@ ApplicationWindow {
                 Material.background: "transparent"
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                enabled: scene.donePlaying()
-                visible: scene.donePlaying()
+                enabled: scene.donePlaying() && scene.shareMode !== SpiralScene.SHARE_NONE
+                visible: scene.donePlaying() && scene.shareMode !== SpiralScene.SHARE_NONE
                 onClicked: scene.share()
             }
 
             Label {
-                text: "RECORDING"
-                anchors.bottom: recordProgressBar.top
+                text: scene.isRecording() ? "RECORDING" : `MUTATION SEQUENCE (${scene.sequenceFrame}/${scene.sequenceLength})`
+                anchors.bottom: playProgressBar.top
                 anchors.horizontalCenter: parent.horizontalCenter
-                visible: scene.isRecording()
+                visible: scene.isRecording() || scene.isPlayingSequence()
                 SequentialAnimation on color {
                     loops: Animation.Infinite
                     ColorAnimation { from: "white"; to: "black"; duration: 1000 }
@@ -137,14 +129,14 @@ ApplicationWindow {
                 }
             }
             ProgressBar {
-                id: recordProgressBar
-                value: scene.playAngle
+                id: playProgressBar
+                value: scene.isRecording() ? scene.playAngle : scene.sequenceFrame
                 from: 0
-                to: Math.PI * 2;
+                to: scene.isRecording() ? Math.PI * 2 : scene.sequenceLength
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                visible: scene.isRecording()
+                visible: scene.isRecording() || scene.isPlayingSequence()
             }
 
             Menu {
@@ -173,8 +165,16 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Record GIF"
-                    enabled: scene.donePlaying() && !scene.isInVideoShareMode()
+                    enabled: scene.donePlaying() && scene.shareMode === SpiralScene.SHARE_PIC
                     onTriggered: scene.record()
+                }
+                MenuItem {
+                    text: "Play mutation sequence"
+                    enabled: scene.notPlaying()
+                    onTriggered: {
+                        if (scene.checkPlayRequirement())
+                            mutationSequenceDialog.show(scene.numCircles, scene.getCircleColorList())
+                    }
                 }
                 MenuItem {
                     text: "Statistics"
@@ -191,7 +191,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Help"
-                    onTriggered: sceneMoreMenu.showWindow("help.qml")
+                    onTriggered: sceneMoreMenu.showWindow("Help.qml")
                 }
                 MenuItem {
                     text: "About"
@@ -383,6 +383,14 @@ ApplicationWindow {
         var component = Qt.createComponent("message.qml");
         var obj = component.createObject(root);
         obj.show(message);
+    }
+
+    MutationSequenceDialog {
+        id: mutationSequenceDialog;
+        onAccepted: {
+            scene.playSequence(mutationList, sequenceLength, addReverseSequence, saveAs,
+                               saveInNewAlbum, frameRate)
+        }
     }
 
     Component.onCompleted: {
