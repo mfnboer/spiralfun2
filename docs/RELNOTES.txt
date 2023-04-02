@@ -1,3 +1,7 @@
+3.0
+---
+* Create mutation sequence animations.
+
 2.2
 ---
 * Fix quality of saved image.
