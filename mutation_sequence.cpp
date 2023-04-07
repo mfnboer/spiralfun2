@@ -6,7 +6,8 @@
 
 namespace SpiralFun {
 
-MutationSequence::MutationSequence(const CircleList& circles, ISequencePlayer& sequencePlayer) :
+MutationSequence::MutationSequence(const CircleList* circles, ISequencePlayer* sequencePlayer) :
+    QObject(),
     mCircles(circles),
     mSequencePlayer(sequencePlayer)
 {
@@ -14,12 +15,13 @@ MutationSequence::MutationSequence(const CircleList& circles, ISequencePlayer& s
 
 MutationSequence::~MutationSequence()
 {
-    if (mOrigCircleSettings.size() == mCircles.size())
+    if (mCircles && mOrigCircleSettings.size() == mCircles->size())
         restoreCircleSettings();
 }
 
 void MutationSequence::setMutations(const QVariant& mutationsQmlList)
 {
+    Q_ASSERT(mCircles);
     const auto mutationList = mutationsQmlList.value<QQmlListReference>();
     mMutations.clear();
     mMutations.reserve(mutationList.size());
@@ -27,7 +29,7 @@ void MutationSequence::setMutations(const QVariant& mutationsQmlList)
     for (int i = 0; i < mutationList.size(); ++i)
     {
         Mutation* mutation = dynamic_cast<Mutation*>(mutationList.at(i));
-        mutation->init(mCircles);
+        mutation->init(*mCircles);
         mMutations.push_back(mutation);
     }
 }
@@ -35,6 +37,7 @@ void MutationSequence::setMutations(const QVariant& mutationsQmlList)
 // Diameter mutations may make the scene bigger. Calculate this effect.
 void MutationSequence::calcMaxSceneRect()
 {
+    Q_ASSERT(mSequencePlayer);
     int maxExtraSize = 0;
     int extraSize = 0;
 
@@ -52,22 +55,23 @@ void MutationSequence::calcMaxSceneRect()
         }
     }
 
-    mMaxSceneRect = mSequencePlayer.getMaxSceneRect();
+    mMaxSceneRect = mSequencePlayer->getMaxSceneRect();
 
     if (maxExtraSize > 0)
     {
         qDebug() << "Extra size due to diameter mutations:" << maxExtraSize;
         mMaxSceneRect.adjust(-maxExtraSize, -maxExtraSize, maxExtraSize, maxExtraSize);
-        mMaxSceneRect = mMaxSceneRect & mSequencePlayer.getBoundingRect();
+        mMaxSceneRect = mMaxSceneRect & mSequencePlayer->getBoundingRect();
     }
 }
 
 void MutationSequence::backupCircleSettings()
 {
-    mOrigCircleSettings.clear();
-    mOrigCircleSettings.reserve(mCircles.size());
 
-    for (const auto& c : mCircles)
+    mOrigCircleSettings.clear();
+    mOrigCircleSettings.reserve(mCircles->size());
+
+    for (const auto& c : *mCircles)
     {
         CircleTraits traits;
         traits.mDiameter = c->getDiameter();
@@ -80,10 +84,11 @@ void MutationSequence::backupCircleSettings()
 
 void MutationSequence::restoreCircleSettings()
 {
-    Q_ASSERT(mOrigCircleSettings.size() == mCircles.size());
+    Q_ASSERT(mCircles);
+    Q_ASSERT(mOrigCircleSettings.size() == mCircles->size());
     for (unsigned i = 0; i < mOrigCircleSettings.size(); ++i)
     {
-        auto& c = mCircles[i];
+        auto& c = (*mCircles)[i];
         const auto& traits = mOrigCircleSettings[i];
         c->setDiameter(traits.mDiameter);
         c->setSpeed(traits.mSpeed);
@@ -104,12 +109,13 @@ void MutationSequence::play(SaveAs saveAs)
     }
 
     // Unfortunately an interface cannot have signals
-    auto* hack = dynamic_cast<SpiralScene*>(&mSequencePlayer);
+    Q_ASSERT(mSequencePlayer);
+    auto* hack = dynamic_cast<SpiralScene*>(mSequencePlayer);
     Q_ASSERT(hack);
     connect(hack, &SpiralScene::sequenceFramePlayed, this, [this]{ postFrameProcessing(); });
     mCurrentSequenceFrame = 0;
     emit sequenceFramePlaying(mCurrentSequenceFrame);
-    mSequencePlayer.playSequenceFrame();
+    mSequencePlayer->playSequenceFrame();
 }
 
 void MutationSequence::playNextFrame()
@@ -141,12 +147,14 @@ void MutationSequence::playNextFrame()
 
 void MutationSequence::playMutation(unsigned index, bool reverse)
 {
+    Q_ASSERT(mCircles);
+    Q_ASSERT(mSequencePlayer);
     Q_ASSERT(index < mMutations.size());
     const auto* mutation = mMutations[index];
     qDebug() << mutation->getCircle() << mutation->getTrait() << mutation->getChange();
-    mutation->apply(mCircles, mSequencePlayer.getMaxDiameter(), reverse);
+    mutation->apply(*mCircles, mSequencePlayer->getMaxDiameter(), reverse);
     emit sequenceFramePlaying(mCurrentSequenceFrame);
-    mSequencePlayer.playSequenceFrame();
+    mSequencePlayer->playSequenceFrame();
 }
 
 void MutationSequence::postFrameProcessing()
@@ -157,12 +165,14 @@ void MutationSequence::postFrameProcessing()
         playNextFrame();
         break;
     case SAVE_AS_PICS: {
+        Q_ASSERT(mSequencePlayer);
         const QString suffix = QString("_MS%1").arg(mCurrentSequenceFrame + 1, 3, 10, QChar('0'));
-        mSequencePlayer.saveImage(mMaxSceneRect, mPicturesSubDir, suffix, [this](bool){ playNextFrame(); });
+        mSequencePlayer->saveImage(mMaxSceneRect, mPicturesSubDir, suffix, [this](bool){ playNextFrame(); });
         break; }
     case SAVE_AS_GIF: {
+        Q_ASSERT(mSequencePlayer);
         // Enlarge the rect by 2 pixels on each side to avoid rounding error artifacts
-        const auto currentRect = mSequencePlayer.getSceneRect().adjusted(-2, -2, 2, 2);
+        const auto currentRect = mSequencePlayer->getSceneRect().adjusted(-2, -2, 2, 2);
         const auto rect = mSceneGrabber->getGrabRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
         mPreviousFrameRect = currentRect;
         mGifRecorder->addFrame(rect, [this]{ playNextFrame(); });
@@ -203,8 +213,9 @@ bool MutationSequence::preparePlay()
 
 bool MutationSequence::setupGifRecording()
 {
-    mSceneGrabber = mSequencePlayer.createSceneGrabber(mMaxSceneRect);
-    mGifRecorder = std::make_unique<GifRecorder>(*mSceneGrabber);
+    Q_ASSERT(mSequencePlayer);
+    mSceneGrabber = mSequencePlayer->createSceneGrabber(mMaxSceneRect);
+    mGifRecorder = std::make_unique<GifRecorder>(mSceneGrabber.get());
     mPreviousFrameRect = mMaxSceneRect;
 
     return mGifRecorder->startRecording(mFrameRate, "_MS");

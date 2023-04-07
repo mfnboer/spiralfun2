@@ -18,9 +18,10 @@ public:
     enum FrameRate { FPS_25, FPS_10, FPS_4, FPS_2, FPS_1 };
     Q_ENUM(FrameRate);
 
-    explicit GifRecorder(SceneGrabber& sceneGrabber);
+    explicit GifRecorder(SceneGrabber* sceneGrabber = nullptr);
     ~GifRecorder();
 
+    void setSceneGrabber(SceneGrabber* sceneGrabber) { mSceneGrabber = sceneGrabber; }
     const QRect& getFullFrameRect() const { return mFullFrameRect; }
     const QString& getFileName() const { return mGifFileName; }
 
@@ -37,7 +38,7 @@ private:
     void recordFrame();
     void runRecordFrameThread(const FrameAddedCallback& whenFinished);
 
-    SceneGrabber& mSceneGrabber;
+    SceneGrabber* mSceneGrabber = nullptr;
     std::unique_ptr<GifEncoder> mGifEncoder;
     QString mGifFileName;
     bool mRecording = false;

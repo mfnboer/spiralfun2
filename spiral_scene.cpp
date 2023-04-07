@@ -293,7 +293,7 @@ void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, bo
     if (!checkPlayRequirement())
         return;
 
-    mMutationSequence = std::make_unique<MutationSequence>(mCircles, *this);
+    mMutationSequence = std::make_unique<MutationSequence>(&mCircles, this);
     mMutationSequence->setSequenceLength(sequenceLength);
     mMutationSequence->setAddReverseSequence(addReverse);
     mMutationSequence->setMutations(mutations);

@@ -36,9 +36,12 @@ public:
     enum SaveAs { SAVE_AS_NONE, SAVE_AS_PICS, SAVE_AS_GIF };
     Q_ENUM(SaveAs);
 
-    MutationSequence(const CircleList& circles, ISequencePlayer& sequencePlayer);
+    MutationSequence() = default; // Needed for QML_ELEMENT
+    MutationSequence(const CircleList* circles, ISequencePlayer* sequencePlayer);
     ~MutationSequence();
 
+    void setCircles(const CircleList* circles) { mCircles = circles; }
+    void setSequencePlayer(ISequencePlayer* sequencePlayer) { mSequencePlayer = sequencePlayer; }
     void setSequenceLength(int sequenceLength) { mSequenceLength = sequenceLength; }
     void setAddReverseSequence(int addReverse) { mAddReverseSequence = addReverse; }
     void setMutations(const QVariant& mutationsQmlList);
@@ -77,8 +80,8 @@ private:
     GifRecorder::FrameRate mFrameRate = GifRecorder::FPS_10;
     bool mAddReverseSequence = false;
     QString mPicturesSubDir;
-    const CircleList& mCircles;
-    ISequencePlayer& mSequencePlayer;
+    const CircleList* mCircles = nullptr;
+    ISequencePlayer* mSequencePlayer = nullptr;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<GifRecorder> mGifRecorder;
     QRectF mMaxSceneRect;

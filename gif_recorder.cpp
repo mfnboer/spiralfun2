@@ -13,10 +13,12 @@ constexpr int GIF_QUALITY = 10;
 constexpr int GIF_LOOP = 0;
 }
 
-GifRecorder::GifRecorder(SceneGrabber& sceneGrabber) :
-    mSceneGrabber(sceneGrabber),
-    mFullFrameRect(mSceneGrabber.getSpiralCutRect())
+GifRecorder::GifRecorder(SceneGrabber* sceneGrabber) :
+    QObject(),
+    mSceneGrabber(sceneGrabber)
 {
+    if (mSceneGrabber)
+        mFullFrameRect = mSceneGrabber->getSpiralCutRect();
 }
 
 GifRecorder::~GifRecorder()
@@ -90,10 +92,11 @@ bool GifRecorder::addFrame(const FrameAddedCallback& frameAddedCallback)
 
 bool GifRecorder::addFrame(const QRectF& rect, const FrameAddedCallback& frameAddedCallback)
 {
+    Q_ASSERT(mSceneGrabber);
     const QRect frameRect = mFrameNumber == 0 ? mFullFrameRect : rect.toRect();
     calcFramePosition(frameRect);
 
-    const bool grabbed = mSceneGrabber.grabScene(frameRect,
+    const bool grabbed = mSceneGrabber->grabScene(frameRect,
         [this, frameAddedCallback](QImage&& img){
             mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
             runRecordFrameThread([frameAddedCallback]{ if (frameAddedCallback) frameAddedCallback(); });

@@ -28,7 +28,7 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     mSceneGrabber = std::move(sceneGrabber);
 
     if (mSceneGrabber)
-        mGifRecorder = std::make_unique<GifRecorder>(*mSceneGrabber);
+        mGifRecorder = std::make_unique<GifRecorder>(mSceneGrabber.get());
 
     startTimers();
 

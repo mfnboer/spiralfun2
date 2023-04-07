@@ -3,10 +3,10 @@
 #include "utils.h"
 #include "exception.h"
 #include <QDir>
-#include <QJniObject>
 #include <QStandardPaths>
 
 #ifdef Q_OS_ANDROID
+#include <QJniObject>
 #include <QtCore/private/qandroidextras_p.h>
 #else
 #include "jni_callback.h"
@@ -19,11 +19,12 @@ constexpr const char* SPIRAL_CONFIG_SUB_DIR = "SpiralFun/SpiralConfigs";
 bool checkStoragePermission()
 {
 #if defined(Q_OS_ANDROID)
-    auto checkResult = QtAndroidPrivate::checkPermission(QtAndroidPrivate::Storage);
+    static const QString WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
+    auto checkResult = QtAndroidPrivate::checkPermission(WRITE_EXTERNAL_STORAGE);
     if (checkResult.result() != QtAndroidPrivate::Authorized)
     {
         qDebug() << "Write storage permission check failed.";
-        auto requestResult = QtAndroidPrivate::requestPermission(QtAndroidPrivate::Storage);
+        auto requestResult = QtAndroidPrivate::requestPermission(WRITE_EXTERNAL_STORAGE);
         if (requestResult.result() != QtAndroidPrivate::Authorized)
         {
             qWarning() << "No permission to write to storage.";

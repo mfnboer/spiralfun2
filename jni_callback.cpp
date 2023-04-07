@@ -2,7 +2,10 @@
 // License: GPLv3
 #include "jni_callback.h"
 #include <QDebug>
+
+#if defined(Q_OS_ANDROID)
 #include <QJniObject>
+#endif
 
 namespace SpiralFun {
 
