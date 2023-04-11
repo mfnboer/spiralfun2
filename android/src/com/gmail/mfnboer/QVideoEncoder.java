@@ -3,19 +3,15 @@
 
 package com.gmail.mfnboer;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Surface;
 
@@ -96,6 +92,7 @@ public class QVideoEncoder {
         drainEncoder(false);
 
         ByteBuffer frameBuffer = ByteBuffer.wrap(frameArray);
+        // TODO: create bitmap once and reuse it
         Bitmap frameBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
         frameBitmap.copyPixelsFromBuffer(frameBuffer);
 
