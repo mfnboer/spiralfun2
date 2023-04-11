@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
         circle.h
         circle.cpp
         exception.h
+        gif_encoder_wrapper.h
+        gif_encoder_wrapper.cpp
         gif_recorder.h
         gif_recorder.cpp
         jni_callback.h
@@ -43,6 +45,7 @@ set(PROJECT_SOURCES
         utils.cpp
         video_encoder.h
         video_encoder.cpp
+        video_encoder_interface.h
 )
 
 set_source_files_properties(

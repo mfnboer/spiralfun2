@@ -23,9 +23,7 @@ public class QVideoEncoder {
 
     private static final String LOGTAG = "spiralfun.QVideoEncoder";
     private static final String MIME_TYPE = "video/avc"; // H.264 Advanced Video Coding
-    private static final int FRAME_RATE = 30; // frames per second
-    private static final int I_FRAME_INTERVAL = 1; // key frame interval, in seconds
-    private static final int TIMEOUT_US = 10000; // timeout for encoder/decoder operations, in microseconds
+    private static final int I_FRAME_INTERVAL = 15; // key frame interval, in seconds
 
     private int mWidth;
     private int mHeight;
@@ -36,7 +34,7 @@ public class QVideoEncoder {
     private boolean mMuxerStarted;
     private MediaCodec.BufferInfo mBufferInfo;
 
-    public boolean init(int width, int height, String outputPath) {
+    public boolean init(String outputPath, int width, int height, int fps) {
         mWidth = width;
         mHeight = height;
         mBufferInfo = new MediaCodec.BufferInfo();
@@ -44,8 +42,8 @@ public class QVideoEncoder {
         // Configure the output format
         MediaFormat outputFormat = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
         outputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-        outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, mWidth * mHeight * 3 * 8 * FRAME_RATE);
-        outputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
+        outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, mWidth * mHeight * 3 * 8 * fps);
+        outputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, fps);
         outputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL);
 
         // Create the encoder and configure it
