@@ -41,6 +41,8 @@ set(PROJECT_SOURCES
         spiral_scene.cpp
         utils.h
         utils.cpp
+        video_encoder.h
+        video_encoder.cpp
 )
 
 set_source_files_properties(
@@ -70,6 +72,7 @@ qt_add_qml_module(spiralfun
     RESOURCES
         "android/src/com/gmail/mfnboer/QAndroidUtils.java"
         "android/src/com/gmail/mfnboer/QSpiralFunActivity.java"
+        "android/src/com/gmail/mfnboer/QVideoEncoder.java"
         "icons/spiralfun/20x20/arrow_downward.png"
         "icons/spiralfun/20x20/arrow_upward.png"
         "icons/spiralfun/20x20/delete.png"
