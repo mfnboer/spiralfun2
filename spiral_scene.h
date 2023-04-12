@@ -134,7 +134,7 @@ private:
     void setShareMode(ShareMode shareMode);
     QSGNode* createLineNode(const Line& line);
     void updateSceneRect(const QPointF& p);
-    void doPlay(std::unique_ptr<SceneGrabber> recorder);
+    void doPlay(std::unique_ptr<Recorder> recorder);
     void shareImage();
     void shareContent();
     void shareVideo();

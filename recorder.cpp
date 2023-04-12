@@ -8,9 +8,9 @@
 
 namespace SpiralFun {
 
-Recorder::Recorder(SceneGrabber* sceneGrabber) :
+Recorder::Recorder(std::unique_ptr<SceneGrabber> sceneGrabber) :
     QObject(),
-    mSceneGrabber(sceneGrabber)
+    mSceneGrabber(std::move(sceneGrabber))
 {
     if (mSceneGrabber)
         mFullFrameRect = mSceneGrabber->getSpiralCutRect();
@@ -86,10 +86,10 @@ bool Recorder::addFrame(const FrameAddedCallback& frameAddedCallback)
     return addFrame(mFullFrameRect.toRectF(), frameAddedCallback);
 }
 
-bool Recorder::addFrame(const QRectF& rect, const FrameAddedCallback& frameAddedCallback)
+bool Recorder::addFrame(const QRectF& recordingRect, const FrameAddedCallback& frameAddedCallback)
 {
     Q_ASSERT(mSceneGrabber);
-    const QRect frameRect = mFrameNumber == 0 ? mFullFrameRect : rect.toRect();
+    const QRect frameRect = mFrameNumber == 0 ? mFullFrameRect : recordingRect.toRect();
     calcFramePosition(frameRect);
 
     const bool grabbed = mSceneGrabber->grabScene(frameRect,

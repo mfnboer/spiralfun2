@@ -18,10 +18,9 @@ public:
     enum FrameRate { FPS_25, FPS_10, FPS_4, FPS_2, FPS_1 };
     Q_ENUM(FrameRate);
 
-    explicit Recorder(SceneGrabber* sceneGrabber = nullptr);
+    explicit Recorder(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
     ~Recorder();
 
-    void setSceneGrabber(SceneGrabber* sceneGrabber) { mSceneGrabber = sceneGrabber; }
     void setEncoder(std::unique_ptr<IVideoEncoder> encoder) { mEncoder = std::move(encoder); }
     const QRect& getFullFrameRect() const { return mFullFrameRect; }
     const QString& getFileName() const { return mFileName; }
@@ -31,7 +30,10 @@ public:
 
     using FrameAddedCallback = std::function<void()>;
     bool addFrame(const FrameAddedCallback& frameAddedCallback);
-    bool addFrame(const QRectF& rect, const FrameAddedCallback& frameAddedCallback);
+    bool addFrame(const QRectF& recordingRect, const FrameAddedCallback& frameAddedCallback);
+
+    QRectF sceneRectToRecordingRect(const QRectF& sceneRect) const { return mSceneGrabber->getGrabRect(sceneRect); }
+    QRectF calcBoundingRectangle(const CircleList& circles) const { return mSceneGrabber->calcBoundingRectangle(circles); }
 
 private:
     int frameRateToFps(FrameRate frameRate);
@@ -39,7 +41,7 @@ private:
     void recordFrame();
     void runRecordFrameThread(const FrameAddedCallback& whenFinished);
 
-    SceneGrabber* mSceneGrabber = nullptr;
+    std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<IVideoEncoder> mEncoder;
     QString mFileName;
     bool mRecording = false;

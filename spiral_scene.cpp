@@ -3,6 +3,7 @@
 #include "spiral_scene.h"
 #include "circle.h"
 #include "exception.h"
+#include "gif_encoder_wrapper.h"
 #include "jni_callback.h"
 #include "player.h"
 #include "utils.h"
@@ -322,7 +323,7 @@ void SpiralScene::playSequenceFrame()
     doPlay(nullptr);
 }
 
-void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
+void SpiralScene::doPlay(std::unique_ptr<Recorder> recorder)
 {
     mStats = {};
     setCurrentCircleFocus(false);
@@ -387,7 +388,10 @@ void SpiralScene::record()
 {
     const qreal r = mCircles.back()->getRadius();
     QRectF recordRect = mSceneRect.adjusted(-r, -r, r, r);
-    auto recorder = createSceneGrabber(recordRect);
+    auto sceneGrabber = createSceneGrabber(recordRect);
+    auto recorder = std::make_unique<Recorder>(std::move(sceneGrabber));
+    auto encoder = std::make_unique<GifEncoderWrapper>();
+    recorder->setEncoder(std::move(encoder));
     resetScene();
     setPlayState(RECORDING);
     setShareMode(SHARE_VID);

@@ -1,7 +1,6 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "player.h"
-#include "gif_encoder_wrapper.h"
 #include <QTime>
 #include <chrono>
 
@@ -18,7 +17,7 @@ Player::Player(const CircleList &circles) :
     QObject::connect(&mSceneRefreshTimer, &QTimer::timeout, this, [this]{ emit refreshScene(); });
 }
 
-bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
+bool Player::play(std::unique_ptr<Recorder> recorder)
 {
     for (auto& circle : mCircles)
         circle->preparePlay();
@@ -26,15 +25,7 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     mStepsPerInterval = 1;
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
     mCycles = 0;
-    mSceneGrabber = std::move(sceneGrabber);
-
-    if (mSceneGrabber)
-    {
-        mRecorder = std::make_unique<Recorder>(mSceneGrabber.get());
-        auto encoder = std::make_unique<GifEncoderWrapper>();
-        mRecorder->setEncoder(std::move(encoder));
-    }
-
+    mRecorder = std::move(recorder);
     startTimers();
 
     if (mRecorder)
@@ -180,12 +171,12 @@ bool Player::setupRecording()
 
 void Player::resetRecordingRect()
 {
-    mRecordingRect = mSceneGrabber->calcBoundingRectangle(mCircles) & mFullFrameRect;
+    mRecordingRect = mRecorder->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
 void Player::updateRecordingRect()
 {
-    mRecordingRect |= mSceneGrabber->calcBoundingRectangle(mCircles) & mFullFrameRect;
+    mRecordingRect |= mRecorder->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
 void Player::record()

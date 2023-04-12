@@ -174,7 +174,7 @@ void MutationSequence::postFrameProcessing()
         Q_ASSERT(mSequencePlayer);
         // Enlarge the rect by 2 pixels on each side to avoid rounding error artifacts
         const auto currentRect = mSequencePlayer->getSceneRect().adjusted(-2, -2, 2, 2);
-        const auto rect = mSceneGrabber->getGrabRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
+        const auto rect = mRecorder->sceneRectToRecordingRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
         mPreviousFrameRect = currentRect;
         mRecorder->addFrame(rect, [this]{ playNextFrame(); });
         break; }
@@ -215,8 +215,8 @@ bool MutationSequence::preparePlay()
 bool MutationSequence::setupGifRecording()
 {
     Q_ASSERT(mSequencePlayer);
-    mSceneGrabber = mSequencePlayer->createSceneGrabber(mMaxSceneRect);
-    mRecorder = std::make_unique<Recorder>(mSceneGrabber.get());
+    auto sceneGrabber = mSequencePlayer->createSceneGrabber(mMaxSceneRect);
+    mRecorder = std::make_unique<Recorder>(std::move(sceneGrabber));
     auto encoder = std::make_unique<GifEncoderWrapper>();
     mRecorder->setEncoder(std::move(encoder));
     mPreviousFrameRect = mMaxSceneRect;

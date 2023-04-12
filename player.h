@@ -21,7 +21,7 @@ public:
 
     explicit Player(const CircleList &circles);
 
-    bool play(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
+    bool play(std::unique_ptr<Recorder> recorder = nullptr);
     void playAll();
     qreal getAngle() const { return mAngle; }
     const QString& getFileName() const { return mRecorder->getFileName(); }
@@ -56,7 +56,6 @@ private:
     int mCycles;
     QRect mFullFrameRect;
     QRectF mRecordingRect;
-    std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<Recorder> mRecorder;
     bool mRecording = false;
 };

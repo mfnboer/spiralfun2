@@ -82,7 +82,6 @@ private:
     QString mPicturesSubDir;
     const CircleList* mCircles = nullptr;
     ISequencePlayer* mSequencePlayer = nullptr;
-    std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<Recorder> mRecorder;
     QRectF mMaxSceneRect;
     QRectF mPreviousFrameRect;

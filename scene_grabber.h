@@ -24,7 +24,7 @@ public:
     // The rectangle position and size are relative to the full scene rect.
     QRectF calcBoundingRectangle(const CircleList& circles) const;
 
-    QRectF getGrabRect(const QRectF& sceneRect);
+    QRectF getGrabRect(const QRectF& sceneRect) const;
 
 private:
     QSize getImageGrabSize() const;

@@ -70,7 +70,7 @@ QRectF SceneGrabber::calcBoundingRectangle(const CircleList& circles) const
     return rect;
 }
 
-QRectF SceneGrabber::getGrabRect(const QRectF& sceneRect)
+QRectF SceneGrabber::getGrabRect(const QRectF& sceneRect) const
 {
     auto rect = QRectF(QPointF(0, 0), sceneRect.size() * mPixelRatio);
     rect.translate(sceneRect.x() * mPixelRatio, sceneRect.y() * mPixelRatio);
