@@ -3,7 +3,7 @@
 #pragma once
 
 #include "circle.h"
-#include "gif_recorder.h"
+#include "recorder.h"
 #include <QTimer>
 
 namespace SpiralFun {
@@ -24,7 +24,7 @@ public:
     bool play(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
     void playAll();
     qreal getAngle() const { return mAngle; }
-    const QString& getGifFileName() const { return mGifRecorder->getFileName(); }
+    const QString& getFileName() const { return mRecorder->getFileName(); }
 
 signals:
     void done(Player::Stats stats);
@@ -57,7 +57,7 @@ private:
     QRect mFullFrameRect;
     QRectF mRecordingRect;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
-    std::unique_ptr<GifRecorder> mGifRecorder;
+    std::unique_ptr<Recorder> mRecorder;
     bool mRecording = false;
 };
 

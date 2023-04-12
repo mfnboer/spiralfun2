@@ -12,7 +12,7 @@ Dialog {
     property list<string> circleColorList
     property int saveAs: MutationSequence.SAVE_AS_NONE
     property bool saveInNewAlbum: true
-    property int frameRate: GifRecorder.FPS_10
+    property int frameRate: Recorder.FPS_10
 
     id: mutationSequenceDialog
     standardButtons: Dialog.Cancel | Dialog.Ok

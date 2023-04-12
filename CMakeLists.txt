@@ -22,8 +22,6 @@ set(PROJECT_SOURCES
         exception.h
         gif_encoder_wrapper.h
         gif_encoder_wrapper.cpp
-        gif_recorder.h
-        gif_recorder.cpp
         jni_callback.h
         jni_callback.cpp
         main.cpp
@@ -33,6 +31,8 @@ set(PROJECT_SOURCES
         mutation_sequence.cpp
         player.h
         player.cpp
+        recorder.h
+        recorder.cpp
         scene_grabber.h
         scene_grabber.cpp
         scoped_line.h

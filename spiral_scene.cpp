@@ -287,7 +287,7 @@ void SpiralScene::play()
 
 void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, bool addReverse,
                                MutationSequence::SaveAs saveAs, bool createAlbum,
-                               GifRecorder::FrameRate frameRate)
+                               Recorder::FrameRate frameRate)
 {
     Q_ASSERT(sequenceLength > 0);
     if (!checkPlayRequirement())
@@ -335,8 +335,8 @@ void SpiralScene::doPlay(std::unique_ptr<SceneGrabber> recorder)
 
             if (mPlayState == RECORDING)
             {
-                const QString fileName = mPlayer->getGifFileName().split('/').last();
-                emit statusUpdate(QString("GIF saved: %1").arg(fileName));
+                const QString fileName = mPlayer->getFileName().split('/').last();
+                emit statusUpdate(QString("Recording saved: %1").arg(fileName));
             }
 
             if (mPlayState == PLAYING_SEQUENCE)

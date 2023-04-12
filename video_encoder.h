@@ -16,6 +16,7 @@ public:
     bool open(const QString &fileName, int width, int height, int fps) override;
     bool close() override;
     bool push(const QImage& frame, int x = 0, int y = 0) override;
+    QString getFileExtension() const override { return "mp4"; }
 
 private:
 #if defined(Q_OS_ANDROID)

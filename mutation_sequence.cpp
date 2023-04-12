@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "mutation_sequence.h"
+#include "gif_encoder_wrapper.h"
 #include "spiral_scene.h"
 #include "utils.h"
 
@@ -138,7 +139,7 @@ void MutationSequence::playNextFrame()
         qDebug() << "Finished playing mutation sequence";
 
         if (mSaveAs == SAVE_AS_GIF)
-            mGifRecorder->stopRecording(true);
+            mRecorder->stopRecording(true);
 
         restoreCircleSettings();
         emit sequenceFinished();
@@ -175,7 +176,7 @@ void MutationSequence::postFrameProcessing()
         const auto currentRect = mSequencePlayer->getSceneRect().adjusted(-2, -2, 2, 2);
         const auto rect = mSceneGrabber->getGrabRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
         mPreviousFrameRect = currentRect;
-        mGifRecorder->addFrame(rect, [this]{ playNextFrame(); });
+        mRecorder->addFrame(rect, [this]{ playNextFrame(); });
         break; }
     }
 }
@@ -215,10 +216,12 @@ bool MutationSequence::setupGifRecording()
 {
     Q_ASSERT(mSequencePlayer);
     mSceneGrabber = mSequencePlayer->createSceneGrabber(mMaxSceneRect);
-    mGifRecorder = std::make_unique<GifRecorder>(mSceneGrabber.get());
+    mRecorder = std::make_unique<Recorder>(mSceneGrabber.get());
+    auto encoder = std::make_unique<GifEncoderWrapper>();
+    mRecorder->setEncoder(std::move(encoder));
     mPreviousFrameRect = mMaxSceneRect;
 
-    return mGifRecorder->startRecording(mFrameRate, "_MS");
+    return mRecorder->startRecording(mFrameRate, "_MS");
 }
 
 }

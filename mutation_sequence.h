@@ -3,7 +3,7 @@
 #pragma once
 
 #include "circle.h"
-#include "gif_recorder.h"
+#include "recorder.h"
 #include "mutation.h"
 #include "scene_grabber.h"
 #include <QVariant>
@@ -46,7 +46,7 @@ public:
     void setAddReverseSequence(int addReverse) { mAddReverseSequence = addReverse; }
     void setMutations(const QVariant& mutationsQmlList);
     void setCreateNewPicturesFolder(bool create) { mCreateNewPictureFolder = create; }
-    void setFrameRate(GifRecorder::FrameRate frameRate) { mFrameRate = frameRate; }
+    void setFrameRate(Recorder::FrameRate frameRate) { mFrameRate = frameRate; }
     int getCurrentSequenceFrame() const { return mCurrentSequenceFrame; }
     int getTotalSequenceLength() const { return mAddReverseSequence ? mSequenceLength * 2 - 1 : mSequenceLength; }
     void play(SaveAs saveAs);
@@ -77,13 +77,13 @@ private:
     std::vector<CircleTraits> mOrigCircleSettings;
     SaveAs mSaveAs = SAVE_AS_NONE;
     bool mCreateNewPictureFolder = true;
-    GifRecorder::FrameRate mFrameRate = GifRecorder::FPS_10;
+    Recorder::FrameRate mFrameRate = Recorder::FPS_10;
     bool mAddReverseSequence = false;
     QString mPicturesSubDir;
     const CircleList* mCircles = nullptr;
     ISequencePlayer* mSequencePlayer = nullptr;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
-    std::unique_ptr<GifRecorder> mGifRecorder;
+    std::unique_ptr<Recorder> mRecorder;
     QRectF mMaxSceneRect;
     QRectF mPreviousFrameRect;
 };

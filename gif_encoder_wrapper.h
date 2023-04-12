@@ -12,6 +12,7 @@ public:
     bool open(const QString& fileName, int width, int height, int fps) override;
     bool close() override;
     bool push(const QImage& frame, int x, int y) override;
+    QString getFileExtension() const override { return "gif"; }
 
 private:
     std::unique_ptr<GifEncoder> mGifEncoder;

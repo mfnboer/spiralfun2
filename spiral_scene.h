@@ -81,7 +81,7 @@ public:
     Q_INVOKABLE void play();
     Q_INVOKABLE void playSequence(const QVariant& mutations, int sequenceLength, bool addReverse,
                                   MutationSequence::SaveAs saveAs, bool createAlbum,
-                                  GifRecorder::FrameRate frameRate);
+                                  Recorder::FrameRate frameRate);
     Q_INVOKABLE void showSpiralStats();
     Q_INVOKABLE void record();
     Q_INVOKABLE void stop();

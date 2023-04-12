@@ -1,6 +1,6 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
-#include "gif_recorder.h"
+#include "recorder.h"
 #include "exception.h"
 #include "utils.h"
 #include <QFile>
@@ -8,12 +8,7 @@
 
 namespace SpiralFun {
 
-namespace {
-constexpr int GIF_QUALITY = 10;
-constexpr int GIF_LOOP = 0;
-}
-
-GifRecorder::GifRecorder(SceneGrabber* sceneGrabber) :
+Recorder::Recorder(SceneGrabber* sceneGrabber) :
     QObject(),
     mSceneGrabber(sceneGrabber)
 {
@@ -21,7 +16,7 @@ GifRecorder::GifRecorder(SceneGrabber* sceneGrabber) :
         mFullFrameRect = mSceneGrabber->getSpiralCutRect();
 }
 
-GifRecorder::~GifRecorder()
+Recorder::~Recorder()
 {
     if (mRecordingThread)
     {
@@ -31,14 +26,16 @@ GifRecorder::~GifRecorder()
 
     if (mRecording)
     {
-        qDebug() << "Stop recording and remove file:" << mGifFileName;
+        qDebug() << "Stop recording and remove file:" << mFileName;
         stopRecording(false);
-        QFile::remove(mGifFileName);
+        QFile::remove(mFileName);
     }
 }
 
-bool GifRecorder::startRecording(FrameRate frameRate, const QString& baseNameSuffix)
+bool Recorder::startRecording(FrameRate frameRate, const QString& baseNameSuffix)
 {
+    Q_ASSERT(mEncoder);
+
     if (mRecording)
     {
         qWarning() << "Recoring already started!";
@@ -54,17 +51,16 @@ bool GifRecorder::startRecording(FrameRate frameRate, const QString& baseNameSuf
     }
 
     const QString baseName = Utils::createDateTimeName();
-    mGifFileName = path + QString("/VID_%1%2.gif").arg(baseName, baseNameSuffix);
-    mGifEncoder = std::make_unique<GifEncoder>();
+    const QString ext = mEncoder->getFileExtension();
+    mFileName = path + QString("/VID_%1%2.%3").arg(baseName, baseNameSuffix, ext);
     const int width = mFullFrameRect.width();
     const int height = mFullFrameRect.height();
-    setFrameDuration(frameRate);
 
     qDebug() << "Start recording frame:" << mFullFrameRect.size();
 
-    if (!mGifEncoder->open(mGifFileName.toStdString(), width, height, GIF_QUALITY, GIF_LOOP))
+    if (!mEncoder->open(mFileName, width, height, frameRateToFps(frameRate)))
     {
-        qWarning() << "Cannot open file:" << mGifFileName;
+        qWarning() << "Cannot open file:" << mFileName;
         return false;
     }
 
@@ -73,24 +69,24 @@ bool GifRecorder::startRecording(FrameRate frameRate, const QString& baseNameSuf
     return true;
 }
 
-void GifRecorder::stopRecording(bool scanMediaFile)
+void Recorder::stopRecording(bool scanMediaFile)
 {
     if (!mRecording)
         return;
 
-    mGifEncoder->close();
+    mEncoder->close();
     mRecording = false;
 
     if (scanMediaFile)
-        Utils::scanMediaFile(mGifFileName);
+        Utils::scanMediaFile(mFileName);
 }
 
-bool GifRecorder::addFrame(const FrameAddedCallback& frameAddedCallback)
+bool Recorder::addFrame(const FrameAddedCallback& frameAddedCallback)
 {
     return addFrame(mFullFrameRect.toRectF(), frameAddedCallback);
 }
 
-bool GifRecorder::addFrame(const QRectF& rect, const FrameAddedCallback& frameAddedCallback)
+bool Recorder::addFrame(const QRectF& rect, const FrameAddedCallback& frameAddedCallback)
 {
     Q_ASSERT(mSceneGrabber);
     const QRect frameRect = mFrameNumber == 0 ? mFullFrameRect : rect.toRect();
@@ -112,46 +108,39 @@ bool GifRecorder::addFrame(const QRectF& rect, const FrameAddedCallback& frameAd
     return true;
 }
 
-void GifRecorder::setFrameDuration(FrameRate frameRate)
+int Recorder::frameRateToFps(FrameRate frameRate)
 {
     switch (frameRate)
     {
     case FPS_25:
-        mFrameDuration = 4;
-        break;
+        return 25;
     case FPS_10:
-        mFrameDuration = 10;
-        break;
+        return 10;
     case FPS_4:
-        mFrameDuration = 25;
-        break;
+        return 4;
     case FPS_2:
-        mFrameDuration = 50;
-        break;
+        return 2;
     case FPS_1:
-        mFrameDuration = 100;
-        break;
+        return 1;
     }
 
-    qDebug() << "Frame duration:" << mFrameDuration;
+    Q_ASSERT(false);
+    return 25;
 }
 
-void GifRecorder::calcFramePosition(const QRectF& frameRect)
+void Recorder::calcFramePosition(const QRectF& frameRect)
 {
     mFramePosition = frameRect.translated(-mFullFrameRect.topLeft()).toRect().topLeft();
 }
 
-void GifRecorder::recordFrame()
+void Recorder::recordFrame()
 {
-    Q_ASSERT(mGifEncoder);
+    Q_ASSERT(mEncoder);
     Q_ASSERT(mFrame);
-    const uint8_t* frame = mFrame->constBits();
-
-    mGifEncoder->push(frame, mFramePosition.x(), mFramePosition.y(),
-                      mFrame->width(), mFrame->height(), mFrameDuration);
+    mEncoder->push(*mFrame, mFramePosition.x(), mFramePosition.y());
 }
 
-void GifRecorder::runRecordFrameThread(const std::function<void()>& whenFinished)
+void Recorder::runRecordFrameThread(const std::function<void()>& whenFinished)
 {
     QThread* thread = QThread::create([this]{ recordFrame(); });
     mRecordingThread.reset(thread);

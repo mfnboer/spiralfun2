@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "player.h"
+#include "gif_encoder_wrapper.h"
 #include <QTime>
 #include <chrono>
 
@@ -28,11 +29,15 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     mSceneGrabber = std::move(sceneGrabber);
 
     if (mSceneGrabber)
-        mGifRecorder = std::make_unique<GifRecorder>(mSceneGrabber.get());
+    {
+        mRecorder = std::make_unique<Recorder>(mSceneGrabber.get());
+        auto encoder = std::make_unique<GifEncoderWrapper>();
+        mRecorder->setEncoder(std::move(encoder));
+    }
 
     startTimers();
 
-    if (mGifRecorder)
+    if (mRecorder)
     {
         if (!setupRecording())
             return false;
@@ -106,15 +111,15 @@ void Player::finishPlaying()
         // Record last frame
         updateRecordingRect();
 
-        const bool frameAdded = mGifRecorder->addFrame(mRecordingRect, [this, stats]{
-                mGifRecorder->stopRecording(true);
+        const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this, stats]{
+            mRecorder->stopRecording(true);
                 emit done(stats);
             });
 
         if (!frameAdded)
         {
             qWarning() << "Failed to add last frame";
-            mGifRecorder->stopRecording(true);
+            mRecorder->stopRecording(true);
             emit done(stats);
         }
     }
@@ -158,11 +163,11 @@ void Player::forceDraw()
 
 bool Player::setupRecording()
 {
-    Q_ASSERT(mGifRecorder);
-    if (!mGifRecorder->startRecording(GifRecorder::FPS_25))
+    Q_ASSERT(mRecorder);
+    if (!mRecorder->startRecording(Recorder::FPS_25))
         return false;
 
-    mFullFrameRect = mGifRecorder->getFullFrameRect();
+    mFullFrameRect = mRecorder->getFullFrameRect();
 
     // Capture one full frame, next frames will be subframes where changes happened.
     mRecordingRect = mFullFrameRect;
@@ -192,7 +197,7 @@ void Player::record()
         return;
 
     mRecordAngle = 0.0;
-    const bool frameAdded = mGifRecorder->addFrame(mRecordingRect, [this]{ mPlayTimer.start(); });
+    const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this]{ mPlayTimer.start(); });
 
     if (!frameAdded)
     {

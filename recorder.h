@@ -3,13 +3,13 @@
 #pragma once
 
 #include "scene_grabber.h"
-#include "egif/GifEncoder.h"
+#include "video_encoder_interface.h"
 #include <QString>
 #include <memory>
 
 namespace SpiralFun {
 
-class GifRecorder : public QObject
+class Recorder : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
@@ -18,12 +18,13 @@ public:
     enum FrameRate { FPS_25, FPS_10, FPS_4, FPS_2, FPS_1 };
     Q_ENUM(FrameRate);
 
-    explicit GifRecorder(SceneGrabber* sceneGrabber = nullptr);
-    ~GifRecorder();
+    explicit Recorder(SceneGrabber* sceneGrabber = nullptr);
+    ~Recorder();
 
     void setSceneGrabber(SceneGrabber* sceneGrabber) { mSceneGrabber = sceneGrabber; }
+    void setEncoder(std::unique_ptr<IVideoEncoder> encoder) { mEncoder = std::move(encoder); }
     const QRect& getFullFrameRect() const { return mFullFrameRect; }
-    const QString& getFileName() const { return mGifFileName; }
+    const QString& getFileName() const { return mFileName; }
 
     bool startRecording(FrameRate frameRate, const QString& baseNameSuffix = "");
     void stopRecording(bool scanMediaFile);
@@ -33,17 +34,16 @@ public:
     bool addFrame(const QRectF& rect, const FrameAddedCallback& frameAddedCallback);
 
 private:
-    void setFrameDuration(FrameRate frameRate);
+    int frameRateToFps(FrameRate frameRate);
     void calcFramePosition(const QRectF& frameRect);
     void recordFrame();
     void runRecordFrameThread(const FrameAddedCallback& whenFinished);
 
     SceneGrabber* mSceneGrabber = nullptr;
-    std::unique_ptr<GifEncoder> mGifEncoder;
-    QString mGifFileName;
+    std::unique_ptr<IVideoEncoder> mEncoder;
+    QString mFileName;
     bool mRecording = false;
     std::unique_ptr<QImage> mFrame;
-    int mFrameDuration = 4; // unit is 10ms
     int mFrameNumber = 0;
     QRect mFullFrameRect;
     QPoint mFramePosition;
