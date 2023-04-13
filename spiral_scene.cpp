@@ -3,7 +3,6 @@
 #include "spiral_scene.h"
 #include "circle.h"
 #include "exception.h"
-#include "gif_encoder_wrapper.h"
 #include "jni_callback.h"
 #include "player.h"
 #include "utils.h"
@@ -300,13 +299,23 @@ void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, bo
     mMutationSequence->setMutations(mutations);
     mMutationSequence->setCreateNewPicturesFolder(createAlbum);
     mMutationSequence->setFrameRate(frameRate);
+
     emit sequenceLengthChanged();
 
     removeCirclesFromScene();
     setPlayState(PLAYING_SEQUENCE);
 
-    if (saveAs == MutationSequence::SAVE_AS_GIF)
-        setShareMode(SHARE_VID);
+    switch (saveAs)
+    {
+    case MutationSequence::SAVE_AS_GIF:
+        setShareMode(SHARE_GIF);
+        break;
+    case MutationSequence::SAVE_AS_VIDEO:
+        setShareMode(SHARE_VIDEO);
+        break;
+    default:
+        break;
+    }
 
     connect(mMutationSequence.get(), &MutationSequence::sequenceFramePlaying, this, [this]{ emit sequenceFrameChanged(); });
     connect(mMutationSequence.get(), &MutationSequence::sequenceFinished, this, [this]{
@@ -384,18 +393,31 @@ void SpiralScene::showSpiralStats()
     emit message(statMsg);
 }
 
-void SpiralScene::record()
+void SpiralScene::record(Recorder::Format format)
 {
     const qreal r = mCircles.back()->getRadius();
     QRectF recordRect = mSceneRect.adjusted(-r, -r, r, r);
     auto sceneGrabber = createSceneGrabber(recordRect);
-    auto recorder = std::make_unique<Recorder>(std::move(sceneGrabber));
-    auto encoder = std::make_unique<GifEncoderWrapper>();
-    recorder->setEncoder(std::move(encoder));
+    auto recorder = Recorder::createRecorder(format, std::move(sceneGrabber));
+
+    // Seems to give a reasonable tradeoff between quality and file size
+    const int bitsPerFrame = std::max(int(mStats.mLineSegmentCount * 0.8), 6000);
+    recorder->setBitsPerFrame(bitsPerFrame);
+
     resetScene();
     setPlayState(RECORDING);
-    setShareMode(SHARE_VID);
-    mShareContentUri.clear();
+
+    switch (format)
+    {
+    case Recorder::FMT_GIF:
+        setShareMode(SHARE_GIF);
+        break;
+    case Recorder::FMT_VIDEO:
+        setShareMode(SHARE_VIDEO);
+        break;
+    }
+
+    mShareMediaUri.clear();
     doPlay(std::move(recorder));
 }
 
@@ -488,7 +510,7 @@ void SpiralScene::resetScene()
     setScale(mScaleFactor);
     update();
     setSharingInProgress(false);
-    mShareContentUri.clear();
+    mShareMediaUri.clear();
 }
 
 void SpiralScene::selectCircle(Circle* circle)
@@ -717,7 +739,8 @@ void SpiralScene::share()
     case SHARE_PIC:
         shareImage();
         break;
-    case SHARE_VID:
+    case SHARE_GIF:
+    case SHARE_VIDEO:
         shareVideo();
         break;
     case SHARE_NONE:
@@ -730,10 +753,10 @@ void SpiralScene::shareImage()
 {
     setSharingInProgress(true);
 
-    if (!mShareContentUri.isEmpty())
+    if (!mShareMediaUri.isEmpty())
     {
-        qDebug() << "Share content uri available:" << mShareContentUri;
-        shareContent();
+        qDebug() << "Share content uri available:" << mShareMediaUri;
+        shareMedia();
     }
     else
     {
@@ -742,9 +765,9 @@ void SpiralScene::shareImage()
     }
 }
 
-void SpiralScene::shareContent()
+void SpiralScene::shareMedia()
 {
-    Q_ASSERT(!mShareContentUri.isEmpty());
+    Q_ASSERT(!mShareMediaUri.isEmpty());
     SpiralConfig cfg(mCircles, mDefaultCircleRadius);
     const QString configAppUri = cfg.getConfigAppUri();
 
@@ -754,35 +777,43 @@ void SpiralScene::shareContent()
     case SHARE_PIC:
         mimeType = "image/jpg";
         break;
-    case SHARE_VID:
+    case SHARE_GIF:
         mimeType = "image/gif";
+        break;
+    case SHARE_VIDEO:
+        mimeType = "video/mp4";
         break;
     case SHARE_NONE:
         qWarning() << "Nothing to share";
         return;
     }
 
-    Utils::sharePicture(mShareContentUri, configAppUri, mimeType);
+    Utils::shareMedia(mShareMediaUri, configAppUri, mimeType);
+}
+
+bool SpiralScene::hasVideoTypeShareMode() const
+{
+    return mShareMode == SHARE_GIF || mShareMode == SHARE_VIDEO;
 }
 
 void SpiralScene::shareVideo()
 {
-    if (mShareMode != SHARE_VID || mShareContentUri.isEmpty())
+    if (!hasVideoTypeShareMode() || mShareMediaUri.isEmpty())
     {
         qDebug() << "No video to share";
         return;
     }
 
     setSharingInProgress(true);
-    shareContent();
+    shareMedia();
     setSharingInProgress(false);
 }
 
 void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
 {
-    if (mShareContentUri.isEmpty() && (mShareMode == SHARE_VID || mSharingInProgress))
+    if (mShareMediaUri.isEmpty() && (hasVideoTypeShareMode() || mSharingInProgress))
     {
-        mShareContentUri = contentUri;
+        mShareMediaUri = contentUri;
         qDebug() << "Content sharing URI:" << contentUri << "share mode:" << mShareMode;
     }
 
@@ -790,7 +821,7 @@ void SpiralScene::handleMediaScannerFinished(const QString& contentUri)
         return;
 
     if (!contentUri.isEmpty())
-        shareContent();
+        shareMedia();
     else
         qDebug() << "No content URI for sharing";
 

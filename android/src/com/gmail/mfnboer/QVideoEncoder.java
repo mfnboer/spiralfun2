@@ -19,7 +19,7 @@ public class QVideoEncoder {
 
     private static final String LOGTAG = "spiralfun.QVideoEncoder";
     private static final String MIME_TYPE = "video/avc"; // H.264 Advanced Video Coding
-    private static final int I_FRAME_INTERVAL = 15; // key frame interval, in seconds
+    private static final int I_FRAME_INTERVAL = 5; // key frame interval, in seconds
 
     private int mWidth;
     private int mHeight;
@@ -29,16 +29,24 @@ public class QVideoEncoder {
     private int mTrackIndex;
     private boolean mMuxerStarted;
     private MediaCodec.BufferInfo mBufferInfo;
+    private int mFrameDurationUs;
+    private int mPresentationTimeUs;
+    private Bitmap mFrameBitmap;
 
-    public boolean init(String outputPath, int width, int height, int fps) {
+    public boolean init(String outputPath, int width, int height, int fps, int bitRate) {
         mWidth = width;
         mHeight = height;
+        mFrameDurationUs = 1000000 / fps;
+        mPresentationTimeUs = 0;
         mBufferInfo = new MediaCodec.BufferInfo();
+        mFrameBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
 
         // Configure the output format
         MediaFormat outputFormat = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
         outputFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-        outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, mWidth * mHeight * 3 * 8 * fps);
+
+        outputFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
+        outputFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
         outputFormat.setInteger(MediaFormat.KEY_FRAME_RATE, fps);
         outputFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL);
 
@@ -49,6 +57,12 @@ public class QVideoEncoder {
             Log.w(LOGTAG, "Failed to create encoder: " + e.getMessage());
             return false;
         }
+
+        MediaCodecInfo mci = mEncoder.getCodecInfo();
+        MediaCodecInfo.EncoderCapabilities caps = mci.getCapabilitiesForType(MIME_TYPE).getEncoderCapabilities();
+        Log.d(LOGTAG, "VBR: " + caps.isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR));
+        Log.d(LOGTAG, "Complexity: " + caps.getComplexityRange());
+        Log.d(LOGTAG, "Quality: " + caps.getQualityRange());
 
         mEncoder.configure(outputFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         mInputSurface = mEncoder.createInputSurface();
@@ -92,12 +106,10 @@ public class QVideoEncoder {
         drainEncoder(false);
 
         ByteBuffer frameBuffer = ByteBuffer.wrap(frameArray);
-        // TODO: create bitmap once and reuse it
-        Bitmap frameBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-        frameBitmap.copyPixelsFromBuffer(frameBuffer);
+        mFrameBitmap.copyPixelsFromBuffer(frameBuffer);
 
         Canvas canvas = mInputSurface.lockCanvas(null);
-        canvas.drawBitmap(frameBitmap, 0, 0, null);
+        canvas.drawBitmap(mFrameBitmap, 0, 0, null);
         mInputSurface.unlockCanvasAndPost(canvas);
     }
 
@@ -108,10 +120,10 @@ public class QVideoEncoder {
      * is set, we send EOS to the encoder, and then iterate until we see EOS on the output.
      * Calling this with endOfStream set should be done once, right before stopping the muxer.
      * Taken from: https://bigflake.com/mediacodec/EncodeAndMuxTest.java.txt
+     * Made some adaptations
      */
     private void drainEncoder(boolean endOfStream) {
         final int TIMEOUT_USEC = 10000;
-        Log.d(LOGTAG, "drainEncoder(" + endOfStream + ")");
 
         if (endOfStream) {
             Log.d(LOGTAG, "sending EOS to encoder");
@@ -166,12 +178,14 @@ public class QVideoEncoder {
                         throw new RuntimeException("muxer hasn't started");
                     }
 
+                    mBufferInfo.presentationTimeUs = mPresentationTimeUs;
+                    mPresentationTimeUs += mFrameDurationUs;
+
                     // adjust the ByteBuffer values to match BufferInfo (not needed?)
                     encodedData.position(mBufferInfo.offset);
                     encodedData.limit(mBufferInfo.offset + mBufferInfo.size);
 
                     mMuxer.writeSampleData(mTrackIndex, encodedData, mBufferInfo);
-                    Log.d(LOGTAG, "sent " + mBufferInfo.size + " bytes to muxer");
                 }
 
                 mEncoder.releaseOutputBuffer(encoderStatus, false);

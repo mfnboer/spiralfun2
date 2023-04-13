@@ -9,7 +9,7 @@ constexpr int GIF_QUALITY = 10;
 constexpr int GIF_LOOP = 0;
 }
 
-bool GifEncoderWrapper::open(const QString& fileName, int width, int height, int fps)
+bool GifEncoderWrapper::open(const QString& fileName, int width, int height, int fps, int)
 {
     Q_ASSERT(fps > 0);
     mFrameDuration = 100 / fps;

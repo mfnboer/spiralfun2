@@ -33,8 +33,10 @@ class MutationSequence : public QObject
     QML_ELEMENT
 
 public:
-    enum SaveAs { SAVE_AS_NONE, SAVE_AS_PICS, SAVE_AS_GIF };
+    enum SaveAs { SAVE_AS_NONE, SAVE_AS_PICS, SAVE_AS_GIF, SAVE_AS_VIDEO };
     Q_ENUM(SaveAs);
+
+    static bool isVideoType(SaveAs saveAs);
 
     MutationSequence() = default; // Needed for QML_ELEMENT
     MutationSequence(const CircleList* circles, ISequencePlayer* sequencePlayer);
@@ -69,7 +71,7 @@ private:
     void playMutation(unsigned index, bool reverse = false);
     void postFrameProcessing();
     bool preparePlay();
-    bool setupGifRecording();
+    bool setupRecording(Recorder::Format format);
 
     int mSequenceLength = 10;
     int mCurrentSequenceFrame = 0;

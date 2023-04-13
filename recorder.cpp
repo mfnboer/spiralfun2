@@ -2,11 +2,32 @@
 // License: GPLv3
 #include "recorder.h"
 #include "exception.h"
+#include "gif_encoder_wrapper.h"
 #include "utils.h"
+#include "video_encoder.h"
 #include <QFile>
 #include <QThread>
 
 namespace SpiralFun {
+
+std::unique_ptr<Recorder> Recorder::createRecorder(Recorder::Format format, std::unique_ptr<SceneGrabber> sceneGrabber)
+{
+    auto recorder = std::make_unique<Recorder>(std::move(sceneGrabber));
+    std::unique_ptr<IVideoEncoder> encoder;
+
+    switch (format)
+    {
+    case FMT_GIF:
+        encoder = std::make_unique<GifEncoderWrapper>();
+        break;
+    case FMT_VIDEO:
+        encoder = std::make_unique<VideoEncoder>();
+        break;
+    }
+
+    recorder->setEncoder(std::move(encoder));
+    return recorder;
+}
 
 Recorder::Recorder(std::unique_ptr<SceneGrabber> sceneGrabber) :
     QObject(),
@@ -58,7 +79,7 @@ bool Recorder::startRecording(FrameRate frameRate, const QString& baseNameSuffix
 
     qDebug() << "Start recording frame:" << mFullFrameRect.size();
 
-    if (!mEncoder->open(mFileName, width, height, frameRateToFps(frameRate)))
+    if (!mEncoder->open(mFileName, width, height, frameRateToFps(frameRate), mBitsPerFrame))
     {
         qWarning() << "Cannot open file:" << mFileName;
         return false;
@@ -89,7 +110,8 @@ bool Recorder::addFrame(const FrameAddedCallback& frameAddedCallback)
 bool Recorder::addFrame(const QRectF& recordingRect, const FrameAddedCallback& frameAddedCallback)
 {
     Q_ASSERT(mSceneGrabber);
-    const QRect frameRect = mFrameNumber == 0 ? mFullFrameRect : recordingRect.toRect();
+    const QRect frameRect = (mFrameNumber == 0 || !mEncoder->canEncodePartialFrame()) ?
+            mFullFrameRect : recordingRect.toRect();
     calcFramePosition(frameRect);
 
     const bool grabbed = mSceneGrabber->grabScene(frameRect,

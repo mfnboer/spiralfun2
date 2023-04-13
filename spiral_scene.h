@@ -41,7 +41,7 @@ public:
     enum PlayState { NOT_PLAYING, PLAYING, PLAYING_SEQUENCE, RECORDING, DONE_PLAYING };
     Q_ENUM(PlayState)
 
-    enum ShareMode { SHARE_NONE, SHARE_PIC, SHARE_VID };
+    enum ShareMode { SHARE_NONE, SHARE_PIC, SHARE_GIF, SHARE_VIDEO };
     Q_ENUM(ShareMode)
 
     struct Stats
@@ -83,7 +83,7 @@ public:
                                   MutationSequence::SaveAs saveAs, bool createAlbum,
                                   Recorder::FrameRate frameRate);
     Q_INVOKABLE void showSpiralStats();
-    Q_INVOKABLE void record();
+    Q_INVOKABLE void record(Recorder::Format format);
     Q_INVOKABLE void stop();
     Q_INVOKABLE bool saveImage(const QRectF cutRect = {}, const QString subDir = "", const QString& baseNameSuffix = "",
                                const ISequencePlayer::SavedCallback& savedCallback = nullptr) override;
@@ -136,7 +136,8 @@ private:
     void updateSceneRect(const QPointF& p);
     void doPlay(std::unique_ptr<Recorder> recorder);
     void shareImage();
-    void shareContent();
+    void shareMedia();
+    bool hasVideoTypeShareMode() const;
     void shareVideo();
 
     std::unordered_map<QObject*, Line> mLines;
@@ -153,7 +154,7 @@ private:
     std::vector<std::unique_ptr<QObject>> mConfigFileList;
     bool mSharingInProgress = false;
     ShareMode mShareMode = SHARE_NONE;
-    QString mShareContentUri;
+    QString mShareMediaUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<MutationSequence> mMutationSequence;
 

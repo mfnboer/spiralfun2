@@ -1,11 +1,15 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "mutation_sequence.h"
-#include "gif_encoder_wrapper.h"
 #include "spiral_scene.h"
 #include "utils.h"
 
 namespace SpiralFun {
+
+bool MutationSequence::isVideoType(SaveAs saveAs)
+{
+    return saveAs == SAVE_AS_GIF || saveAs == SAVE_AS_VIDEO;
+}
 
 MutationSequence::MutationSequence(const CircleList* circles, ISequencePlayer* sequencePlayer) :
     QObject(),
@@ -138,7 +142,7 @@ void MutationSequence::playNextFrame()
     {
         qDebug() << "Finished playing mutation sequence";
 
-        if (mSaveAs == SAVE_AS_GIF)
+        if (isVideoType(mSaveAs))
             mRecorder->stopRecording(true);
 
         restoreCircleSettings();
@@ -170,7 +174,8 @@ void MutationSequence::postFrameProcessing()
         const QString suffix = QString("_MS%1").arg(mCurrentSequenceFrame + 1, 3, 10, QChar('0'));
         mSequencePlayer->saveImage(mMaxSceneRect, mPicturesSubDir, suffix, [this](bool){ playNextFrame(); });
         break; }
-    case SAVE_AS_GIF: {
+    case SAVE_AS_GIF:
+    case SAVE_AS_VIDEO: {
         Q_ASSERT(mSequencePlayer);
         // Enlarge the rect by 2 pixels on each side to avoid rounding error artifacts
         const auto currentRect = mSequencePlayer->getSceneRect().adjusted(-2, -2, 2, 2);
@@ -193,9 +198,15 @@ bool MutationSequence::preparePlay()
 
     calcMaxSceneRect();
 
-    if (mSaveAs == SAVE_AS_GIF && !setupGifRecording())
+    if (mSaveAs == SAVE_AS_GIF && !setupRecording(Recorder::FMT_GIF))
     {
         qDebug() << "Failed to setup GIF recording";
+        return false;
+    }
+
+    if (mSaveAs == SAVE_AS_VIDEO && !setupRecording(Recorder::FMT_VIDEO))
+    {
+        qDebug() << "Failed to setup Video recording";
         return false;
     }
 
@@ -212,13 +223,12 @@ bool MutationSequence::preparePlay()
     return true;
 }
 
-bool MutationSequence::setupGifRecording()
+bool MutationSequence::setupRecording(Recorder::Format format)
 {
     Q_ASSERT(mSequencePlayer);
     auto sceneGrabber = mSequencePlayer->createSceneGrabber(mMaxSceneRect);
-    mRecorder = std::make_unique<Recorder>(std::move(sceneGrabber));
-    auto encoder = std::make_unique<GifEncoderWrapper>();
-    mRecorder->setEncoder(std::move(encoder));
+    mRecorder = Recorder::createRecorder(format, std::move(sceneGrabber));
+    mRecorder->setBitsPerFrame(6'000'000 / Recorder::frameRateToFps(mFrameRate));
     mPreviousFrameRect = mMaxSceneRect;
 
     return mRecorder->startRecording(mFrameRate, "_MS");

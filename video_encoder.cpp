@@ -8,7 +8,7 @@
 
 namespace SpiralFun {
 
-bool VideoEncoder::open(const QString &fileName, int width, int height, int fps)
+bool VideoEncoder::open(const QString &fileName, int width, int height, int fps, int bitsPerFrame)
 {
 #if defined(Q_OS_ANDROID)
     Q_ASSERT(!mEncoder);
@@ -16,9 +16,10 @@ bool VideoEncoder::open(const QString &fileName, int width, int height, int fps)
     mHeight = height;
     auto jsFile = QJniObject::fromString(fileName);
     mEncoder = std::make_unique<QJniObject>("com/gmail/mfnboer/QVideoEncoder");
-    const jboolean result = mEncoder->callMethod<jboolean>("init", "(Ljava/lang/String;III)Z",
+    const jboolean result = mEncoder->callMethod<jboolean>("init", "(Ljava/lang/String;IIII)Z",
                                                            jsFile.object<jstring>(),
-                                                           (jint)width, (jint)height, (jint)fps);
+                                                           (jint)width, (jint)height, (jint)fps,
+                                                           (jint)fps * bitsPerFrame);
     return (bool)result;
 #else
     Q_UNUSED(fileName);
@@ -49,10 +50,11 @@ bool VideoEncoder::push(const QImage& frame, int, int)
 #if defined(Q_OS_ANDROID)
     Q_ASSERT(mWidth == frame.width());
     Q_ASSERT(mHeight == frame.height());
-    int size = frame.width() * frame.height() * 4;
-    auto jsFrame = mEnv->NewByteArray(size);
+    QJniEnvironment env;
+    const int size = frame.width() * frame.height() * 4;
+    auto jsFrame = env->NewByteArray(size);
     const uint8_t* frameBits = frame.constBits();
-    mEnv->SetByteArrayRegion(jsFrame, 0, size, (jbyte*)frameBits);
+    env->SetByteArrayRegion(jsFrame, 0, size, (jbyte*)frameBits);
     mEncoder->callMethod<void>("addFrame", "([B)V", jsFrame);
     return true;
 #else
