@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.Surface;
 
 public class QVideoEncoder {
-
     private static final String LOGTAG = "spiralfun.QVideoEncoder";
     private static final String MIME_TYPE = "video/avc"; // H.264 Advanced Video Coding
     private static final int I_FRAME_INTERVAL = 5; // key frame interval, in seconds
@@ -102,8 +101,9 @@ public class QVideoEncoder {
         }
     }
 
-    public void addFrame(byte[] frameArray) {
-        drainEncoder(false);
+    public boolean addFrame(byte[] frameArray) {
+        if (!drainEncoder(false))
+            return false;
 
         ByteBuffer frameBuffer = ByteBuffer.wrap(frameArray);
         mFrameBitmap.copyPixelsFromBuffer(frameBuffer);
@@ -111,6 +111,8 @@ public class QVideoEncoder {
         Canvas canvas = mInputSurface.lockCanvas(null);
         canvas.drawBitmap(mFrameBitmap, 0, 0, null);
         mInputSurface.unlockCanvasAndPost(canvas);
+
+        return true;
     }
 
     /**
@@ -122,7 +124,7 @@ public class QVideoEncoder {
      * Taken from: https://bigflake.com/mediacodec/EncodeAndMuxTest.java.txt
      * Made some adaptations
      */
-    private void drainEncoder(boolean endOfStream) {
+    private boolean drainEncoder(boolean endOfStream) {
         final int TIMEOUT_USEC = 10000;
 
         if (endOfStream) {
@@ -146,7 +148,8 @@ public class QVideoEncoder {
             } else if (encoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                 // should happen before receiving buffers, and should only happen once
                 if (mMuxerStarted) {
-                    throw new RuntimeException("format changed twice");
+                    Log.e(LOGTAG, "format changed twice");
+                    return false;
                 }
                 MediaFormat newFormat = mEncoder.getOutputFormat();
                 Log.d(LOGTAG, "encoder output format changed: " + newFormat);
@@ -162,8 +165,8 @@ public class QVideoEncoder {
             } else {
                 ByteBuffer encodedData = encoderOutputBuffers[encoderStatus];
                 if (encodedData == null) {
-                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus +
-                            " was null");
+                    Log.e(LOGTAG, "encoderOutputBuffer " + encoderStatus + " was null");
+                    return false;
                 }
 
                 if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
@@ -175,7 +178,8 @@ public class QVideoEncoder {
 
                 if (mBufferInfo.size != 0) {
                     if (!mMuxerStarted) {
-                        throw new RuntimeException("muxer hasn't started");
+                        Log.e(LOGTAG, "muxer hasn't started");
+                        return false;
                     }
 
                     mBufferInfo.presentationTimeUs = mPresentationTimeUs;
@@ -200,5 +204,7 @@ public class QVideoEncoder {
                 }
             }
         }
+
+        return true;
     }
 }

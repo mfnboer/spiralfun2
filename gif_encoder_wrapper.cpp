@@ -34,8 +34,7 @@ bool GifEncoderWrapper::push(const QImage& frame, int x, int y)
 {
     Q_ASSERT(mGifEncoder);
     const uint8_t* frameBits = frame.constBits();
-    mGifEncoder->push(frameBits, x, y, frame.width(), frame.height(), mFrameDuration);
-    return true;
+    return mGifEncoder->push(frameBits, x, y, frame.width(), frame.height(), mFrameDuration);
 }
 
 }

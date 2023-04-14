@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #include "video_encoder.h"
+#include <QDebug>
 
 #if not defined(Q_OS_ANDROID)
 #include "exception.h"
@@ -26,7 +27,9 @@ bool VideoEncoder::open(const QString &fileName, int width, int height, int fps,
     Q_UNUSED(width);
     Q_UNUSED(height);
     Q_UNUSED(fps);
-    throw RuntimeException("Video encoding not supported!");
+    Q_UNUSED(bitsPerFrame);
+    qWarning() << "Video encoding not supported!";
+    return false;
 #endif
 }
 
@@ -55,8 +58,8 @@ bool VideoEncoder::push(const QImage& frame, int, int)
     auto jsFrame = env->NewByteArray(size);
     const uint8_t* frameBits = frame.constBits();
     env->SetByteArrayRegion(jsFrame, 0, size, (jbyte*)frameBits);
-    mEncoder->callMethod<void>("addFrame", "([B)V", jsFrame);
-    return true;
+    auto added = mEncoder->callMethod<jboolean>("addFrame", "([B)Z", jsFrame);
+    return (bool)added;
 #else
     Q_UNUSED(frame);
     throw RuntimeException("Video encoding not supported!");

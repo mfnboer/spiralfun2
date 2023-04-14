@@ -1,3 +1,7 @@
+3.1
+---
+* Record animations to video (MP4).
+
 3.0
 ---
 * Create mutation sequence animations.
