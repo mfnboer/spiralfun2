@@ -318,9 +318,12 @@ void SpiralScene::playSequence(const QVariant& mutations, int sequenceLength, bo
     }
 
     connect(mMutationSequence.get(), &MutationSequence::sequenceFramePlaying, this, [this]{ emit sequenceFrameChanged(); });
-    connect(mMutationSequence.get(), &MutationSequence::sequenceFinished, this, [this]{
+    connect(mMutationSequence.get(), &MutationSequence::sequenceFinished, this, [this](bool success){
             setPlayState(DONE_PLAYING);
             mMutationSequence = nullptr;
+
+            if (!success)
+                emit message("Failed to play sequence");
         });
 
     mMutationSequence->play(saveAs);
@@ -345,8 +348,15 @@ void SpiralScene::doPlay(std::unique_ptr<Recorder> recorder)
 
             if (mPlayState == RECORDING)
             {
-                const QString fileName = mPlayer->getFileName().split('/').last();
-                emit statusUpdate(QString("Recording saved: %1").arg(fileName));
+                if (stats.mRecordingFailed)
+                {
+                    emit message("Recording failed");
+                }
+                else
+                {
+                    const QString fileName = mPlayer->getFileName().split('/').last();
+                    emit statusUpdate(QString("Recording saved: %1").arg(fileName));
+                }
             }
 
             if (mPlayState == PLAYING_SEQUENCE)
@@ -378,6 +388,12 @@ void SpiralScene::doPlay(std::unique_ptr<Recorder> recorder)
 
 void SpiralScene::showSpiralStats()
 {
+    if (mStats.mPlayerStats.mCycles == 0)
+    {
+        emit message("No stats available");
+        return;
+    }
+
     const QString statMsg = QString(
         "| Statistic      | Value |\n"
         "| :------------- | ----: |\n"

@@ -8,6 +8,8 @@
 
 namespace SpiralFun {
 
+using namespace std::chrono_literals;
+
 class Player : public QObject
 {
     Q_OBJECT
@@ -15,11 +17,13 @@ class Player : public QObject
 public:
     struct Stats
     {
-        int mCycles;
-        std::chrono::milliseconds mPlayTime;
+        int mCycles = 0;
+        std::chrono::milliseconds mPlayTime = 0ms;
+        bool mRecordingFailed = false;
     };
 
     explicit Player(const CircleList &circles);
+    ~Player();
 
     bool play(std::unique_ptr<Recorder> recorder = nullptr);
     void playAll();
@@ -38,11 +42,12 @@ private:
     void advanceCircles(qreal angle);
     void advanceCircle(unsigned index, qreal angle);
     void forceDraw();
+    void recordingFailed();
     void finishPlaying();
     bool setupRecording();
     void resetRecordingRect();
     void updateRecordingRect();
-    void record();
+    bool record();
 
     const CircleList& mCircles;
     QTimer mPlayTimer;

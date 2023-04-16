@@ -34,7 +34,7 @@ public:
     bool startRecording(FrameRate frameRate, const QString& baseNameSuffix = "");
     void stopRecording(bool scanMediaFile);
 
-    using FrameAddedCallback = std::function<void()>;
+    using FrameAddedCallback = std::function<void(bool frameAdded)>;
     bool addFrame(const FrameAddedCallback& frameAddedCallback);
     bool addFrame(const QRectF& recordingRect, const FrameAddedCallback& frameAddedCallback);
     static int frameRateToFps(FrameRate frameRate);
@@ -53,6 +53,7 @@ private:
     int mBitsPerFrame = 80000;
     bool mRecording = false;
     std::unique_ptr<QImage> mFrame;
+    bool mLastFrameAdded = false;
     int mFrameNumber = 0;
     QRect mFullFrameRect;
     QPoint mFramePosition;

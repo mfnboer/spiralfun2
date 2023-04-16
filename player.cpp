@@ -17,6 +17,11 @@ Player::Player(const CircleList &circles) :
     QObject::connect(&mSceneRefreshTimer, &QTimer::timeout, this, [this]{ emit refreshScene(); });
 }
 
+Player::~Player()
+{
+    stopTimers();
+}
+
 bool Player::play(std::unique_ptr<Recorder> recorder)
 {
     for (auto& circle : mCircles)
@@ -76,8 +81,20 @@ void Player::advance()
         }
 
         if (mRecording)
-            record();
+        {
+            if (!record())
+                recordingFailed();
+        }
     }
+}
+
+void Player::recordingFailed()
+{
+    stopTimers();
+    Stats stats;
+    stats.mRecordingFailed = true;
+    emit done(stats);
+    mRecorder = nullptr;
 }
 
 void Player::finishPlaying()
@@ -102,7 +119,10 @@ void Player::finishPlaying()
         // Record last frame
         updateRecordingRect();
 
-        const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this, stats]{
+        const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this, stats](bool frameAdded){
+            if (!frameAdded)
+                qWarning() << "Adding last frame failed";
+
             mRecorder->stopRecording(true);
                 emit done(stats);
             });
@@ -164,9 +184,8 @@ bool Player::setupRecording()
     mRecordingRect = mFullFrameRect;
     mRecordAngle = mRecordAngleThreshold;
     mRecording = true;
-    record();
 
-    return true;
+    return record();
 }
 
 void Player::resetRecordingRect()
@@ -179,25 +198,35 @@ void Player::updateRecordingRect()
     mRecordingRect |= mRecorder->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
-void Player::record()
+bool Player::record()
 {
     updateRecordingRect();
     mRecordAngle += mStepAngle;
 
     if (mRecordAngle < mRecordAngleThreshold)
-        return;
+        return true;
 
     mRecordAngle = 0.0;
-    const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this]{ mPlayTimer.start(); });
+    const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this](bool frameAdded){
+        if (!frameAdded)
+        {
+            qWarning() << "Adding last frame failed";
+            recordingFailed();
+            return;
+        }
+
+        mPlayTimer.start();
+    });
 
     if (!frameAdded)
     {
         qDebug() << "Could not add frame";
-        return;
+        return false;
     }
 
     resetRecordingRect();
     mPlayTimer.stop();
+    return true;
 }
 
 }

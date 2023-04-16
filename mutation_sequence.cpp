@@ -109,7 +109,7 @@ void MutationSequence::play(SaveAs saveAs)
 
     if (!preparePlay())
     {
-        emit sequenceFinished();
+        emit sequenceFinished(false);
         return;
     }
 
@@ -146,7 +146,7 @@ void MutationSequence::playNextFrame()
             mRecorder->stopRecording(true);
 
         restoreCircleSettings();
-        emit sequenceFinished();
+        emit sequenceFinished(true);
     }
 }
 
@@ -181,7 +181,17 @@ void MutationSequence::postFrameProcessing()
         const auto currentRect = mSequencePlayer->getSceneRect().adjusted(-2, -2, 2, 2);
         const auto rect = mRecorder->sceneRectToRecordingRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
         mPreviousFrameRect = currentRect;
-        mRecorder->addFrame(rect, [this]{ playNextFrame(); });
+        mRecorder->addFrame(rect, [this](bool frameAdded){
+            if (!frameAdded)
+            {
+                qWarning() << "Failed to add frame";
+                restoreCircleSettings();
+                emit sequenceFinished(false);
+                return;
+            }
+
+            playNextFrame();
+        });
         break; }
     }
 }

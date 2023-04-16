@@ -55,7 +55,7 @@ public:
 
 signals:
     void sequenceFramePlaying(int frame);
-    void sequenceFinished();
+    void sequenceFinished(bool success);
 
 private:
     struct CircleTraits

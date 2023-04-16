@@ -117,7 +117,9 @@ bool Recorder::addFrame(const QRectF& recordingRect, const FrameAddedCallback& f
     const bool grabbed = mSceneGrabber->grabScene(frameRect,
         [this, frameAddedCallback](QImage&& img){
             mFrame = std::make_unique<QImage>(std::forward<QImage>(img));
-            runRecordFrameThread([frameAddedCallback]{ if (frameAddedCallback) frameAddedCallback(); });
+            runRecordFrameThread([frameAddedCallback](bool added){
+                if (frameAddedCallback) frameAddedCallback(added);
+            });
         });
 
     if (!grabbed)
@@ -159,14 +161,17 @@ void Recorder::recordFrame()
 {
     Q_ASSERT(mEncoder);
     Q_ASSERT(mFrame);
-    mEncoder->push(*mFrame, mFramePosition.x(), mFramePosition.y());
+    mLastFrameAdded = mEncoder->push(*mFrame, mFramePosition.x(), mFramePosition.y());
 }
 
-void Recorder::runRecordFrameThread(const std::function<void()>& whenFinished)
+void Recorder::runRecordFrameThread(const FrameAddedCallback& whenFinished)
 {
+    mLastFrameAdded = false;
     QThread* thread = QThread::create([this]{ recordFrame(); });
     mRecordingThread.reset(thread);
-    QObject::connect(thread, &QThread::finished, this, whenFinished, Qt::SingleShotConnection);
+    QObject::connect(thread, &QThread::finished, this,
+        [this, whenFinished]{ whenFinished(mLastFrameAdded); },
+        Qt::SingleShotConnection);
     mRecordingThread->start();
 }
 
