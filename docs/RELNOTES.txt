@@ -1,6 +1,7 @@
 3.1
 ---
 * Record animations to video (MP4).
+* Fix line width bug.
 
 3.0
 ---
