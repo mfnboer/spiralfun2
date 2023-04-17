@@ -132,7 +132,7 @@ private:
     void handleReceivedAndroidIntent(const QString& uri);
     void setPlayState(PlayState state);
     void setShareMode(ShareMode shareMode);
-    QSGNode* createLineNode(const Line& line);
+    QSGNode* createLineNode(Line& line);
     void updateSceneRect(const QPointF& p);
     void doPlay(std::unique_ptr<Recorder> recorder);
     void shareImage();

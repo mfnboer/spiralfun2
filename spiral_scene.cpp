@@ -9,7 +9,6 @@
 #include <QFile>
 #include <QQmlEngine>
 #include <QQuickItemGrabResult>
-#include <QSGFlatColorMaterial>
 #include <QSGNode>
 
 using namespace std::chrono_literals;
@@ -605,7 +604,7 @@ QSGNode* SpiralScene::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     return sceneRoot;
 }
 
-QSGNode* SpiralScene::createLineNode(const Line& line)
+QSGNode* SpiralScene::createLineNode(Line& line)
 {
     auto* node = new QSGGeometryNode;
     auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), line.mLinePoints.size());
@@ -613,11 +612,7 @@ QSGNode* SpiralScene::createLineNode(const Line& line)
     geometry->setDrawingMode(QSGGeometry::DrawLineStrip);
     node->setGeometry(geometry);
     node->setFlag(QSGNode::OwnsGeometry);
-    auto* material = new QSGFlatColorMaterial;
-    material->setColor(line.mColor);
-    material->setFlag(QSGMaterial::Blending);
-    node->setMaterial(material);
-    node->setFlag(QSGNode::OwnsMaterial);
+    line.setNodeMaterial(node);
 
     auto* vertices = geometry->vertexDataAsPoint2D();
     for (int unsigned i = 0; i < line.mLinePoints.size(); ++i)
