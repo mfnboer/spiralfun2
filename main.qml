@@ -78,8 +78,10 @@ ApplicationWindow {
                     switch (scene.shareMode) {
                     case SpiralScene.SHARE_PIC:
                         return "share picture";
-                    case SpiralScene.SHARE_VID:
+                    case SpiralScene.SHARE_GIF:
                         return "share gif";
+                    case SpiralScene.SHARE_VIDEO:
+                        return "share video";
                     case SpiralScene.SHARE_NONE:
                         return "";
                     }
@@ -165,8 +167,13 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Record GIF"
-                    enabled: scene.donePlaying() && scene.shareMode === SpiralScene.SHARE_PIC
-                    onTriggered: scene.record()
+                    enabled: scene.donePlaying()
+                    onTriggered: scene.record(Recorder.FMT_GIF)
+                }
+                MenuItem {
+                    text: "Record Video (MP4)"
+                    enabled: scene.donePlaying()
+                    onTriggered: scene.record(Recorder.FMT_VIDEO)
                 }
                 MenuItem {
                     text: "Play mutation sequence"

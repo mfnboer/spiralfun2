@@ -12,7 +12,7 @@ QString getPublicSpiralConfigPath();
 QString getSpiralConfigPath();
 QString createPictureFileName(const QString& baseNameSuffix = "");
 void scanMediaFile(const QString& fileName);
-void sharePicture(const QString& contentUri, const QString& configAppUri, const QString& mimeType);
+void shareMedia(const QString& contentUri, const QString& configAppUri, const QString& mimeType);
 void handlePendingIntent();
 void setKeepScreenOn(bool keepOn);
 

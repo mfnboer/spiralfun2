@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(spiralfun VERSION 3.0 LANGUAGES CXX)
-set(VERSION_CODE 5)
+project(spiralfun VERSION 3.1 LANGUAGES CXX)
+set(VERSION_CODE 6)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -20,8 +20,8 @@ set(PROJECT_SOURCES
         circle.h
         circle.cpp
         exception.h
-        gif_recorder.h
-        gif_recorder.cpp
+        gif_encoder_wrapper.h
+        gif_encoder_wrapper.cpp
         jni_callback.h
         jni_callback.cpp
         main.cpp
@@ -31,6 +31,8 @@ set(PROJECT_SOURCES
         mutation_sequence.cpp
         player.h
         player.cpp
+        recorder.h
+        recorder.cpp
         scene_grabber.h
         scene_grabber.cpp
         scoped_line.h
@@ -41,6 +43,9 @@ set(PROJECT_SOURCES
         spiral_scene.cpp
         utils.h
         utils.cpp
+        video_encoder.h
+        video_encoder.cpp
+        video_encoder_interface.h
 )
 
 set_source_files_properties(
@@ -70,6 +75,7 @@ qt_add_qml_module(spiralfun
     RESOURCES
         "android/src/com/gmail/mfnboer/QAndroidUtils.java"
         "android/src/com/gmail/mfnboer/QSpiralFunActivity.java"
+        "android/src/com/gmail/mfnboer/QVideoEncoder.java"
         "icons/spiralfun/20x20/arrow_downward.png"
         "icons/spiralfun/20x20/arrow_upward.png"
         "icons/spiralfun/20x20/delete.png"

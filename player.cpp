@@ -17,7 +17,12 @@ Player::Player(const CircleList &circles) :
     QObject::connect(&mSceneRefreshTimer, &QTimer::timeout, this, [this]{ emit refreshScene(); });
 }
 
-bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
+Player::~Player()
+{
+    stopTimers();
+}
+
+bool Player::play(std::unique_ptr<Recorder> recorder)
 {
     for (auto& circle : mCircles)
         circle->preparePlay();
@@ -25,14 +30,10 @@ bool Player::play(std::unique_ptr<SceneGrabber> sceneGrabber)
     mStepsPerInterval = 1;
     mStartTime = QTime::currentTime().msecsSinceStartOfDay();
     mCycles = 0;
-    mSceneGrabber = std::move(sceneGrabber);
-
-    if (mSceneGrabber)
-        mGifRecorder = std::make_unique<GifRecorder>(mSceneGrabber.get());
-
+    mRecorder = std::move(recorder);
     startTimers();
 
-    if (mGifRecorder)
+    if (mRecorder)
     {
         if (!setupRecording())
             return false;
@@ -80,8 +81,20 @@ void Player::advance()
         }
 
         if (mRecording)
-            record();
+        {
+            if (!record())
+                recordingFailed();
+        }
     }
+}
+
+void Player::recordingFailed()
+{
+    stopTimers();
+    Stats stats;
+    stats.mRecordingFailed = true;
+    emit done(stats);
+    mRecorder = nullptr;
 }
 
 void Player::finishPlaying()
@@ -106,15 +119,18 @@ void Player::finishPlaying()
         // Record last frame
         updateRecordingRect();
 
-        const bool frameAdded = mGifRecorder->addFrame(mRecordingRect, [this, stats]{
-                mGifRecorder->stopRecording(true);
+        const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this, stats](bool frameAdded){
+            if (!frameAdded)
+                qWarning() << "Adding last frame failed";
+
+            mRecorder->stopRecording(true);
                 emit done(stats);
             });
 
         if (!frameAdded)
         {
             qWarning() << "Failed to add last frame";
-            mGifRecorder->stopRecording(true);
+            mRecorder->stopRecording(true);
             emit done(stats);
         }
     }
@@ -158,50 +174,59 @@ void Player::forceDraw()
 
 bool Player::setupRecording()
 {
-    Q_ASSERT(mGifRecorder);
-    if (!mGifRecorder->startRecording(GifRecorder::FPS_25))
+    Q_ASSERT(mRecorder);
+    if (!mRecorder->startRecording(Recorder::FPS_25))
         return false;
 
-    mFullFrameRect = mGifRecorder->getFullFrameRect();
+    mFullFrameRect = mRecorder->getFullFrameRect();
 
     // Capture one full frame, next frames will be subframes where changes happened.
     mRecordingRect = mFullFrameRect;
     mRecordAngle = mRecordAngleThreshold;
     mRecording = true;
-    record();
 
-    return true;
+    return record();
 }
 
 void Player::resetRecordingRect()
 {
-    mRecordingRect = mSceneGrabber->calcBoundingRectangle(mCircles) & mFullFrameRect;
+    mRecordingRect = mRecorder->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
 void Player::updateRecordingRect()
 {
-    mRecordingRect |= mSceneGrabber->calcBoundingRectangle(mCircles) & mFullFrameRect;
+    mRecordingRect |= mRecorder->calcBoundingRectangle(mCircles) & mFullFrameRect;
 }
 
-void Player::record()
+bool Player::record()
 {
     updateRecordingRect();
     mRecordAngle += mStepAngle;
 
     if (mRecordAngle < mRecordAngleThreshold)
-        return;
+        return true;
 
     mRecordAngle = 0.0;
-    const bool frameAdded = mGifRecorder->addFrame(mRecordingRect, [this]{ mPlayTimer.start(); });
+    const bool frameAdded = mRecorder->addFrame(mRecordingRect, [this](bool frameAdded){
+        if (!frameAdded)
+        {
+            qWarning() << "Adding last frame failed";
+            recordingFailed();
+            return;
+        }
+
+        mPlayTimer.start();
+    });
 
     if (!frameAdded)
     {
         qDebug() << "Could not add frame";
-        return;
+        return false;
     }
 
     resetRecordingRect();
     mPlayTimer.stop();
+    return true;
 }
 
 }

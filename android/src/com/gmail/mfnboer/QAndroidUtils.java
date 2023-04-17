@@ -82,7 +82,7 @@ public class QAndroidUtils
             );
     }
 
-    public static void sharePicture(String uriString, String configAppUri, String mimeType) {
+    public static void shareMedia(String uriString, String configAppUri, String mimeType) {
         if (QtNative.activity() == null)
             return;
 

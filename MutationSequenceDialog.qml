@@ -12,7 +12,7 @@ Dialog {
     property list<string> circleColorList
     property int saveAs: MutationSequence.SAVE_AS_NONE
     property bool saveInNewAlbum: true
-    property int frameRate: GifRecorder.FPS_10
+    property int frameRate: Recorder.FPS_10
 
     id: mutationSequenceDialog
     standardButtons: Dialog.Cancel | Dialog.Ok
@@ -167,22 +167,22 @@ Dialog {
         }
         ComboBox {
             id: saveAsComboBox
-            model: ["none (just play)", "Picture per frame", "GIF"]
+            model: ["none (just play)", "Picture per frame", "GIF", "Video (MP4)"]
             implicitContentWidthPolicy: ComboBox.WidestText
             currentIndex: saveAs
             onActivated: saveAs = currentIndex
         }
 
         Label {
-            text: "GIF frames per second:"
-            enabled: saveAs === MutationSequence.SAVE_AS_GIF
+            text: "Frames per second:"
+            enabled: saveAsIsVideoType()
         }
         ComboBox {
             id: frameRateComboBox
             model: ["25 (video)", "10 (slow video)", "4 (fast slide show)", "2 (slide show)", "1 (slow slide show)"]
             implicitContentWidthPolicy: ComboBox.WidestText
             currentIndex: frameRate
-            enabled: saveAs === MutationSequence.SAVE_AS_GIF
+            enabled: saveAsIsVideoType()
             onActivated: frameRate = currentIndex
         }
 
@@ -194,6 +194,10 @@ Dialog {
             onCheckedChanged: saveInNewAlbum = checked
             Layout.columnSpan: 2
         }
+    }
+
+    function saveAsIsVideoType() {
+        return saveAs === MutationSequence.SAVE_AS_GIF || saveAs === MutationSequence.SAVE_AS_VIDEO
     }
 
     function addMutation() {

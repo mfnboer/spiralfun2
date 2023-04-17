@@ -3,10 +3,12 @@
 #pragma once
 
 #include "circle.h"
-#include "gif_recorder.h"
+#include "recorder.h"
 #include <QTimer>
 
 namespace SpiralFun {
+
+using namespace std::chrono_literals;
 
 class Player : public QObject
 {
@@ -15,16 +17,18 @@ class Player : public QObject
 public:
     struct Stats
     {
-        int mCycles;
-        std::chrono::milliseconds mPlayTime;
+        int mCycles = 0;
+        std::chrono::milliseconds mPlayTime = 0ms;
+        bool mRecordingFailed = false;
     };
 
     explicit Player(const CircleList &circles);
+    ~Player();
 
-    bool play(std::unique_ptr<SceneGrabber> sceneGrabber = nullptr);
+    bool play(std::unique_ptr<Recorder> recorder = nullptr);
     void playAll();
     qreal getAngle() const { return mAngle; }
-    const QString& getGifFileName() const { return mGifRecorder->getFileName(); }
+    const QString& getFileName() const { return mRecorder->getFileName(); }
 
 signals:
     void done(Player::Stats stats);
@@ -38,11 +42,12 @@ private:
     void advanceCircles(qreal angle);
     void advanceCircle(unsigned index, qreal angle);
     void forceDraw();
+    void recordingFailed();
     void finishPlaying();
     bool setupRecording();
     void resetRecordingRect();
     void updateRecordingRect();
-    void record();
+    bool record();
 
     const CircleList& mCircles;
     QTimer mPlayTimer;
@@ -56,8 +61,7 @@ private:
     int mCycles;
     QRect mFullFrameRect;
     QRectF mRecordingRect;
-    std::unique_ptr<SceneGrabber> mSceneGrabber;
-    std::unique_ptr<GifRecorder> mGifRecorder;
+    std::unique_ptr<Recorder> mRecorder;
     bool mRecording = false;
 };
 

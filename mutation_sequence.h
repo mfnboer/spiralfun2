@@ -3,7 +3,7 @@
 #pragma once
 
 #include "circle.h"
-#include "gif_recorder.h"
+#include "recorder.h"
 #include "mutation.h"
 #include "scene_grabber.h"
 #include <QVariant>
@@ -33,8 +33,10 @@ class MutationSequence : public QObject
     QML_ELEMENT
 
 public:
-    enum SaveAs { SAVE_AS_NONE, SAVE_AS_PICS, SAVE_AS_GIF };
+    enum SaveAs { SAVE_AS_NONE, SAVE_AS_PICS, SAVE_AS_GIF, SAVE_AS_VIDEO };
     Q_ENUM(SaveAs);
+
+    static bool isVideoType(SaveAs saveAs);
 
     MutationSequence() = default; // Needed for QML_ELEMENT
     MutationSequence(const CircleList* circles, ISequencePlayer* sequencePlayer);
@@ -46,14 +48,14 @@ public:
     void setAddReverseSequence(int addReverse) { mAddReverseSequence = addReverse; }
     void setMutations(const QVariant& mutationsQmlList);
     void setCreateNewPicturesFolder(bool create) { mCreateNewPictureFolder = create; }
-    void setFrameRate(GifRecorder::FrameRate frameRate) { mFrameRate = frameRate; }
+    void setFrameRate(Recorder::FrameRate frameRate) { mFrameRate = frameRate; }
     int getCurrentSequenceFrame() const { return mCurrentSequenceFrame; }
     int getTotalSequenceLength() const { return mAddReverseSequence ? mSequenceLength * 2 - 1 : mSequenceLength; }
     void play(SaveAs saveAs);
 
 signals:
     void sequenceFramePlaying(int frame);
-    void sequenceFinished();
+    void sequenceFinished(bool success);
 
 private:
     struct CircleTraits
@@ -69,7 +71,7 @@ private:
     void playMutation(unsigned index, bool reverse = false);
     void postFrameProcessing();
     bool preparePlay();
-    bool setupGifRecording();
+    bool setupRecording(Recorder::Format format);
 
     int mSequenceLength = 10;
     int mCurrentSequenceFrame = 0;
@@ -77,13 +79,12 @@ private:
     std::vector<CircleTraits> mOrigCircleSettings;
     SaveAs mSaveAs = SAVE_AS_NONE;
     bool mCreateNewPictureFolder = true;
-    GifRecorder::FrameRate mFrameRate = GifRecorder::FPS_10;
+    Recorder::FrameRate mFrameRate = Recorder::FPS_10;
     bool mAddReverseSequence = false;
     QString mPicturesSubDir;
     const CircleList* mCircles = nullptr;
     ISequencePlayer* mSequencePlayer = nullptr;
-    std::unique_ptr<SceneGrabber> mSceneGrabber;
-    std::unique_ptr<GifRecorder> mGifRecorder;
+    std::unique_ptr<Recorder> mRecorder;
     QRectF mMaxSceneRect;
     QRectF mPreviousFrameRect;
 };

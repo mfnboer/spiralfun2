@@ -3,19 +3,32 @@
 #pragma once
 #include <QColor>
 #include <QPointF>
+#include <QSGFlatColorMaterial>
 #include <QSGNode>
 #include <functional>
 #include <vector>
 
 namespace SpiralFun {
 
+class LineMaterial : public QSGFlatColorMaterial
+{
+public:
+    QSGMaterialType* type() const override { return &const_cast<QSGMaterialType&>(mType); }
+
+private:
+    QSGMaterialType mType;
+};
+
 struct Line
 {
       std::vector<QPointF> mLinePoints;
       QColor mColor;
       int mLineWidth = 1;
+      LineMaterial* mMaterial = nullptr;
       QSGNode* mRoot = nullptr;
+
       void addPoint(const QPointF& p) { mLinePoints.push_back(p); }
+      void setNodeMaterial(QSGGeometryNode* node);
 };
 
 class ScopedLine

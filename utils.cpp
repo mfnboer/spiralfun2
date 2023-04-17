@@ -142,14 +142,14 @@ void scanMediaFile(const QString& fileName)
 #endif
 }
 
-void sharePicture(const QString& contentUri, const QString& configAppUri, const QString& mimeType)
+void shareMedia(const QString& contentUri, const QString& configAppUri, const QString& mimeType)
 {
 #if defined(Q_OS_ANDROID)
     auto jsContentUri = QJniObject::fromString(contentUri);
     auto jsConfigAppUri = QJniObject::fromString(configAppUri);
     auto jsMimeType = QJniObject::fromString(mimeType);
     QJniObject::callStaticMethod<void>("com/gmail/mfnboer/QAndroidUtils",
-                                       "sharePicture",
+                                       "shareMedia",
                                        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
                                        jsContentUri.object<jstring>(),
                                        jsConfigAppUri.object<jstring>(),

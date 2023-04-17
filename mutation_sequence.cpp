@@ -6,6 +6,11 @@
 
 namespace SpiralFun {
 
+bool MutationSequence::isVideoType(SaveAs saveAs)
+{
+    return saveAs == SAVE_AS_GIF || saveAs == SAVE_AS_VIDEO;
+}
+
 MutationSequence::MutationSequence(const CircleList* circles, ISequencePlayer* sequencePlayer) :
     QObject(),
     mCircles(circles),
@@ -104,7 +109,7 @@ void MutationSequence::play(SaveAs saveAs)
 
     if (!preparePlay())
     {
-        emit sequenceFinished();
+        emit sequenceFinished(false);
         return;
     }
 
@@ -137,11 +142,11 @@ void MutationSequence::playNextFrame()
     {
         qDebug() << "Finished playing mutation sequence";
 
-        if (mSaveAs == SAVE_AS_GIF)
-            mGifRecorder->stopRecording(true);
+        if (isVideoType(mSaveAs))
+            mRecorder->stopRecording(true);
 
         restoreCircleSettings();
-        emit sequenceFinished();
+        emit sequenceFinished(true);
     }
 }
 
@@ -169,13 +174,24 @@ void MutationSequence::postFrameProcessing()
         const QString suffix = QString("_MS%1").arg(mCurrentSequenceFrame + 1, 3, 10, QChar('0'));
         mSequencePlayer->saveImage(mMaxSceneRect, mPicturesSubDir, suffix, [this](bool){ playNextFrame(); });
         break; }
-    case SAVE_AS_GIF: {
+    case SAVE_AS_GIF:
+    case SAVE_AS_VIDEO: {
         Q_ASSERT(mSequencePlayer);
         // Enlarge the rect by 2 pixels on each side to avoid rounding error artifacts
         const auto currentRect = mSequencePlayer->getSceneRect().adjusted(-2, -2, 2, 2);
-        const auto rect = mSceneGrabber->getGrabRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
+        const auto rect = mRecorder->sceneRectToRecordingRect((mPreviousFrameRect | currentRect) & mMaxSceneRect);
         mPreviousFrameRect = currentRect;
-        mGifRecorder->addFrame(rect, [this]{ playNextFrame(); });
+        mRecorder->addFrame(rect, [this](bool frameAdded){
+            if (!frameAdded)
+            {
+                qWarning() << "Failed to add frame";
+                restoreCircleSettings();
+                emit sequenceFinished(false);
+                return;
+            }
+
+            playNextFrame();
+        });
         break; }
     }
 }
@@ -192,9 +208,15 @@ bool MutationSequence::preparePlay()
 
     calcMaxSceneRect();
 
-    if (mSaveAs == SAVE_AS_GIF && !setupGifRecording())
+    if (mSaveAs == SAVE_AS_GIF && !setupRecording(Recorder::FMT_GIF))
     {
         qDebug() << "Failed to setup GIF recording";
+        return false;
+    }
+
+    if (mSaveAs == SAVE_AS_VIDEO && !setupRecording(Recorder::FMT_VIDEO))
+    {
+        qDebug() << "Failed to setup Video recording";
         return false;
     }
 
@@ -211,14 +233,15 @@ bool MutationSequence::preparePlay()
     return true;
 }
 
-bool MutationSequence::setupGifRecording()
+bool MutationSequence::setupRecording(Recorder::Format format)
 {
     Q_ASSERT(mSequencePlayer);
-    mSceneGrabber = mSequencePlayer->createSceneGrabber(mMaxSceneRect);
-    mGifRecorder = std::make_unique<GifRecorder>(mSceneGrabber.get());
+    auto sceneGrabber = mSequencePlayer->createSceneGrabber(mMaxSceneRect);
+    mRecorder = Recorder::createRecorder(format, std::move(sceneGrabber));
+    mRecorder->setBitsPerFrame(6'000'000 / Recorder::frameRateToFps(mFrameRate));
     mPreviousFrameRect = mMaxSceneRect;
 
-    return mGifRecorder->startRecording(mFrameRate, "_MS");
+    return mRecorder->startRecording(mFrameRate, "_MS");
 }
 
 }
