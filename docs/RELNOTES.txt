@@ -1,3 +1,7 @@
+3.2
+---
+* Update Android target API to 33
+
 3.1
 ---
 * Record animations to video (MP4).
