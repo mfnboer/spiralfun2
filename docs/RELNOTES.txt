@@ -3,6 +3,7 @@
 * Do not close the app when pressing the Android back button.
 * Black Android status bar.
 * Backup config files to Google Drive (if enabled)
+* Android storage permissions for Android 12 and higher.
 
 3.2
 ---

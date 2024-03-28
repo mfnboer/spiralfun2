@@ -7,6 +7,7 @@
 
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
+#include <QOperatingSystemVersion>
 #include <QtCore/private/qandroidextras_p.h>
 #else
 #include "jni_callback.h"
@@ -20,6 +21,13 @@ bool checkStoragePermission()
 {
 #if defined(Q_OS_ANDROID)
     static const QString WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
+
+    const auto osVersion = QOperatingSystemVersion::current();
+
+    if (osVersion >= QOperatingSystemVersion::Android11)
+        return true;
+
+
     auto checkResult = QtAndroidPrivate::checkPermission(WRITE_EXTERNAL_STORAGE);
     if (checkResult.result() != QtAndroidPrivate::Authorized)
     {
