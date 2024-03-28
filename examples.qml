@@ -21,24 +21,28 @@ Dialog {
                 display: AbstractButton.IconOnly
                 icon.source: "/images/example1.png"
                 icon { width: 150; height: 150; color: "transparent" }
+                flat: true
                 onClicked: { examplesDialog.selected = icon.source; accept(); }
             }
             Button {
                 display: AbstractButton.IconOnly
                 icon.source: "/images/example2.png"
                 icon { width: 150; height: 150; color: "transparent" }
+                flat: true
                 onClicked: { examplesDialog.selected = icon.source; accept(); }
             }
             Button {
                 display: AbstractButton.IconOnly
                 icon.source: "/images/example3.png"
                 icon { width: 150; height: 150; color: "transparent" }
+                flat: true
                 onClicked: { examplesDialog.selected = icon.source; accept(); }
             }
             Button {
                 display: AbstractButton.IconOnly
                 icon.source: "/images/example4.png"
                 icon { width: 150; height: 150; color: "transparent" }
+                flat: true
                 onClicked: { examplesDialog.selected = icon.source; accept(); }
             }
         }

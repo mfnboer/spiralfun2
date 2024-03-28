@@ -2,6 +2,7 @@
 ---
 * Do not close the app when pressing the Android back button.
 * Black Android status bar.
+* Backup config files to Google Drive (if enabled)
 
 3.2
 ---
