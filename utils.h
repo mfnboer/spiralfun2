@@ -15,6 +15,7 @@ void scanMediaFile(const QString& fileName);
 void shareMedia(const QString& contentUri, const QString& configAppUri, const QString& mimeType);
 void handlePendingIntent();
 void setKeepScreenOn(bool keepOn);
+bool sendAppToBackground();
 
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize);
 

@@ -94,6 +94,7 @@ public:
     Q_INVOKABLE void deleteConfig(const QStringList& fileNameList);
     Q_INVOKABLE qreal getDevicePixelRatio() const { return window()->devicePixelRatio(); }
     Q_INVOKABLE QStringList getCircleColorList() const;
+    Q_INVOKABLE bool sendAppToBackground();
 
 signals:
     void maxDiameterChanged();

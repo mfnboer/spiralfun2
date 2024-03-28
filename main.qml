@@ -14,6 +14,15 @@ ApplicationWindow {
     visible: true
     title: "Spiral Fun"
 
+    onClosing: (event) => {
+        if (Qt.platform.os !== "android")
+            return
+
+        // This catches the back-button on Android
+        if (scene.sendAppToBackground())
+            event.accepted = false
+    }
+
     Popup {
         id: statusPopup
         width: parent.width

@@ -10,6 +10,7 @@ import java.lang.String;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -30,6 +31,11 @@ public class QSpiralFunActivity extends QtActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(LOGTAG, "onCreate");
+
+        Window window = this.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(Color.BLACK);
 
         Intent intent = getIntent();
         if (intent == null)
@@ -120,5 +126,11 @@ public class QSpiralFunActivity extends QtActivity {
                 }
             }
         });
+    }
+
+    // Avoid the app to close when the user presses the back button.
+    public void goToBack() {
+        Log.d(LOGTAG, "Moving task to back");
+        moveTaskToBack(true);
     }
 }

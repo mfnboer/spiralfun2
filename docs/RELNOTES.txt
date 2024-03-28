@@ -1,3 +1,8 @@
+3.3
+---
+* Do not close the app when pressing the Android back button.
+* Black Android status bar.
+
 3.2
 ---
 * Update Android target API to 33

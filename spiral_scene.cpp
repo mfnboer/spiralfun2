@@ -962,4 +962,9 @@ std::unique_ptr<SceneGrabber> SpiralScene::createSceneGrabber(const QRectF& rect
     return std::make_unique<SceneGrabber>(this, rect);
 }
 
+bool SpiralScene::sendAppToBackground()
+{
+    return Utils::sendAppToBackground();
+}
+
 }

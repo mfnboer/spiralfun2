@@ -190,6 +190,23 @@ void setKeepScreenOn(bool keepOn)
 #endif
 }
 
+bool sendAppToBackground()
+{
+#ifdef Q_OS_ANDROID
+    if (!QNativeInterface::QAndroidApplication::isActivityContext())
+    {
+        qWarning() << "Cannot find Android activity";
+        return false;
+    }
+
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    activity.callMethod<void>("goToBack", "()V");
+    return true;
+#else
+    return false;
+#endif
+}
+
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize)
 {
     const QSize sz = scaledImg.size();

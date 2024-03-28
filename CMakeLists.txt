@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(spiralfun VERSION 3.2 LANGUAGES CXX)
-set(VERSION_CODE 7)
+project(spiralfun VERSION 3.3 LANGUAGES CXX)
+set(VERSION_CODE 8)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 20)
