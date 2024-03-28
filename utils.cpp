@@ -27,7 +27,6 @@ bool checkStoragePermission()
     if (osVersion >= QOperatingSystemVersion::Android11)
         return true;
 
-
     auto checkResult = QtAndroidPrivate::checkPermission(WRITE_EXTERNAL_STORAGE);
     if (checkResult.result() != QtAndroidPrivate::Authorized)
     {
