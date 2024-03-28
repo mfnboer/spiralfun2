@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.1'
+        classpath 'com.android.tools.build:gradle:8.2.0'
     }
 }
 
@@ -74,6 +74,8 @@ android {
 
     defaultConfig {
         resConfig "en"
+	applicationId "com.gmail.mfnboer.spiralfun"
+	namespace "com.gmail.mfnboer.spiralfun"
         minSdkVersion qtMinSdkVersion
         targetSdkVersion qtTargetSdkVersion
         ndk.abiFilters = qtTargetAbiList.split(",")
