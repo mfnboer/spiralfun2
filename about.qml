@@ -15,6 +15,6 @@ Dialog {
               "<p>" +
               "Version: " + scene.VERSION +
               "<p>" +
-              "\u00A9 2023 Michel de Boer"
+              "\u00A9 2024 Michel de Boer"
     }
 }

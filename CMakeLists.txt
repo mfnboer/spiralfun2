@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(spiralfun VERSION 3.3 LANGUAGES CXX)
-set(VERSION_CODE 8)
+project(spiralfun VERSION 3.3.1 LANGUAGES CXX)
+set(VERSION_CODE 9)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -114,12 +114,13 @@ qt_add_qml_module(spiralfun
         "images/example3.png"
         "images/example4.png"
         "images/question_mark.png"
+        "images/kofi_button_blue.webp"
         "qtquickcontrols2.conf"
 )
 
 set_target_properties(spiralfun PROPERTIES
     QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
-    QT_ANDROID_TARGET_SDK_VERSION 33
+    QT_ANDROID_TARGET_SDK_VERSION 34
     QT_ANDROID_SDK_BUILD_TOOLS_REVISION 34.0.0
     QT_ANDROID_VERSION_NAME ${PROJECT_VERSION}
     QT_ANDROID_VERSION_CODE ${VERSION_CODE})

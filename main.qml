@@ -214,6 +214,32 @@ ApplicationWindow {
                     onTriggered: sceneMoreMenu.showWindow("about.qml")
                 }
 
+                Rectangle {
+                    width: parent.width
+                    height: kofiButton.y + kofiButton.height + 10
+                    color: "transparent"
+
+                    Image {
+                        id: kofiButton
+                        x: 15
+                        y: 20
+                        width: parent.width - 2 * x
+                        fillMode: Image.PreserveAspectFit
+                        source: "/images/kofi_button_blue.webp"
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: sceneMoreMenu.buyKofi()
+                        }
+                    }
+                }
+
+
+
+                function buyKofi() {
+                    Qt.openUrlExternally("https://ko-fi.com/michelbestaat")
+                }
+
                 function handleFileDialogAccepted(obj) {
                     if (obj.selected)
                         scene.loadConfig(obj.selected);
