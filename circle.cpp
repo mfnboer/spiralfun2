@@ -162,6 +162,7 @@ void Circle::drawTo(const QPointF& center, bool force)
         Q_ASSERT(*mSceneLine);
         mSceneLine->addPoint(center);
         mDrawPos = center;
+        mDrawnLength += line.length();
     }
 }
 
@@ -193,6 +194,8 @@ void Circle::paint(QPainter* painter)
 void Circle::preparePlay()
 {
     mSceneLine = {};
+    mDrawnLength = 0;
+
     if (mDraw)
         mSceneLine = mScene->addLine(this, mColor, mDraw, mCenter);
 }

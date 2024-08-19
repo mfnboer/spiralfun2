@@ -128,6 +128,17 @@ ApplicationWindow {
                 onClicked: scene.share()
             }
 
+            RoundButton {
+                id: mustButton
+                icon.name: scene.musicGeneration ? "music" : "music_off"
+                Material.background: "transparent"
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                enabled: scene.notPlaying()
+                visible: enabled
+                onClicked: musicDialog.show(scene)
+            }
+
             Label {
                 text: scene.isRecording() ? "RECORDING" : `MUTATION SEQUENCE (${scene.sequenceFrame}/${scene.sequenceLength})`
                 anchors.bottom: playProgressBar.top
@@ -411,6 +422,7 @@ ApplicationWindow {
             icon.name: scene.playStateIcon()
             Layout.fillWidth: true
             Layout.columnSpan: 2
+            Layout.rightMargin: 5
             onClicked: {
                 if (scene.playState === SpiralScene.NOT_PLAYING) {
                     scene.play();
@@ -428,10 +440,19 @@ ApplicationWindow {
     }
 
     MutationSequenceDialog {
-        id: mutationSequenceDialog;
+        id: mutationSequenceDialog
         onAccepted: {
             scene.playSequence(mutationList, sequenceLength, addReverseSequence, saveAs,
                                saveInNewAlbum, frameRate)
+        }
+    }
+
+    MusicDialog {
+        id: musicDialog
+        onAccepted: {
+            scene.musicGeneration = musicOn
+            scene.playingSpeed = speed
+            scene.toneDistance = toneDistance
         }
     }
 

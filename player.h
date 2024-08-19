@@ -3,6 +3,7 @@
 #pragma once
 
 #include "circle.h"
+#include "music_generator.h"
 #include "recorder.h"
 #include <QTimer>
 
@@ -22,7 +23,7 @@ public:
         bool mRecordingFailed = false;
     };
 
-    explicit Player(const CircleList &circles);
+    Player(const CircleList &circles, std::unique_ptr<MusicGenerator> musicGenerator);
     ~Player();
 
     bool play(std::unique_ptr<Recorder> recorder = nullptr);
@@ -63,6 +64,7 @@ private:
     QRectF mRecordingRect;
     std::unique_ptr<Recorder> mRecorder;
     bool mRecording = false;
+    std::unique_ptr<MusicGenerator> mMusicGenerator;
 };
 
 }

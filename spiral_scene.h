@@ -26,6 +26,10 @@ class SpiralScene : public QQuickItem, public ISequencePlayer
     Q_PROPERTY(int MAX_ROTATIONS MEMBER MAX_ROTATIONS CONSTANT)
     Q_PROPERTY(int MAX_DRAW MEMBER MAX_DRAW CONSTANT)
     Q_PROPERTY(int CFG_IMAGE_SIZE MEMBER CFG_IMAGE_SIZE CONSTANT)
+    Q_PROPERTY(int MIN_PLAYING_SPEED MEMBER MIN_PLAYING_SPEED CONSTANT)
+    Q_PROPERTY(int MAX_PLAYING_SPEED MEMBER MAX_PLAYING_SPEED CONSTANT)
+    Q_PROPERTY(int MIN_TONE_DISTANCE MEMBER MIN_TONE_DISTANCE CONSTANT)
+    Q_PROPERTY(int MAX_TONE_DISTANCE MEMBER MAX_TONE_DISTANCE CONSTANT)
     Q_PROPERTY(int numCircles READ getNumCircles WRITE setNumCircles NOTIFY numCirclesChanged)
     Q_PROPERTY(SpiralFun::Circle* currentCircle READ getCurrentCircle NOTIFY currentCircleChanged)
     Q_PROPERTY(int currentCircleIndex READ getCurrentCircleIndex NOTIFY currentCircleIndexChanged)
@@ -35,9 +39,14 @@ class SpiralScene : public QQuickItem, public ISequencePlayer
     Q_PROPERTY(int sequenceLength READ getSequenceLength NOTIFY sequenceLengthChanged)
     Q_PROPERTY(SpiralScene::ShareMode shareMode READ getShareMode NOTIFY shareModeChanged)
     Q_PROPERTY(bool sharingInProgress MEMBER mSharingInProgress NOTIFY sharingInProgressChanged)
+    Q_PROPERTY(bool musicGeneration READ getMusicGeneration WRITE setMusicGeneration NOTIFY musicGenerationChanged)
+    Q_PROPERTY(int playingSpeed READ getPlayingSpeed WRITE setPlayingSpeed NOTIFY playingSpeedChanged)
+    Q_PROPERTY(int toneDistance READ getToneDistance WRITE setToneDistance NOTIFY toneDistanceChanged)
     QML_ELEMENT
 
 public:
+    static int MAX_DIAMETER;
+
     enum PlayState { NOT_PLAYING, PLAYING, PLAYING_SEQUENCE, RECORDING, DONE_PLAYING };
     Q_ENUM(PlayState)
 
@@ -60,6 +69,12 @@ public:
     int getCurrentCircleIndex() const { return mCurrentIndex; }
     PlayState getPlayState() const { return mPlayState; }
     ShareMode getShareMode() const { return mShareMode; }
+    bool getMusicGeneration() const { return mMusicGeneration; }
+    void setMusicGeneration(bool musicGeneration);
+    int getPlayingSpeed() const { return mPlayingSpeed; }
+    void setPlayingSpeed(int playingSpeed);
+    int getToneDistance() const { return mToneDistance; }
+    void setToneDistance(int toneDistance);
     int getMaxDiameter() const override { return MAX_DIAMETER; }
     qreal getPlayAngle() const { return mPlayer ? mPlayer->getAngle() : 0.0; }
     int getSequenceFrame() const { return mMutationSequence ? mMutationSequence->getCurrentSequenceFrame() : 0; }
@@ -107,6 +122,9 @@ signals:
     void sequenceLengthChanged();
     void shareModeChanged();
     void sharingInProgressChanged();
+    void musicGenerationChanged();
+    void playingSpeedChanged();
+    void toneDistanceChanged();
     void message(const QString message);
     void statusUpdate(const QString message);
     void sequenceFramePlayed();
@@ -158,13 +176,19 @@ private:
     QString mShareMediaUri;
     std::unique_ptr<SceneGrabber> mSceneGrabber;
     std::unique_ptr<MutationSequence> mMutationSequence;
+    bool mMusicGeneration = false;
+    int mPlayingSpeed = MAX_PLAYING_SPEED;
+    int mToneDistance = 25;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;
-    int MAX_DIAMETER = 300;
     static constexpr int MAX_ROTATIONS = SpiralConfig::MAX_SPEED;
     static constexpr int MAX_DRAW = Circle::MAX_DRAW;
     static constexpr int CFG_IMAGE_SIZE = 150;
+    static constexpr int MIN_PLAYING_SPEED = 1;
+    static constexpr int MAX_PLAYING_SPEED = 50;
+    static constexpr int MIN_TONE_DISTANCE = 10;
+    static constexpr int MAX_TONE_DISTANCE = 100;
     static constexpr const char* VERSION = APP_VERSION;
 };
 

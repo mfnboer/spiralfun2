@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(spiralfun VERSION 3.3.1 LANGUAGES CXX)
-set(VERSION_CODE 9)
+project(spiralfun VERSION 4.0 LANGUAGES CXX)
+set(VERSION_CODE 10)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core WebView)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core WebView Multimedia)
 
 add_compile_definitions(APP_VERSION="${PROJECT_VERSION}")
 
@@ -20,11 +20,15 @@ set(PROJECT_SOURCES
         circle.h
         circle.cpp
         exception.h
+        flash.h
+        flash.cpp
         gif_encoder_wrapper.h
         gif_encoder_wrapper.cpp
         jni_callback.h
         jni_callback.cpp
         main.cpp
+        music_generator.h
+        music_generator.cpp
         mutation.h
         mutation.cpp
         mutation_sequence.h
@@ -71,6 +75,7 @@ qt_add_qml_module(spiralfun
         Help.qml
         main.qml
         message.qml
+        MusicDialog.qml
 	MutationSequenceDialog.qml
     RESOURCES
         "android/src/com/gmail/mfnboer/QAndroidUtils.java"
@@ -81,6 +86,8 @@ qt_add_qml_module(spiralfun
         "icons/spiralfun/20x20/delete.png"
         "icons/spiralfun/20x20/home.png"
         "icons/spiralfun/20x20/more.png"
+        "icons/spiralfun/20x20/music.png"
+        "icons/spiralfun/20x20/music_off.png"
         "icons/spiralfun/20x20/play.png"
         "icons/spiralfun/20x20/share.png"
         "icons/spiralfun/20x20/stop.png"
@@ -89,6 +96,8 @@ qt_add_qml_module(spiralfun
         "icons/spiralfun/20x20@2/delete.png"
         "icons/spiralfun/20x20@2/home.png"
         "icons/spiralfun/20x20@2/more.png"
+        "icons/spiralfun/20x20@2/music.png"
+        "icons/spiralfun/20x20@2/music_off.png"
         "icons/spiralfun/20x20@2/play.png"
         "icons/spiralfun/20x20@2/share.png"
         "icons/spiralfun/20x20@2/stop.png"
@@ -97,6 +106,8 @@ qt_add_qml_module(spiralfun
         "icons/spiralfun/20x20@3/delete.png"
         "icons/spiralfun/20x20@3/home.png"
         "icons/spiralfun/20x20@3/more.png"
+        "icons/spiralfun/20x20@3/music.png"
+        "icons/spiralfun/20x20@3/music_off.png"
         "icons/spiralfun/20x20@3/play.png"
         "icons/spiralfun/20x20@3/share.png"
         "icons/spiralfun/20x20@3/stop.png"
@@ -105,6 +116,8 @@ qt_add_qml_module(spiralfun
         "icons/spiralfun/20x20@4/delete.png"
         "icons/spiralfun/20x20@4/home.png"
         "icons/spiralfun/20x20@4/more.png"
+        "icons/spiralfun/20x20@4/music.png"
+        "icons/spiralfun/20x20@4/music_off.png"
         "icons/spiralfun/20x20@4/play.png"
         "icons/spiralfun/20x20@4/share.png"
         "icons/spiralfun/20x20@4/stop.png"
@@ -115,6 +128,66 @@ qt_add_qml_module(spiralfun
         "images/example4.png"
         "images/question_mark.png"
         "images/kofi_button_blue.webp"
+        "piano-wav/A2.wav"
+        "piano-wav/Ab2.wav"
+        "piano-wav/B2.wav"
+        "piano-wav/Bb2.wav"
+        "piano-wav/C2.wav"
+        "piano-wav/D2.wav"
+        "piano-wav/Db2.wav"
+        "piano-wav/E2.wav"
+        "piano-wav/Eb2.wav"
+        "piano-wav/F2.wav"
+        "piano-wav/G2.wav"
+        "piano-wav/Gb2.wav"
+        "piano-wav/A3.wav"
+        "piano-wav/Ab3.wav"
+        "piano-wav/B3.wav"
+        "piano-wav/Bb3.wav"
+        "piano-wav/C3.wav"
+        "piano-wav/D3.wav"
+        "piano-wav/Db3.wav"
+        "piano-wav/E3.wav"
+        "piano-wav/Eb3.wav"
+        "piano-wav/F3.wav"
+        "piano-wav/G3.wav"
+        "piano-wav/Gb3.wav"
+        "piano-wav/A4.wav"
+        "piano-wav/Ab4.wav"
+        "piano-wav/B4.wav"
+        "piano-wav/Bb4.wav"
+        "piano-wav/C4.wav"
+        "piano-wav/D4.wav"
+        "piano-wav/Db4.wav"
+        "piano-wav/E4.wav"
+        "piano-wav/Eb4.wav"
+        "piano-wav/F4.wav"
+        "piano-wav/G4.wav"
+        "piano-wav/Gb4.wav"
+        "piano-wav/A5.wav"
+        "piano-wav/Ab5.wav"
+        "piano-wav/B5.wav"
+        "piano-wav/Bb5.wav"
+        "piano-wav/C5.wav"
+        "piano-wav/D5.wav"
+        "piano-wav/Db5.wav"
+        "piano-wav/E5.wav"
+        "piano-wav/Eb5.wav"
+        "piano-wav/F5.wav"
+        "piano-wav/G5.wav"
+        "piano-wav/Gb5.wav"
+        "piano-wav/A6.wav"
+        "piano-wav/Ab6.wav"
+        "piano-wav/B6.wav"
+        "piano-wav/Bb6.wav"
+        "piano-wav/C6.wav"
+        "piano-wav/D6.wav"
+        "piano-wav/Db6.wav"
+        "piano-wav/E6.wav"
+        "piano-wav/Eb6.wav"
+        "piano-wav/F6.wav"
+        "piano-wav/G6.wav"
+        "piano-wav/Gb6.wav"
         "qtquickcontrols2.conf"
 )
 
@@ -136,6 +209,7 @@ target_link_libraries(spiralfun PRIVATE
     Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::WebView
+    Qt${QT_VERSION_MAJOR}::Multimedia
     egif
 )
 

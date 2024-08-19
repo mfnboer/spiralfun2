@@ -15,6 +15,8 @@ using namespace std::chrono_literals;
 
 namespace SpiralFun {
 
+int SpiralScene::MAX_DIAMETER = 300;
+
 SpiralScene::SpiralScene(QQuickItem *parent) :
     QQuickItem(parent)
 {
@@ -46,6 +48,33 @@ void SpiralScene::init()
     Utils::handlePendingIntent();
 
     qInfo() << "Surface format:" << window()->format();
+}
+
+void SpiralScene::setMusicGeneration(bool musicGeneration)
+{
+    if (musicGeneration != mMusicGeneration)
+    {
+        mMusicGeneration = musicGeneration;
+        emit musicGenerationChanged();
+    }
+}
+
+void SpiralScene::setPlayingSpeed(int playingSpeed)
+{
+    if (playingSpeed != mPlayingSpeed)
+    {
+        mPlayingSpeed = playingSpeed;
+        emit playingSpeedChanged();
+    }
+}
+
+void SpiralScene::setToneDistance(int toneDistance)
+{
+    if (toneDistance != mToneDistance)
+    {
+        mToneDistance = toneDistance;
+        emit toneDistanceChanged();
+    }
 }
 
 void SpiralScene::calcDefaultRadiusSize()
@@ -338,7 +367,15 @@ void SpiralScene::doPlay(std::unique_ptr<Recorder> recorder)
 {
     mStats = {};
     setCurrentCircleFocus(false);
-    mPlayer = std::make_unique<Player>(mCircles);
+
+    // Music is only supported in playing state.
+    std::unique_ptr<MusicGenerator> musicGenerator;
+
+    if (mMusicGeneration && mPlayState == PLAYING)
+        musicGenerator = std::make_unique<MusicGenerator>(mCircles, mToneDistance, MAX_PLAYING_SPEED - mPlayingSpeed + MIN_PLAYING_SPEED, this);
+
+    mPlayer = std::make_unique<Player>(mCircles, std::move(musicGenerator));
+
     QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
     QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });
     QObject::connect(mPlayer.get(), &Player::done, this, [this](const Player::Stats& stats){

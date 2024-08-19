@@ -8,10 +8,11 @@ using namespace std::chrono_literals;
 
 namespace SpiralFun {
 
-Player::Player(const CircleList &circles) :
-    mCircles(circles)
-{
-    mPlayTimer.setInterval(0);
+Player::Player(const CircleList &circles, std::unique_ptr<MusicGenerator> musicGenerator) :
+    mCircles(circles),
+    mMusicGenerator(std::move(musicGenerator))
+{   
+    mPlayTimer.setInterval(mMusicGenerator ? mMusicGenerator->getTonePlayInterval() : 0);
     QObject::connect(&mPlayTimer, &QTimer::timeout, this, &Player::advance);
     mSceneRefreshTimer.setInterval(40ms);
     QObject::connect(&mSceneRefreshTimer, &QTimer::timeout, this, [this]{ emit refreshScene(); });
@@ -86,6 +87,9 @@ void Player::advance()
                 recordingFailed();
         }
     }
+
+    if (mMusicGenerator)
+        mMusicGenerator->playNotes();
 }
 
 void Player::recordingFailed()
