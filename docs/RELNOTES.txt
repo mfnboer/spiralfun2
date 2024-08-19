@@ -1,3 +1,7 @@
+4.0
+---
+* Spiral piano player
+
 3.3.1
 -----
 * Update Android target API to 34
