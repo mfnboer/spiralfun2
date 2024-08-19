@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         jni_callback.h
         jni_callback.cpp
         main.cpp
+        music_generator.h
+        music_generator.cpp
         mutation.h
         mutation.cpp
         mutation_sequence.h
