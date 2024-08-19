@@ -5,6 +5,8 @@
 #include "circle.h"
 #include "recorder.h"
 #include <QTimer>
+#include <QSoundEffect>
+#include <queue>
 
 namespace SpiralFun {
 
@@ -22,7 +24,7 @@ public:
         bool mRecordingFailed = false;
     };
 
-    explicit Player(const CircleList &circles);
+    Player(const CircleList &circles, bool musicGeneration, qreal toneDistance = 10.0, int tonePlayInterval = 1);
     ~Player();
 
     bool play(std::unique_ptr<Recorder> recorder = nullptr);
@@ -36,12 +38,15 @@ signals:
     void angleChanged();
 
 private:
+    void initNotes();
     void startTimers();
     void stopTimers();
     void advance();
     void advanceCircles(qreal angle);
     void advanceCircle(unsigned index, qreal angle);
     void forceDraw();
+    void playNotes();
+    void playNote(const std::unique_ptr<SpiralFun::Circle>& circle);
     void recordingFailed();
     void finishPlaying();
     bool setupRecording();
@@ -63,6 +68,20 @@ private:
     QRectF mRecordingRect;
     std::unique_ptr<Recorder> mRecorder;
     bool mRecording = false;
+
+    struct Sound
+    {
+        int mIndex;
+        std::unique_ptr<QSoundEffect> mSound;
+    };
+
+    std::vector<QString> mNotes;
+    qreal mNoteSize = 1.0;
+    std::unordered_map<Circle*, std::queue<Sound>> mSounds;
+    bool mMusicGeneration = false;
+    qreal mToneDistance = 25.0;
+    int mTonePlayInterval = 0.0;
+
 };
 
 }

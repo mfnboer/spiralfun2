@@ -3,6 +3,7 @@
 #pragma once
 #include "scoped_line.h"
 #include <QQuickPaintedItem>
+#include <QSoundEffect>
 
 namespace SpiralFun {
 
@@ -50,6 +51,8 @@ public:
     void addToScene();
     void forceDrawToCenter();
     void preparePlay();
+    qreal getDrawnLength() const { return mDrawnLength; }
+    void setDrawnLength(qreal drawnLength) { mDrawnLength = drawnLength; }
 
     void paint(QPainter* painter) override;
 
@@ -75,6 +78,7 @@ private:
     int mDraw = 0;
     int mSpeed = 0;
     const qreal mMinDrawLength = 2.0;
+    qreal mDrawnLength = 0.0;
     int mPenWidth;
     ScopedLine mSceneLine;
 };
