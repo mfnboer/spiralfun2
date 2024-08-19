@@ -60,6 +60,14 @@ Dialog {
             enabled: musicOn
             onValueChanged: toneDistance = value
         }
+
+        Label {
+            Layout.columnSpan: 2
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: "For each line drawing circle piano tones are played at every \"tone distance\" pixels. " +
+                  "Playing speed determines the speed of drawing and hence the speed of music playing."
+        }
     }
 
     function show(scene) {

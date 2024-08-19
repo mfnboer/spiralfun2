@@ -23,7 +23,7 @@ public:
         bool mRecordingFailed = false;
     };
 
-    Player(const CircleList &circles, bool musicGeneration, qreal toneDistance = 10.0, int tonePlayInterval = 1);
+    Player(const CircleList &circles, std::unique_ptr<MusicGenerator> musicGenerator);
     ~Player();
 
     bool play(std::unique_ptr<Recorder> recorder = nullptr);

@@ -1,6 +1,7 @@
 // Copyright (C) 2024 Michel de Boer
 // License: GPLv3
 #include "music_generator.h"
+#include "flash.h"
 #include "spiral_scene.h"
 #include <QAudioDevice>
 #include <QMediaDevices>
@@ -10,20 +11,18 @@ namespace SpiralFun {
 
 static const std::initializer_list<QString> NOTES = { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" };
 
-MusicGenerator::MusicGenerator(const CircleList &circles, qreal toneDistance) :
+MusicGenerator::MusicGenerator(const CircleList &circles, qreal toneDistance, int tonePlayInterval, SpiralScene* scene) :
     mCircles(circles),
-    mToneDistance(toneDistance)
+    mToneDistance(toneDistance),
+    mTonePlayInterval(tonePlayInterval),
+    mScene(scene)
 {
+    Q_ASSERT(scene);
     initNotes();
 }
 
 void MusicGenerator::initNotes()
 {
-    const auto devices = QMediaDevices::audioOutputs();
-    for (const auto& dev : devices)
-        qDebug() << "AUDIO:" << dev.description() << dev.maximumSampleRate();
-    qDebug() << "AUDIO DFLT:" << QMediaDevices::defaultAudioOutput().description();
-
     for (int i = 2; i <= 5; ++i)
     {
         for (const auto& note : NOTES)
@@ -86,6 +85,8 @@ void MusicGenerator::playNote(const std::unique_ptr<SpiralFun::Circle>& circle)
 
     qDebug() << "Play:" << newNote;
     circle->setDrawnLength(0.0);
+
+    new Flash(circle->getCenter(), circle->getColor(), mScene);
 }
 
 }

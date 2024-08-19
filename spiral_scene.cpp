@@ -369,10 +369,12 @@ void SpiralScene::doPlay(std::unique_ptr<Recorder> recorder)
     setCurrentCircleFocus(false);
 
     // Music is only supported in playing state.
-    if (mPlayState == PLAYING)
-        mPlayer = std::make_unique<Player>(mCircles, mMusicGeneration, mToneDistance, MAX_PLAYING_SPEED - mPlayingSpeed + MIN_PLAYING_SPEED);
-    else
-        mPlayer = std::make_unique<Player>(mCircles, false);
+    std::unique_ptr<MusicGenerator> musicGenerator;
+
+    if (mMusicGeneration && mPlayState == PLAYING)
+        musicGenerator = std::make_unique<MusicGenerator>(mCircles, mToneDistance, MAX_PLAYING_SPEED - mPlayingSpeed + MIN_PLAYING_SPEED, this);
+
+    mPlayer = std::make_unique<Player>(mCircles, std::move(musicGenerator));
 
     QObject::connect(mPlayer.get(), &Player::refreshScene, this, [this]{ update(); });
     QObject::connect(mPlayer.get(), &Player::angleChanged, this, [this]{ emit playAngleChanged(); });

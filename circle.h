@@ -3,7 +3,6 @@
 #pragma once
 #include "scoped_line.h"
 #include <QQuickPaintedItem>
-#include <QSoundEffect>
 
 namespace SpiralFun {
 

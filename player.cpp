@@ -8,16 +8,14 @@ using namespace std::chrono_literals;
 
 namespace SpiralFun {
 
-Player::Player(const CircleList &circles, bool musicGeneration, qreal toneDistance, int tonePlayInterval) :
-    mCircles(circles)
+Player::Player(const CircleList &circles, std::unique_ptr<MusicGenerator> musicGenerator) :
+    mCircles(circles),
+    mMusicGenerator(std::move(musicGenerator))
 {   
-    mPlayTimer.setInterval(musicGeneration ? tonePlayInterval : 0);
+    mPlayTimer.setInterval(mMusicGenerator ? mMusicGenerator->getTonePlayInterval() : 0);
     QObject::connect(&mPlayTimer, &QTimer::timeout, this, &Player::advance);
     mSceneRefreshTimer.setInterval(40ms);
     QObject::connect(&mSceneRefreshTimer, &QTimer::timeout, this, [this]{ emit refreshScene(); });
-
-    if (musicGeneration)
-        mMusicGenerator = std::make_unique<MusicGenerator>(circles, toneDistance);
 }
 
 Player::~Player()

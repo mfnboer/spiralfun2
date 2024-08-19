@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(spiralfun VERSION 3.3.1 LANGUAGES CXX)
-set(VERSION_CODE 9)
+project(spiralfun VERSION 4.0 LANGUAGES CXX)
+set(VERSION_CODE 10)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
         circle.h
         circle.cpp
         exception.h
+        flash.h
+        flash.cpp
         gif_encoder_wrapper.h
         gif_encoder_wrapper.cpp
         jni_callback.h

@@ -9,13 +9,16 @@
 
 namespace SpiralFun {
 
+class SpiralScene;
+
 class MusicGenerator : public QObject
 {
     Q_OBJECT
 
 public:
-    MusicGenerator(const CircleList &circles, qreal toneDistance);
+    MusicGenerator(const CircleList &circles, qreal toneDistance, int tonePlayInterval, SpiralScene* scene);
 
+    int getTonePlayInterval() const { return mTonePlayInterval; }
     void playNotes();
 
 private:
@@ -34,6 +37,8 @@ private:
     qreal mNoteSize = 1.0;
     std::unordered_map<Circle*, std::queue<Sound>> mSounds;
     qreal mToneDistance = 25.0;
+    int mTonePlayInterval = 1;
+    SpiralScene* mScene;
 };
 
 }
