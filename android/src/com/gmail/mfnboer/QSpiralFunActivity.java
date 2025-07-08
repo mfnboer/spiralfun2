@@ -16,10 +16,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
 
 import androidx.core.view.WindowCompat;
 
@@ -29,7 +26,6 @@ public class QSpiralFunActivity extends QtActivity {
     private static QSpiralFunActivity sActivity = null;
     private boolean mIsIntentPending = false;
     private boolean mIsReady = false;
-    private PowerManager.WakeLock mWakeLock = null;
 
     public static native void emitViewUriReceived(String uri);
 
@@ -43,11 +39,8 @@ public class QSpiralFunActivity extends QtActivity {
 
         Log.d(LOGTAG, "onCreate");
         ScreenUtils.init(this);
-
-        Window window = this.getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.setStatusBarColor(Color.BLACK);
+        ScreenUtils.setStatusBarColor(Color.BLACK, false);
+        ScreenUtils.setNavigationBarColor(Color.BLACK, false);
 
         Intent intent = getIntent();
         if (intent == null)
