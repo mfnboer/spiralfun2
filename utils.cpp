@@ -214,6 +214,40 @@ bool sendAppToBackground()
 #endif
 }
 
+int getNavigationBarSize(QEnums::InsetsSide side)
+{
+#ifdef Q_OS_ANDROID
+    return (int)QJniObject::callStaticMethod<jint>(
+        "com/gmail/mfnboer/ScreenUtils", "getNavigationBarSize", "(I)I", (jint)side);
+#else
+    Q_UNUSED(side)
+    return 0;
+#endif
+}
+
+int getStatusBarSize(QEnums::InsetsSide side)
+{
+#ifdef Q_OS_ANDROID
+    return (int)QJniObject::callStaticMethod<jint>(
+        "com/gmail/mfnboer/ScreenUtils", "getStatusBarSize", "(I)I", (jint)side);
+#else
+    Q_UNUSED(side)
+    return 0;
+#endif
+}
+
+int getDisplayCutoutSize(QEnums::InsetsSide side)
+{
+#ifdef Q_OS_ANDROID
+    return (int)QJniObject::callStaticMethod<jint>(
+        "com/gmail/mfnboer/ScreenUtils", "getDisplayCutoutSize", "(I)I", (jint)side);
+#else
+    Q_UNUSED(side)
+    return 0;
+#endif
+}
+
+
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize)
 {
     const QSize sz = scaledImg.size();

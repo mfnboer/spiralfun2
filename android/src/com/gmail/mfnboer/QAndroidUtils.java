@@ -3,7 +3,8 @@
 
 package com.gmail.mfnboer;
 
-import org.qtproject.qt.android.QtNative;
+import com.gmail.mfnboer.QSpiralFunActivity;
+import com.gmail.mfnboer.SpiralFunApplication;
 
 import java.io.File;
 import java.lang.String;
@@ -45,7 +46,7 @@ public class QAndroidUtils
     }
 
     public static String getSpiralConfigPath(String subDir) {
-        Context context = QtNative.getContext();
+        Context context = SpiralFunApplication.getContext();
         if (context == null)
         {
             Log.w(LOGTAG, "No context");
@@ -69,7 +70,7 @@ public class QAndroidUtils
     public static void scanMediaFile(String fileName) {
         Log.d(LOGTAG, "Scan media file=" + fileName);
 
-        MediaScannerConnection.scanFile(QtNative.getContext(),
+        MediaScannerConnection.scanFile(SpiralFunApplication.getContext(),
                 new String[]{ fileName }, null,
                 new MediaScannerConnection.OnScanCompletedListener() {
                     public void onScanCompleted(String path, Uri uri) {
@@ -83,9 +84,6 @@ public class QAndroidUtils
     }
 
     public static void shareMedia(String uriString, String configAppUri, String mimeType) {
-        if (QtNative.activity() == null)
-            return;
-
         Uri uri;
         try {
             uri = Uri.parse(uriString);
@@ -108,6 +106,7 @@ public class QAndroidUtils
         intent.putExtra(Intent.EXTRA_STREAM, uri);
         intent.setType(mimeType);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        QtNative.activity().startActivity(Intent.createChooser(intent, "Share spiral using"));
+        QSpiralFunActivity activity = QSpiralFunActivity.getInstance();
+        activity.startContentChooser(intent, "Share spiral using");
     }
 }

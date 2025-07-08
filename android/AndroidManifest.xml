@@ -12,7 +12,7 @@
         android:normalScreens="true"
         android:smallScreens="true"/>
     <application
-        android:name="org.qtproject.qt.android.bindings.QtApplication"
+        android:name="com.gmail.mfnboer.SpiralFunApplication"
         android:hardwareAccelerated="true"
         android:label="Spiral Fun"
         android:requestLegacyExternalStorage="true"
@@ -53,7 +53,7 @@
                 android:resource="@xml/qtprovider_paths"/>
         </provider>
     </application>
-    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="34"/>
+    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="35"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"  android:maxSdkVersion="32"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>

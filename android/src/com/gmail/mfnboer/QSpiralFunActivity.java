@@ -3,6 +3,9 @@
 
 package com.gmail.mfnboer;
 
+import com.gmail.mfnboer.ScreenUtils;
+import com.gmail.mfnboer.SpiralFunApplication;
+
 import org.qtproject.qt.android.QtNative;
 import org.qtproject.qt.android.bindings.QtActivity;
 
@@ -18,9 +21,12 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.core.view.WindowCompat;
+
 public class QSpiralFunActivity extends QtActivity {
 
     private static final String LOGTAG = "spiralfun.QSpiralFunActivity";
+    private static QSpiralFunActivity sActivity = null;
     private boolean mIsIntentPending = false;
     private boolean mIsReady = false;
     private PowerManager.WakeLock mWakeLock = null;
@@ -30,7 +36,13 @@ public class QSpiralFunActivity extends QtActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sActivity = this;
+
+        // Enable EdgeToEdge mode, i.e. full screen
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
         Log.d(LOGTAG, "onCreate");
+        ScreenUtils.init(this);
 
         Window window = this.getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -94,43 +106,20 @@ public class QSpiralFunActivity extends QtActivity {
     }
 
     public void setKeepScreenOn(boolean keepOn) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Window window = getWindow();
-                if (window == null) {
-                    Log.w(LOGTAG, "Cannot get window");
-                    return;
-                }
-
-                Context context = QtNative.getContext();
-                if (context == null) {
-                    Log.w(LOGTAG, "No context");
-                    return;
-                }
-
-                PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-
-                if (keepOn) {
-                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                    if (mWakeLock == null) {
-                        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SpiralFunTag");
-                        mWakeLock.acquire();
-                    }
-                } else {
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                    if (mWakeLock != null) {
-                        mWakeLock.release();
-                        mWakeLock = null;
-                    }
-                }
-            }
-        });
+        ScreenUtils.setKeepScreenOn(keepOn);
     }
 
     // Avoid the app to close when the user presses the back button.
     public void goToBack() {
         Log.d(LOGTAG, "Moving task to back");
         moveTaskToBack(true);
+    }
+
+    public static QSpiralFunActivity getInstance() {
+        return sActivity;
+    }
+
+    public void startContentChooser(Intent intent, String title) {
+        startActivity(Intent.createChooser(intent, title));
     }
 }

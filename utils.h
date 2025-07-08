@@ -1,6 +1,7 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
 #pragma once
+#include "enums.h"
 #include <QImage>
 #include <QString>
 
@@ -16,6 +17,9 @@ void shareMedia(const QString& contentUri, const QString& configAppUri, const QS
 void handlePendingIntent();
 void setKeepScreenOn(bool keepOn);
 bool sendAppToBackground();
+int getNavigationBarSize(QEnums::InsetsSide side);
+int getStatusBarSize(QEnums::InsetsSide side);
+int getDisplayCutoutSize(QEnums::InsetsSide side);
 
 QImage createThumbnail(const QImage& scaledImg, const QSizeF& origSize, const QRectF& sceneRect, int thumbnailSize);
 

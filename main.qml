@@ -8,11 +8,18 @@ import QtQuick.Shapes
 import SpiralFun
 
 ApplicationWindow {
+    readonly property bool isPortrait: width < height
+
     id: root
     width: 480
     height: 960
     visible: true
     title: "Spiral Fun"
+    color: "black"
+
+    onIsPortraitChanged: {
+        guiSettings.updateScreenMargins()
+    }
 
     onClosing: (event) => {
         if (Qt.platform.os !== "android")
@@ -26,6 +33,8 @@ ApplicationWindow {
     Popup {
         id: statusPopup
         width: parent.width
+        topMargin: guiSettings.headerMargin
+        bottomMargin: guiSettings.footerMargin
         closePolicy: Popup.CloseOnPressOutside
 
         Label {
@@ -48,14 +57,18 @@ ApplicationWindow {
 
     GridLayout {
         columns: 4
-        anchors.fill: parent
+        x: guiSettings.leftMargin
+        y: guiSettings.headerMargin
+        width: parent.width - guiSettings.rightMargin - x
+        height: parent.height - guiSettings.footerMargin - y
         rowSpacing: 0
+        columnSpacing: 5
 
         // Row 1
         Rectangle {
             color: "black"
             Layout.columnSpan: 4
-            Layout.fillWidth: true
+            Layout.preferredWidth: parent.width
             Layout.fillHeight: true
 
             SpiralScene {
@@ -276,9 +289,8 @@ ApplicationWindow {
         Button {
             icon.name: "arrow_upward"
             Layout.columnSpan: 2
-            Layout.fillWidth: true
-            Layout.minimumWidth: root.width / 2 - 5
-            Layout.maximumWidth: root.width / 2 - 5
+            Layout.minimumWidth: parent.width / 2 - 7.5
+            Layout.maximumWidth: parent.width / 2 - 7.5
             Layout.leftMargin: 5
             enabled: scene.currentCircleIndex < scene.numCircles - 1 && scene.notPlaying()
             onClicked: scene.circleUp()
@@ -286,9 +298,8 @@ ApplicationWindow {
         Button {
             icon.name: "arrow_downward"
             Layout.columnSpan: 2
-            Layout.fillWidth: true
-            Layout.minimumWidth: root.width / 2 - 5
-            Layout.maximumWidth: root.width / 2 - 5
+            Layout.minimumWidth: parent.width / 2 - 7.5
+            Layout.maximumWidth: parent.width / 2 - 7.5
             Layout.rightMargin: 5
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
             onClicked: scene.circleDown()
@@ -296,6 +307,7 @@ ApplicationWindow {
 
         // Row 3
         Label {
+            id: diameterLabel
             text: "Diameter:"
             Layout.leftMargin: 5
         }
@@ -305,6 +317,7 @@ ApplicationWindow {
             editable: true
             value: scene.currentCircle.diameter
             Layout.fillWidth: true
+            Layout.maximumWidth: parent.width / 2 - 12.5 - getLabelColWidth()
             enabled: scene.notPlaying()
             onValueModified: scene.currentCircle.diameter = value
             Keys.onReturnPressed:  Qt.inputMethod.hide()
@@ -377,6 +390,7 @@ ApplicationWindow {
 
         // Row 4
         Label {
+            id: rotationsLabel
             text: "Rotations:"
             Layout.leftMargin: 5
         }
@@ -387,6 +401,7 @@ ApplicationWindow {
             value: scene.currentCircle.rotations
             textFromValue: (value, locale) => { return value.toString(); }
             Layout.fillWidth: true
+            Layout.maximumWidth: parent.width / 2 - 12.5 - getLabelColWidth()
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
             onValueChanged: scene.currentCircle.rotations = value
             Keys.onReturnPressed:  Qt.inputMethod.hide()
@@ -396,7 +411,7 @@ ApplicationWindow {
             model: ["clockwise", "counter clockwise"]
             currentIndex: scene.currentCircle.direction
             Layout.columnSpan: 2
-            Layout.fillWidth: true
+            Layout.preferredWidth: parent.width / 2 - 5
             Layout.rightMargin: 5
             enabled: scene.currentCircleIndex > 0 && scene.notPlaying()
             onCurrentIndexChanged: scene.currentCircle.direction = currentIndex
@@ -404,6 +419,7 @@ ApplicationWindow {
 
         // Row 5
         Label {
+            id: circlesLabel
             text: "Circles:"
             Layout.leftMargin: 5
         }
@@ -413,6 +429,7 @@ ApplicationWindow {
             editable: true
             value: scene.numCircles
             Layout.fillWidth: true
+            Layout.maximumWidth: parent.width / 2 - 12.5 - getLabelColWidth()
             enabled: scene.notPlaying()
             onValueChanged: scene.numCircles = value
             Keys.onReturnPressed:  Qt.inputMethod.hide()
@@ -420,8 +437,8 @@ ApplicationWindow {
         Button {
             id: playButton
             icon.name: scene.playStateIcon()
-            Layout.fillWidth: true
             Layout.columnSpan: 2
+            Layout.preferredWidth: parent.width / 2 - 5
             Layout.rightMargin: 5
             onClicked: {
                 if (scene.playState === SpiralScene.NOT_PLAYING) {
@@ -431,6 +448,10 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    function getLabelColWidth() {
+        return Math.max(diameterLabel.width, rotationsLabel.width, circlesLabel.width)
     }
 
     function showMessage(message) {
@@ -454,6 +475,14 @@ ApplicationWindow {
             scene.playingSpeed = speed
             scene.toneDistance = toneDistance
         }
+    }
+
+    DisplayUtils {
+        id: displayUtils
+    }
+
+    GuiSettings {
+        id: guiSettings
     }
 
     Component.onCompleted: {

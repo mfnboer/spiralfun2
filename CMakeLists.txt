@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 
-project(spiralfun VERSION 4.0 LANGUAGES CXX)
-set(VERSION_CODE 10)
+project(spiralfun VERSION 4.1 LANGUAGES CXX)
+set(VERSION_CODE 11)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Work around to fix build issue in Qt6.8.2
+# See https://bugreports.qt.io/browse/QTBUG-131707
+set(QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL OFF)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core WebView Multimedia)
@@ -19,6 +23,9 @@ endif()
 set(PROJECT_SOURCES
         circle.h
         circle.cpp
+        display_utils.h
+        display_utils.cpp
+        enums.h
         exception.h
         flash.h
         flash.cpp
@@ -72,6 +79,7 @@ qt_add_qml_module(spiralfun
         color_selector.qml
         examples.qml
         file_dialog.qml
+        GuiSettings.qml
         Help.qml
         main.qml
         message.qml
@@ -80,6 +88,8 @@ qt_add_qml_module(spiralfun
     RESOURCES
         "android/src/com/gmail/mfnboer/QAndroidUtils.java"
         "android/src/com/gmail/mfnboer/QSpiralFunActivity.java"
+        "android/src/com/gmail/mfnboer/ScreenUtils.java"
+        "android/src/com/gmail/mfnboer/SpiralFunApplication.java"
         "android/src/com/gmail/mfnboer/QVideoEncoder.java"
         "icons/spiralfun/20x20/arrow_downward.png"
         "icons/spiralfun/20x20/arrow_upward.png"
@@ -193,8 +203,8 @@ qt_add_qml_module(spiralfun
 
 set_target_properties(spiralfun PROPERTIES
     QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
-    QT_ANDROID_TARGET_SDK_VERSION 34
-    QT_ANDROID_SDK_BUILD_TOOLS_REVISION 34.0.0
+    QT_ANDROID_TARGET_SDK_VERSION 35
+    QT_ANDROID_SDK_BUILD_TOOLS_REVISION 35.0.0
     QT_ANDROID_VERSION_NAME ${PROJECT_VERSION}
     QT_ANDROID_VERSION_CODE ${VERSION_CODE})
 
@@ -219,8 +229,17 @@ set_target_properties(spiralfun PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
-    QT_ANDROID_ABIS "arm64-v8a;armeabi-v7a"
 )
+
+if (CMAKE_BUILD_TYPE MATCHES Release)
+    set_target_properties(spiralfun PROPERTIES
+        QT_ANDROID_ABIS "arm64-v8a;armeabi-v7a"
+    )
+else()
+    set_target_properties(spiralfun PROPERTIES
+        QT_ANDROID_ABIS "arm64-v8a"
+    )
+endif()
 
 install(TARGETS spiralfun
     BUNDLE DESTINATION .

@@ -31,6 +31,12 @@ bool SceneGrabber::grabScene(const Callback& callback)
     return grabScene(getSpiralCutRect(), callback);
 }
 
+// TODO:
+// Image grabbing does not work in Qt6.8.2
+// Saving an image results in a black image
+// Saving config seems to have a wrong cut rect
+// Saving GIF or MP4 goes very slow and then it crashes.
+// This all works fine in Qt6.6.3
 bool SceneGrabber::grabScene(const QRect& cutRect, const Callback& callback)
 {
     Q_ASSERT(callback);

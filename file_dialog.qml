@@ -12,8 +12,12 @@ Dialog {
     title: "Load spiral config"
     modal: true
     standardButtons: Dialog.Cancel
-    height: parent.height
-    width: parent.width
+    height: parent.height - topMargin - bottomMargin
+    width: parent.width - leftMargin - rightMargin
+    topMargin: guiSettings.headerMargin
+    bottomMargin: guiSettings.footerMargin
+    leftMargin: guiSettings.leftMargin
+    rightMargin: guiSettings.rightMargin
     anchors.centerIn: parent
     onAccepted: destroy()
     onRejected: destroy()

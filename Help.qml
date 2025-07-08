@@ -1,15 +1,19 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import QtWebView
 
 Window {
     id: helpWindow
+    width: root.width
+    height: root.height
+    color: "black"
     onClosing: destroy()
 
     WebView {
         id: web
-        anchors.fill: parent
+        x: guiSettings.leftMargin
+        y: guiSettings.headerMargin
+        width: root.width - guiSettings.leftMargin - guiSettings.rightMargin
+        height: root.height - guiSettings.headerMargin - guiSettings.footerMargin
     }
 
     function open() {

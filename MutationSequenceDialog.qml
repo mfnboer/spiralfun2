@@ -16,8 +16,12 @@ Dialog {
 
     id: mutationSequenceDialog
     standardButtons: Dialog.Cancel | Dialog.Ok
-    height: parent.height
-    width: parent.width
+    height: parent.height - topMargin - bottomMargin
+    width: parent.width - leftMargin - rightMargin
+    topMargin: guiSettings.headerMargin
+    bottomMargin: guiSettings.footerMargin
+    leftMargin: guiSettings.leftMargin
+    rightMargin: guiSettings.rightMargin
     anchors.centerIn: parent
 
     header: RowLayout {
