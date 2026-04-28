@@ -22,7 +22,10 @@ SceneGrabber::SceneGrabber(QQuickItem* scene, const QRectF& sceneRect) :
 
 QSize SceneGrabber::getImageGrabSize() const
 {
-    const QSize imageSize = (mScene->size() * mPixelRatio).toSize();
+    // In Qt6.6.3 I had to multiply by pixel ratio. grabImage() seems to do that now.
+    // const QSize imageSize = (mScene->size() * mPixelRatio).toSize();
+    const QSize imageSize = mScene->size().toSize();
+    qDebug() << "Grab size:" << imageSize << "pixelRatio:" << mPixelRatio;
     return imageSize;
 }
 
@@ -31,15 +34,10 @@ bool SceneGrabber::grabScene(const Callback& callback)
     return grabScene(getSpiralCutRect(), callback);
 }
 
-// TODO:
-// Image grabbing does not work in Qt6.8.2
-// Saving an image results in a black image
-// Saving config seems to have a wrong cut rect
-// Saving GIF or MP4 goes very slow and then it crashes.
-// This all works fine in Qt6.6.3
 bool SceneGrabber::grabScene(const QRect& cutRect, const Callback& callback)
 {
     Q_ASSERT(callback);
+    qDebug() << "Cut rect:" << cutRect;
 
     // Make sure all rendering is done before grabbing
     mScene->update();

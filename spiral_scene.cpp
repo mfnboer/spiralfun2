@@ -914,8 +914,11 @@ void SpiralScene::handleReceivedAndroidIntent(const QString& uri)
 
 void SpiralScene::saveConfig()
 {
-    const QSize imageSize = size().scaled(CFG_IMAGE_SIZE, CFG_IMAGE_SIZE, Qt::KeepAspectRatioByExpanding).toSize();
+    const auto pixelRatio = window()->effectiveDevicePixelRatio();
+    const auto cfgSize = CFG_IMAGE_SIZE / pixelRatio;
+    const QSize imageSize = size().scaled(cfgSize, cfgSize, Qt::KeepAspectRatioByExpanding).toSize();
     auto grabResult = grabToImage(imageSize);
+
     if (!grabResult)
     {
         emit message("Failed to grab image.");
