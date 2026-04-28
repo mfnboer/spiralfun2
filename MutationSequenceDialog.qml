@@ -44,7 +44,7 @@ Dialog {
 
             MenuItem {
                 text: "Help"
-                onTriggered: guiSettings.openLink("https://mfnboer.home.xs4all.nl/spiralfun/help/index.html?app=1#play_mutation_sequence")
+                onTriggered: guiSettings.openLink("https://thereforeiam.eu/spiralfun/help/index.html?app=1#play_mutation_sequence")
             }
         }
     }

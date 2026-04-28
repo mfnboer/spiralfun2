@@ -240,7 +240,7 @@ ApplicationWindow {
                 }
                 MenuItem {
                     text: "Help"
-                    onTriggered: guiSettings.openLink("https://mfnboer.home.xs4all.nl/spiralfun/help/index.html?app=1")
+                    onTriggered: guiSettings.openLink("https://thereforeiam.eu/spiralfun/help/index.html?app=1")
                 }
                 MenuItem {
                     text: "About"

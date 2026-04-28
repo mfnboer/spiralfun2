@@ -18,7 +18,7 @@ namespace SpiralFun {
 namespace {
 constexpr int CONFIG_VERSION = 1;
 constexpr int MAX_URI_LENGTH = 2000;
-constexpr const char* APP_URI = "https://mfnboer.home.xs4all.nl/spiralfun";
+constexpr const char* APP_URI = "https://thereforeiam.eu/spiralfun";
 constexpr const char* VIEW_PATH = "/view";
 constexpr const char* KEY_CONFIG_VERSION = "V";
 constexpr const char* KEY_APP_VERSION = "A";
