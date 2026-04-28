@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.view.WindowCompat;
 
 public class QSpiralFunActivity extends QtActivity {
@@ -114,5 +115,14 @@ public class QSpiralFunActivity extends QtActivity {
 
     public void startContentChooser(Intent intent, String title) {
         startActivity(Intent.createChooser(intent, title));
+    }
+
+    public void openLinkInApp(String uriString)
+    {
+        Log.d(LOGTAG, "Open in-app: " + uriString);
+        Uri uri = Uri.parse(uriString);
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(this, uri);
     }
 }

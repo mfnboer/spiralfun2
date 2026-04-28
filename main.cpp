@@ -5,7 +5,6 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 #include <QSurfaceFormat>
-#include <QtWebView>
 
 int main(int argc, char *argv[])
 {
@@ -21,7 +20,6 @@ int main(int argc, char *argv[])
     qputenv("QT_SCALE_FACTOR", "0.9");
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-    QtWebView::initialize();
     QApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");
     QIcon::setThemeName("spiralfun");

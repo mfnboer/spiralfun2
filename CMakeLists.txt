@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL OFF)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core WebView Multimedia)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core Multimedia)
 
 if (ANDROID AND Qt6Core_VERSION VERSION_GREATER_EQUAL 6.9.0)
     find_package(Qt6 REQUIRED COMPONENTS CorePrivate)
@@ -84,7 +84,7 @@ qt_add_qml_module(spiralfun
         examples.qml
         file_dialog.qml
         GuiSettings.qml
-        Help.qml
+
         main.qml
         message.qml
         MusicDialog.qml
@@ -222,7 +222,6 @@ target_link_libraries(spiralfun PRIVATE
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::WebView
     Qt${QT_VERSION_MAJOR}::Multimedia
     egif
 )

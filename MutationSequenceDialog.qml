@@ -44,11 +44,7 @@ Dialog {
 
             MenuItem {
                 text: "Help"
-                onTriggered: {
-                    var component = Qt.createComponent("Help.qml");
-                    var obj = component.createObject(root);
-                    obj.openMutationSequenceHelp();
-                }
+                onTriggered: guiSettings.openLink("https://mfnboer.home.xs4all.nl/spiralfun/help/index.html?app=1#play_mutation_sequence")
             }
         }
     }

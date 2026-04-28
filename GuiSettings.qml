@@ -28,4 +28,11 @@ Item {
     function getDisplayCutoutSize(side) {
         return displayUtils.getDisplayCutoutSize(side) / Screen.devicePixelRatio
     }
+
+    function openLink(link) {
+        if (Qt.platform.os === "android")
+            displayUtils.openLinkInApp(link)
+        else
+            Qt.openUrlExternally(link)
+    }
 }
