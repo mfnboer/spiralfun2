@@ -18,9 +18,9 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation 'androidx.core:core:1.16.0'
-    implementation 'androidx.activity:activity:1.10.0'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core:1.18.0'
+    implementation 'androidx.activity:activity:1.13.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
@@ -47,7 +47,7 @@ android {
      *******************************************************/
 
     //compileSdkVersion androidCompileSdkVersion.toInteger()
-    compileSdkVersion 35
+    compileSdkVersion 36
     buildToolsVersion androidBuildToolsVersion
     ndkVersion androidNdkVersion
 
@@ -87,10 +87,17 @@ android {
 
     defaultConfig {
         resConfig "en"
-	applicationId "com.gmail.mfnboer.spiralfun"
-	namespace "com.gmail.mfnboer.spiralfun"
+	    applicationId "com.gmail.mfnboer.spiralfun"
+	    namespace "com.gmail.mfnboer.spiralfun"
         minSdkVersion qtMinSdkVersion
         targetSdkVersion qtTargetSdkVersion
         ndk.abiFilters = qtTargetAbiList.split(",")
+        
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++23'
+                arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON", "-DCMAKE_VERBOSE_MAKEFILE=ON"
+            }
+        }
     }
 }

@@ -1,3 +1,8 @@
+next
+----
+* Support 16K pages
+* Upgrade to Qt6.10.3
+
 4.1
 ---
 * Target API level 35

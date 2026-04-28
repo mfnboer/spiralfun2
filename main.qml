@@ -17,6 +17,12 @@ ApplicationWindow {
     title: "Spiral Fun"
     color: "black"
 
+    // Android 15 full screen
+    topPadding: 0
+    bottomPadding: 0
+    leftPadding: 0
+    rightPadding: 0
+
     onIsPortraitChanged: {
         guiSettings.updateScreenMargins()
     }
@@ -75,6 +81,9 @@ ApplicationWindow {
                 id: scene
                 width: parent.width
                 height: parent.height
+
+                onWidthChanged: init()
+                onHeightChanged: init()
                 onMessage: (msg) => showMessage(msg)
                 onStatusUpdate: (msg) => statusPopup.show(msg)
 
@@ -486,6 +495,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        console.debug("Size:", Qt.size(width, height), "Scene:", Qt.size(scene.width, scene.height))
         scene.init();
     }
 }

@@ -31,6 +31,16 @@ SpiralScene::SpiralScene(QQuickItem *parent) :
 
 void SpiralScene::init()
 {
+    if (mInitialized)
+        return;
+
+    if (width() <= 0 || height() <= 0)
+    {
+        qDebug() << "Size not yet defined:" << size();
+        return;
+    }
+
+    mInitialized = true;
     calcDefaultRadiusSize();
 
     // Now the window size is known, setup with proper position and sizes

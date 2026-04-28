@@ -3,6 +3,7 @@
 #pragma once
 #include "circle.h"
 #include <QJsonDocument>
+#include <QJsonValue>
 #include <vector>
 
 namespace SpiralFun {

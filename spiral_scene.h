@@ -179,6 +179,7 @@ private:
     bool mMusicGeneration = false;
     int mPlayingSpeed = MAX_PLAYING_SPEED;
     int mToneDistance = 25;
+    bool mInitialized = false;
 
     static constexpr int MIN_CIRCLES = SpiralConfig::MIN_CIRCLES;
     static constexpr int MAX_CIRCLES = SpiralConfig::MAX_CIRCLES;

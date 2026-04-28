@@ -14,6 +14,10 @@ set(QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL OFF)
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core WebView Multimedia)
 
+if (ANDROID AND Qt6Core_VERSION VERSION_GREATER_EQUAL 6.9.0)
+    find_package(Qt6 REQUIRED COMPONENTS CorePrivate)
+endif()
+
 add_compile_definitions(APP_VERSION="${PROJECT_VERSION}")
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
@@ -222,6 +226,12 @@ target_link_libraries(spiralfun PRIVATE
     Qt${QT_VERSION_MAJOR}::Multimedia
     egif
 )
+
+if (ANDROID AND Qt6Core_VERSION VERSION_GREATER_EQUAL 6.9.0)
+    target_link_libraries(spiralfun
+        PRIVATE Qt6::CorePrivate
+    )
+endif()
 
 set_target_properties(spiralfun PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
