@@ -1,6 +1,6 @@
 // Copyright (C) 2023 Michel de Boer
 // License: GPLv3
-#include <QApplication>
+#include <QGuiApplication>
 #include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     qputenv("QT_SCALE_FACTOR", "0.9");
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
     qSetMessagePattern("%{time HH:mm:ss.zzz} %{type} %{function}'%{line} %{message}");
     QIcon::setThemeName("spiralfun");
 

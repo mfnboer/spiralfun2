@@ -1,18 +1,17 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(spiralfun VERSION 4.1 LANGUAGES CXX)
-set(VERSION_CODE 11)
+project(spiralfun VERSION 4.2 LANGUAGES CXX)
+set(VERSION_CODE 15)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Work around to fix build issue in Qt6.8.2
 # See https://bugreports.qt.io/browse/QTBUG-131707
 set(QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL OFF)
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Quick QuickControls2 Core Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 Core Multimedia)
 
 if (ANDROID AND Qt6Core_VERSION VERSION_GREATER_EQUAL 6.9.0)
     find_package(Qt6 REQUIRED COMPONENTS CorePrivate)
@@ -84,7 +83,6 @@ qt_add_qml_module(spiralfun
         examples.qml
         file_dialog.qml
         GuiSettings.qml
-
         main.qml
         message.qml
         MusicDialog.qml
@@ -208,7 +206,7 @@ qt_add_qml_module(spiralfun
 set_target_properties(spiralfun PROPERTIES
     QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
     QT_ANDROID_TARGET_SDK_VERSION 35
-    QT_ANDROID_SDK_BUILD_TOOLS_REVISION 35.0.0
+    QT_ANDROID_SDK_BUILD_TOOLS_REVISION 36.0.0
     QT_ANDROID_VERSION_NAME ${PROJECT_VERSION}
     QT_ANDROID_VERSION_CODE ${VERSION_CODE})
 
@@ -218,11 +216,10 @@ file(GLOB_RECURSE EGIF_SOURCES "egif/*.h" "egif/*.cpp")
 add_library(egif STATIC ${EGIF_SOURCES})
 
 target_link_libraries(spiralfun PRIVATE
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Quick
-    Qt${QT_VERSION_MAJOR}::QuickControls2
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Multimedia
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::Core
+    Qt6::Multimedia
     egif
 )
 

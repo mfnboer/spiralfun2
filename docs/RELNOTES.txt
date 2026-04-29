@@ -1,5 +1,5 @@
-next
-----
+4.2
+---
 * Support 16K pages
 * Upgrade to Qt6.10.3
 
