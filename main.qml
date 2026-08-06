@@ -23,10 +23,6 @@ ApplicationWindow {
     leftPadding: 0
     rightPadding: 0
 
-    onIsPortraitChanged: {
-        guiSettings.updateScreenMargins()
-    }
-
     onClosing: (event) => {
         if (Qt.platform.os !== "android")
             return

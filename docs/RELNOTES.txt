@@ -1,3 +1,8 @@
+4.3
+---
+* Update Android target API to 36
+* Upgrade to Qt6.11.1
+
 4.2
 ---
 * Support 16K pages

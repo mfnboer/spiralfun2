@@ -11,74 +11,21 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class ScreenUtils {
     private static final String LOGTAG = "ScreenUtils";
     private static Activity sActivity;
     private static PowerManager.WakeLock sWakeLock = null;
 
-    public static final int INSETS_SIDE_TOP = 0;
-    public static final int INSETS_SIDE_BOTTOM = 1;
-    public static final int INSETS_SIDE_LEFT = 2;
-    public static final int INSETS_SIDE_RIGHT = 3;
-
     public static void init(Activity activity) {
         sActivity = activity;
     }
 
-    private static Insets getInsets(int insetType) {
-        View rootView = ((ViewGroup)sActivity.findViewById(android.R.id.content)).getChildAt(0);
-        WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(rootView);
-        return insets.getInsets(insetType);
-    }
-
-    private static int getInsetsSide(Insets insets, int side) {
-        if (insets == null)
-            return 0;
-
-        switch (side) {
-            case INSETS_SIDE_TOP:
-                return insets.top;
-            case INSETS_SIDE_BOTTOM:
-                return insets.bottom;
-            case INSETS_SIDE_LEFT:
-                return insets.left;
-            case INSETS_SIDE_RIGHT:
-                return insets.right;
-            default:
-                Log.w(LOGTAG, "Unknown side: " + side);
-                return 0;
-        }
-    }
-
-    public static int getNavigationBarSize(int side) {
-        Insets insets = getInsets(WindowInsetsCompat.Type.navigationBars());
-        return getInsetsSide(insets, side);
-    }
-
-    public static int getImeSize(int side) {
-        Insets insets = getInsets(WindowInsetsCompat.Type.ime());
-        return getInsetsSide(insets, side);
-    }
-
-    public static int getStatusBarSize(int side) {
-        Insets insets = getInsets(WindowInsetsCompat.Type.statusBars());
-        return getInsetsSide(insets, side);
-    }
-
-    public static int getDisplayCutoutSize(int side) {
-        Insets insets = getInsets(WindowInsetsCompat.Type.displayCutout());
-        return getInsetsSide(insets, side);
+    public static boolean mustEnableEdgeToEdge() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM;
     }
 
     public static void setStatusBarTransparent(boolean transparent, int color, boolean isLightMode) {

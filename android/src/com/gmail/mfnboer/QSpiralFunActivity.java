@@ -36,13 +36,11 @@ public class QSpiralFunActivity extends QtActivity {
         sActivity = this;
 
         // Enable EdgeToEdge mode, i.e. full screen
-        // WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        WindowCompat.enableEdgeToEdge(getWindow());
+        if (ScreenUtils.mustEnableEdgeToEdge())
+            WindowCompat.enableEdgeToEdge(getWindow());
 
         Log.d(LOGTAG, "onCreate");
         ScreenUtils.init(this);
-        ScreenUtils.setStatusBarColor(Color.BLACK, false);
-        ScreenUtils.setNavigationBarColor(Color.BLACK, false);
 
         Intent intent = getIntent();
         if (intent == null)
@@ -98,6 +96,11 @@ public class QSpiralFunActivity extends QtActivity {
         Uri uri = intent.getData();
         Log.d(LOGTAG, "VIEW uri: " + uri);
         emitViewUriReceived(uri.toString());
+    }
+
+    public void setSystemBarsColor() {
+        ScreenUtils.setStatusBarColor(Color.BLACK, false);
+        ScreenUtils.setNavigationBarColor(Color.BLACK, false);
     }
 
     public void setKeepScreenOn(boolean keepOn) {

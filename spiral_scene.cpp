@@ -54,6 +54,8 @@ void SpiralScene::init()
     QObject::connect(&jniCallbackListener, &JNICallbackListener::mediaScannerFinished,
                      this, [this](const QString& uri){ handleMediaScannerFinished(uri); });
 
+    Utils::setSystemBarsColor();
+
     // Handle possibly pending intent from Android.
     Utils::handlePendingIntent();
 

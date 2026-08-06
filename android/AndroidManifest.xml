@@ -19,6 +19,7 @@
         android:allowNativeHeapPointerTagging="false"
         android:allowBackup="true"
         android:fullBackupOnly="true"
+        android:enableOnBackInvokedCallback="false"
         android:icon="@drawable/icon">
         <activity
             android:name="com.gmail.mfnboer.QSpiralFunActivity"

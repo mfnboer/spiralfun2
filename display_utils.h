@@ -13,9 +13,6 @@ class DisplayUtils : public QObject
 public:
     explicit DisplayUtils(QObject* parent = nullptr);
 
-    Q_INVOKABLE static int getNavigationBarSize(QEnums::InsetsSide side);
-    Q_INVOKABLE static int getStatusBarSize(QEnums::InsetsSide side);
-    Q_INVOKABLE static int getDisplayCutoutSize(QEnums::InsetsSide side);
     Q_INVOKABLE static void openLinkInApp(const QString& link);
 };
 

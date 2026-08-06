@@ -197,6 +197,20 @@ void setKeepScreenOn(bool keepOn)
 #endif
 }
 
+void setSystemBarsColor()
+{
+#ifdef Q_OS_ANDROID
+    if (!QNativeInterface::QAndroidApplication::isActivityContext())
+    {
+        qWarning() << "Cannot find Android activity";
+        return;
+    }
+
+    QJniObject activity = QNativeInterface::QAndroidApplication::context();
+    activity.callMethod<void>("setSystemBarsColor", "()V");
+#endif
+}
+
 bool sendAppToBackground()
 {
 #ifdef Q_OS_ANDROID
@@ -211,39 +225,6 @@ bool sendAppToBackground()
     return true;
 #else
     return false;
-#endif
-}
-
-int getNavigationBarSize(QEnums::InsetsSide side)
-{
-#ifdef Q_OS_ANDROID
-    return (int)QJniObject::callStaticMethod<jint>(
-        "com/gmail/mfnboer/ScreenUtils", "getNavigationBarSize", "(I)I", (jint)side);
-#else
-    Q_UNUSED(side)
-    return 0;
-#endif
-}
-
-int getStatusBarSize(QEnums::InsetsSide side)
-{
-#ifdef Q_OS_ANDROID
-    return (int)QJniObject::callStaticMethod<jint>(
-        "com/gmail/mfnboer/ScreenUtils", "getStatusBarSize", "(I)I", (jint)side);
-#else
-    Q_UNUSED(side)
-    return 0;
-#endif
-}
-
-int getDisplayCutoutSize(QEnums::InsetsSide side)
-{
-#ifdef Q_OS_ANDROID
-    return (int)QJniObject::callStaticMethod<jint>(
-        "com/gmail/mfnboer/ScreenUtils", "getDisplayCutoutSize", "(I)I", (jint)side);
-#else
-    Q_UNUSED(side)
-    return 0;
 #endif
 }
 
